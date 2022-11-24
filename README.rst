@@ -121,6 +121,9 @@ Usage examples are found in the `examples/` directory.
 examples/filereader.py
     A terminal application that uses `thurible` to navigate the
     filesystem and read files.
+examples/showsplash.py
+    A terminal application that uses `thurible` to display a simple
+    splash screen.
 
 
 To-Do List
@@ -128,7 +131,18 @@ To-Do List
 The following items are still needed before initial release:
 
 *   Add documentation.
-*   Add examples for the different types of panels.
-*   Clean up __main__.
-*   Detect the availability of geometric and box drawing characters
-    in the current terminal font.
+*   Manager updates:
+    *   Allow relative panel sizing.
+    *   Allow deletion of stored panels.
+    *   Allow managers to update panels with relative sizing.
+    *   Allow managers to display multiple panels.
+    *   Allow managers to track the history of what panels have been shown.
+    *   Allow managers to catch sigkill and pass it on to the program.
+*   Panel updates:
+    *   Add a logging panel.
+    *   Add a progress panel.
+    *   Add an alert panel.
+    *   Add a textfield panel.
+    *   Add a textform panel.
+    *   Add a tableform panel.
+    *   Add a coroutine manager.

@@ -104,14 +104,6 @@ def create_binary_table(path: str | Path) -> thb.Table:
     # row.
     qwords = get_hex(data)
 
-    # This gets an instance of blessed.Terminal. get_terminal() is used
-    # rather than just calling blessed.Terminal directly for two main
-    # reasons: it avoids code that uses blessed from needing to import
-    # blessed and thurible only generates a new instance the first
-    # time this is called, reducing the number of blessed.Terminals in
-    # memory.
-    term = thb.get_terminal()
-
     # Create and return the thurible.Table object containing the
     # binary data in a hexdump-like format.
     return thb.Table(
@@ -120,10 +112,7 @@ def create_binary_table(path: str | Path) -> thb.Table:
         footer_frame=True,
         title_text=str(path),
         title_frame=True,
-        frame_type='heavy',
-        height=term.height,
-        width=term.width,
-        term=term
+        frame_type='heavy'
     )
 
 
@@ -149,14 +138,6 @@ def create_dir_menu(
     # that will become the selectable optons in the menu.
     options = create_options_from_paths(contents, show_hidden)
 
-    # This gets an instance of blessed.Terminal. get_terminal() is used
-    # rather than just calling blessed.Terminal directly for two main
-    # reasons: it avoids code that uses blessed from needing to import
-    # blessed and thurible only generates a new instance the first
-    # time this is called, reducing the number of blessed.Terminals in
-    # memory.
-    term = thb.get_terminal()
-
     # Create and return a FileReadrMenu object with the list of files
     # and directories as selectable options.
     return FileReaderMenu(
@@ -165,10 +146,7 @@ def create_dir_menu(
         footer_frame=True,
         title_text=str(path),
         title_frame=True,
-        frame_type='double',
-        height=term.height,
-        width=term.width,
-        term=term
+        frame_type='double'
     )
 
 
@@ -229,14 +207,6 @@ def create_text(path: str | Path) -> thb.Text:
     except UnicodeDecodeError:
         content = read_file_as_text(path, 'latin_1')
 
-    # This gets an instance of blessed.Terminal. get_terminal() is used
-    # rather than just calling blessed.Terminal directly for two main
-    # reasons: it avoids code that uses blessed from needing to import
-    # blessed and thurible only generates a new instance the first
-    # time this is called, reducing the number of blessed.Terminals in
-    # memory.
-    term = thb.get_terminal()
-
     # Create and return a thurible.Text object for reading the text
     # in the given file.
     return thb.Text(
@@ -245,10 +215,7 @@ def create_text(path: str | Path) -> thb.Text:
         footer_frame=True,
         title_text=str(path),
         title_frame=True,
-        frame_type='heavy',
-        height=term.height,
-        width=term.width,
-        term=term
+        frame_type='heavy'
     )
 
 
@@ -430,12 +397,6 @@ def main(
     q_to = q_to if q_to else Queue()
     q_from = q_from if q_from else Queue()
 
-    # This creates an instance of blessed.Terminal that the panels will
-    # use to interact with the terminal. Your code does not need to
-    # interact with the blessed package at all. Though, it is imported
-    # as a dependency of thurible.
-    term = thb.get_terminal()
-
     # The first panel displayed by filereader is a FileReaderMenu panel
     # containing the contents of the directory path that was given to
     # main().
@@ -469,7 +430,7 @@ def main(
     # interaction with the terminal will not block the running of your
     # code and vice versa. This will create the thread for the manager
     # and start it.
-    T = Thread(target=thb.queued_manager, args=(q_to, q_from, term))
+    T = Thread(target=thb.queued_manager, args=(q_to, q_from))
     T.start()
 
     # Since the manager communicates through a queue, you need a loop

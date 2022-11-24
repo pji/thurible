@@ -10,10 +10,11 @@ from blessed import Terminal
 from blessed.keyboard import Keystroke
 
 from thurible import panel as p
+from thurible.util import get_terminal
 
 
 # Common values.
-term = Terminal()
+term = get_terminal()
 kwargs_content_opt_default = {
     'content_align_h': 'center',
     'content_align_v': 'middle',
@@ -44,6 +45,9 @@ kwargs_panel_opt_default = {
     'origin_x': 0,
     'fg': '',
     'bg': '',
+    'height': term.height,
+    'width': term.width,
+    'term': term,
 }
 kwargs_panel_opt_set = {
     'height': 5,
@@ -55,9 +59,6 @@ kwargs_panel_opt_set = {
     'bg': 'blue',
 }
 kwargs_panel_req = {
-    'height': 5,
-    'width': 7,
-    'term': term,
 }
 kwargs_title_opt_default = {
     'footer_text': '',

@@ -65,7 +65,6 @@ class QueuedManagerTestCase(ut.TestCase):
             'q_to': self.q_to,
             'q_from': self.q_from,
             'displays': self.displays,
-            'term': term,
         })
 
     def tearDown(self):

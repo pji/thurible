@@ -5,8 +5,16 @@ util
 Miscellaneous utility functions and classes for the `thurible`
 package.
 """
+from typing import Optional
+
+from blessed import Terminal
 
 
+# Common values.
+_term: Optional[Terminal] = None
+
+
+# Common classes.
 class Frame:
     """A class to track the characters used to draw a frame in a
     terminal.
@@ -85,3 +93,26 @@ class Frame:
         else:
             reason = 'The custom string must be 14 characters.'
             raise ValueError(reason)
+
+
+# Common functions.
+def get_terminal() -> Terminal:
+    """Retrieve an instance of `blessed.Terminal` for use by `thurible`
+    objects. Every time this is called, it will return the same
+    instance, avoiding time wasting due to unnecessary `Terminal`
+    object initiation.
+
+    .. note:
+        Since we are using a mutable global value here, there may be
+        theoretical thread safety concerns. However `thurible` doesn't
+        ever change the `Terminal` object. The only mutability is
+        whether or not the `_term` is `None` or is a `Terminal` object.
+        So, I don't think thread safety will ever be a real issue for
+        this. However, it may be worth looking into whether there are
+        better ways to do this in the future. For all I know `Terminal`
+        may be a singleton, and this is entirely unnecessary.
+    """
+    global _term
+    if not isinstance(_term, Terminal):
+        _term = Terminal()
+    return _term

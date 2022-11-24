@@ -343,8 +343,7 @@ class MainTestCase(ut.TestCase):
         exp_calls = [
             call(target=thb.queued_manager, args=(
                 self.q_to,
-                self.q_from,
-                self.term
+                self.q_from
             )),
             call().start(),
         ]
@@ -395,10 +394,7 @@ class MainTestCase(ut.TestCase):
                     footer_frame=True,
                     title_text='tests/data/simple.txt',
                     title_frame=True,
-                    frame_type='heavy',
-                    height=term.height,
-                    width=term.width,
-                    term=term
+                    frame_type='heavy'
                 )
             ),
             tm.Show('b\x1etests/data/simple.txt'),
@@ -408,10 +404,7 @@ class MainTestCase(ut.TestCase):
                 footer_frame=True,
                 title_text='tests/data',
                 title_frame=True,
-                frame_type='double',
-                height=self.term.height,
-                width=self.term.width,
-                term=self.term
+                frame_type='double'
             )),
             tm.Show('tests/data'),
         ]
@@ -438,10 +431,7 @@ class MainTestCase(ut.TestCase):
                 footer_frame=True,
                 title_text='tests/data/lyrics',
                 title_frame=True,
-                frame_type='double',
-                height=self.term.height,
-                width=self.term.width,
-                term=self.term
+                frame_type='double'
             )),
             tm.Show('\n\x1etests/data/lyrics'),
         ]
@@ -461,10 +451,7 @@ class MainTestCase(ut.TestCase):
                     footer_frame=True,
                     title_text='tests/data/simple.txt',
                     title_frame=True,
-                    frame_type='heavy',
-                    height=term.height,
-                    width=term.width,
-                    term=term
+                    frame_type='heavy'
                 )
             ),
             tm.Show('b\x1etests/data/simple.txt'),
@@ -489,10 +476,7 @@ class MainTestCase(ut.TestCase):
                     title_frame=True,
                     footer_text=TEXT_FOOT,
                     footer_frame=True,
-                    frame_type='heavy',
-                    height=term.height,
-                    width=term.width,
-                    term=term
+                    frame_type='heavy'
                 )
             ),
             tm.Show('\n\x1etests/data/simple.txt'),
@@ -522,10 +506,7 @@ class MainTestCase(ut.TestCase):
                 title_frame=True,
                 footer_text=TEXT_FOOT,
                 footer_frame=True,
-                frame_type='heavy',
-                height=term.height,
-                width=term.width,
-                term=term
+                frame_type='heavy'
             )),
             tm.Show('\n\x1etests/data/simple.txt'),
             tm.Store('tests/data', fr.FileReaderMenu(
@@ -534,10 +515,7 @@ class MainTestCase(ut.TestCase):
                 footer_frame=True,
                 title_text='tests/data',
                 title_frame=True,
-                frame_type='double',
-                height=self.term.height,
-                width=self.term.width,
-                term=self.term
+                frame_type='double'
             )),
             tm.Show('tests/data'),
         ]

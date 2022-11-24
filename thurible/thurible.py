@@ -10,14 +10,15 @@ from typing import Optional
 
 from blessed import Terminal
 
-from thurible.panel import Panel
 from thurible import messages as tm
+from thurible.panel import Panel
+from thurible.util import get_terminal
 
 
 def queued_manager(
     q_to: Queue,
     q_from: Queue,
-    term: Terminal,
+    term: Optional[Terminal] = None,
     displays: Optional[dict] = None
 ) -> None:
     """Manager for running the terminal display in a separate thread
@@ -58,6 +59,8 @@ def queued_manager(
 
     """
     # Set up.
+    if term is None:
+        term = get_terminal()
     if displays is None:
         displays = {}
     showing: str = ''

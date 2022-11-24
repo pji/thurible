@@ -9,7 +9,7 @@ from typing import Optional
 from blessed import Terminal
 from blessed.keyboard import Keystroke
 
-from thurible.util import Frame
+from thurible.util import get_terminal, Frame
 
 
 # Exceptions.
@@ -29,9 +29,9 @@ class Panel:
     # Magic methods.
     def __init__(
         self,
-        height: int,
-        width: int,
-        term: Terminal,
+        height: Optional[int] = None,
+        width: Optional[int] = None,
+        term: Optional[Terminal] = None,
         origin_y: int = 0,
         origin_x: int = 0,
         bg: str = '',
@@ -71,9 +71,9 @@ class Panel:
         :rtype: NoneType
         """
         # Panel protocol.
-        self.height = height
-        self.width = width
-        self.term = term
+        self.term = term if term else get_terminal()
+        self.height = height if height is not None else self.term.height
+        self.width = width if width is not None else self.term.width
         self.origin_y = origin_y
         self.origin_x = origin_x
         self.bg = bg

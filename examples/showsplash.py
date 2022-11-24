@@ -20,12 +20,6 @@ if __name__ == '__main__':
     q_to = Queue()
     q_from = Queue()
 
-    # This creates an instance of blessed.Terminal that the panels will
-    # use to interact with the terminal. Your code does not need to
-    # interact with the blessed package at all. Though, it is imported
-    # as a dependency of thurible.
-    term = thb.get_terminal()
-
     # In thurible, a manager is used to send output to the terminal
     # and to receive input from the user. For showsplash, we are using
     # the queued_manager, which is designed to be run in a separate
@@ -34,7 +28,7 @@ if __name__ == '__main__':
     # code and vice versa.
     #
     # Create the thread used to run queued_manager and start it.
-    T = Thread(target=thb.queued_manager, args=(q_to, q_from, term))
+    T = Thread(target=thb.queued_manager, args=(q_to, q_from))
     T.start()
 
     # thurible displays output in the terminal through panels. Input
@@ -50,20 +44,19 @@ if __name__ == '__main__':
         # This is the text that will be displayed in the splash screen.
         content='SPAM!',
 
-        # Panels in thurible fill an area within the terminal. The
-        # current version requires you give the explicit height and
-        # width of that area. The height is measured in rows, and the
-        # width is measured in columns. Since we want the splash to
-        # fill the entire terminal, we are using the blessed.Terminal
-        # object from earlier to get the height and width of the
-        # terminal.
-        height=term.height,
-        width=term.width,
+        # This adds a frame around the edge of the panel. There are
+        # several different types of frames that can be used.
+        frame_type='light',
 
-        # The last of the required panel parameters is term. It needs
-        # an instance of blessed.Terminal that the panel will use to
-        # interact with the terminal.
-        term=term
+        # This adds footer text to the bottom of the panel.
+        footer_text=' Press any key to continue. ',
+
+        # This centers the footer text.
+        footer_align='center',
+
+        # This adds a frame cap on either side of the footer to make
+        # it look a little nicer.
+        footer_frame=True
     )
 
     # The program interacts with the manager by sending it Messages.
