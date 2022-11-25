@@ -13,20 +13,14 @@ from thurible.util import get_terminal, Frame
 
 
 # Exceptions.
-class InvalidHorizontalDimensionsError(Exception):
-    """The parameters that determine the relative width must add up
-    to one.
+class InvalidDimensionsError(Exception):
+    """The parameters that determine the relative width or height
+    must add up to one.
     """
 
 
 class InvalidTitleAlignmentError(Exception):
     """The value given for the title alignment was invalid."""
-
-
-class InvalidVerticalDimensionsError(Exception):
-    """The parameters that determine the relative height must add up
-    to one.
-    """
 
 
 class NoFrameTypeForFrameError(Exception):
@@ -35,7 +29,7 @@ class NoFrameTypeForFrameError(Exception):
     """
 
 
-class PanelHorizontalPaddingAndAlignmentSetError(Exception):
+class PanelPaddingAndAlignmentSetError(Exception):
     """You cannot set both panel padding and alignment."""
 
 
@@ -62,7 +56,7 @@ class Panel:
         panel_relative_height: Optional[float] = None,
         panel_relative_width: Optional[float] = None,
         panel_align_h: Optional[str] = None,
-        panel_align_v: str = 'middle'
+        panel_align_v: Optional[str] = None
     ) -> None:
         """Initialize an instance of the class.
 
@@ -102,50 +96,18 @@ class Panel:
             panel_pad_right,
             panel_align_h
         )
-        self.panel_relative_height = panel_relative_height
-        if self.panel_relative_height is None:
-            self.panel_relative_height = 1.0
-        self.panel_align_v = panel_align_v
-        self.panel_pad_bottom = panel_pad_bottom if panel_pad_bottom else 0.0
-        self.panel_pad_top = panel_pad_top if panel_pad_top else 0.0
+        self._set_relative_vertical_dimensions(
+            panel_pad_top,
+            panel_relative_height,
+            panel_pad_bottom,
+            panel_align_v
+        )
         self.height = height if height is not None else self.term.height
         self.width = width if width is not None else self.term.width
         self.origin_y = origin_y if origin_y else 0
         self.origin_x = origin_x if origin_x else 0
         self.bg = bg
         self.fg = fg
-
-        # Adjust relative dimensions.
-        if (
-            panel_pad_bottom is not None
-            and panel_pad_top is not None
-            and panel_relative_height is not None
-            and (
-                panel_pad_bottom
-                + panel_pad_top
-                + panel_relative_height
-            ) != 1.0
-        ):
-            msg = (
-                'If panel_pad_bottom, panel_pad_top, and '
-                'panel_relative_height are set, the sum of '
-                'the three must equal one. The given values were: '
-                f'panel_pad_bottom={panel_pad_bottom}, '
-                f'panel_pad_top={panel_pad_top}, '
-                f'and panel_relative_height={panel_relative_height}.'
-            )
-            raise InvalidVerticalDimensionsError(msg)
-        if panel_pad_top is None and panel_pad_bottom is None:
-            total = 1.0 - self.panel_relative_height
-            if self.panel_align_v == 'bottom':
-                self.panel_pad_bottom = 0.0
-                self.panel_pad_top = total
-            elif self.panel_align_v == 'top':
-                self.panel_pad_bottom = total
-                self.panel_pad_top = 0.0
-            else:
-                self.panel_pad_bottom = total / 2
-                self.panel_pad_top = total / 2
 
         # Frame protocol.
         self.frame_type = frame_type
@@ -357,14 +319,20 @@ class Panel:
             color += f'on_{bg}'
         return getattr(self.term, color)
 
-    def _set_relative_horizontal_dimensions(
+    def _set_relative_dimenstion(
         self,
         left: Optional[float] = None,
         width: Optional[float] = None,
         right: Optional[float] = None,
         align: Optional[str] = None,
-    ) -> None:
-        """Ensure the horizontal relative dimensions are set correctly."""
+        align_default: str = 'center',
+        alignments: tuple[str, str, str] = ('left', 'center', 'right'),
+        attr_names: tuple[str, str, str] = (
+            'panel_pad_left',
+            'panel_relative_width',
+            'panel_pad_right',
+        )
+    ) -> tuple[float, float, float, str]:
         # This function needs to check which parameters are None a lot.
         # So, the answer to that is stored in this tuple to help
         # reduce the verbosity of the rest of the function.
@@ -382,11 +350,11 @@ class Panel:
         # because the intended behavior of the panel would be ambiguous.
         if align is not None and any((were_set[LEFT], were_set[RIGHT])):
             msg = 'Cannot set both panel padding and panel alignment.'
-            raise PanelHorizontalPaddingAndAlignmentSetError(msg)
+            raise PanelPaddingAndAlignmentSetError(msg)
 
         # If only width was set and align wasn't, set align to the default.
         elif align is None:
-            align = 'center'
+            align = align_default
 
         # If none are set, use the default values.
         if not any(were_set):
@@ -397,14 +365,14 @@ class Panel:
         # If all three values are set, they must add up to one.
         elif all(were_set) and left + right + width != 1.0:
             msg = (
-                'If panel_pad_left, panel_pad_right, and '
-                'panel_relative_width are set, the sum of '
+                f'If {attr_names[LEFT]}, {attr_names[RIGHT]}, and '
+                f'{attr_names[WIDTH]} are set, the sum of '
                 'the three must equal one. The given values were: '
-                f'panel_pad_left={left}, '
-                f'panel_pad_right={right}, '
-                f'and panel_relative_width={width}.'
+                f'{attr_names[LEFT]}={left}, '
+                f'{attr_names[RIGHT]}={right}, '
+                f'and {attr_names[WIDTH]}={width}.'
             )
-            raise InvalidHorizontalDimensionsError(msg)
+            raise InvalidDimensionsError(msg)
 
         # If only left was set, the rest goes to width.
         elif sum(were_set) == 1 and were_set[LEFT]:
@@ -414,10 +382,10 @@ class Panel:
         # If only width was set, the padding depends on the alignment.
         elif sum(were_set) == 1 and were_set[WIDTH]:
             total = 1.0 - width
-            if align == 'left':
+            if align == alignments[LEFT]:
                 left = 0.0
                 right = total
-            elif align == 'right':
+            elif align == alignments[RIGHT]:
                 left = total
                 right = 0.0
             else:
@@ -441,11 +409,58 @@ class Panel:
         elif sum(were_set) == 2 and not were_set[RIGHT]:
             right = 1.0 - left - width
 
+        # Return the values.
+        return left, width, right, align
+
+    def _set_relative_horizontal_dimensions(
+        self,
+        left: Optional[float] = None,
+        width: Optional[float] = None,
+        right: Optional[float] = None,
+        align: Optional[str] = None,
+    ) -> None:
+        """Ensure the horizontal relative dimensions are set correctly."""
+        # Calculate the correct values.
+        left, width, right, align = self._set_relative_dimenstion(
+            left,
+            width,
+            right,
+            align
+        )
+
         # Set the attributes.
         self.panel_pad_left = left
-        self.panel_pad_right = right
         self.panel_relative_width = width
+        self.panel_pad_right = right
         self.panel_align_h = align
+
+    def _set_relative_vertical_dimensions(
+        self,
+        top: Optional[float] = None,
+        height: Optional[float] = None,
+        bottom: Optional[float] = None,
+        align: Optional[str] = None
+    ) -> None:
+        # Calculate the correct values.
+        top, height, bottom, align = self._set_relative_dimenstion(
+            top,
+            height,
+            bottom,
+            align,
+            align_default='middle',
+            alignments=('top', 'middle', 'bottom'),
+            attr_names=(
+                'panel_pad_top',
+                'panel_relative_height',
+                'panel_pad_bottom',
+            )
+        )
+
+        # Set the attributes.
+        self.panel_pad_top = top
+        self.panel_relative_height = height
+        self.panel_pad_bottom = bottom
+        self.panel_align_v = align
 
 
 # Protocols.

@@ -72,7 +72,6 @@ kwargs_panel_opt_set = {
     'panel_pad_top': 0.4,
     'panel_relative_height': 0.3,
     'panel_relative_width': 0.7,
-    'panel_align_v': 'top',
 }
 kwargs_panel_req = {
 }
@@ -127,10 +126,10 @@ class TerminalTestCase(ut.TestCase):
 class PanelTestCase(TerminalTestCase):
     def test___init__cannot_set_panel_pad_left_and_align_h(self):
         """If `panel_pad_left` and `panel_align_h` are set, raise
-        a PanelHorizontalPaddingAndAlignmentSetError.
+        a PanelPaddingAndAlignmentSetError.
         """
         # Expected values.
-        exp_ex = p.PanelHorizontalPaddingAndAlignmentSetError
+        exp_ex = p.PanelPaddingAndAlignmentSetError
         exp_msg = 'Cannot set both panel padding and panel alignment.'
 
         # Test data and state.
@@ -145,10 +144,10 @@ class PanelTestCase(TerminalTestCase):
 
     def test___init__cannot_set_panel_pad_right_and_align_h(self):
         """If `panel_pad_right` and `panel_align_h` are set, raise
-        a PanelHorizontalPaddingAndAlignmentSetError.
+        a PanelPaddingAndAlignmentSetError.
         """
         # Expected values.
-        exp_ex = p.PanelHorizontalPaddingAndAlignmentSetError
+        exp_ex = p.PanelPaddingAndAlignmentSetError
         exp_msg = 'Cannot set both panel padding and panel alignment.'
 
         # Test data and state.
@@ -206,10 +205,10 @@ class PanelTestCase(TerminalTestCase):
         """If `panel_pad_left`, `panel_pad_right`, and
         `panel_relative_width` are set but the sum of all
         three doesn't equal one, `Panel` should raise a
-        `panel.InvalidHorizontalDimensionsError` exception.
+        `panel.InvalidDimensionsError` exception.
         """
         # Expected values.
-        exp_ex = p.InvalidHorizontalDimensionsError
+        exp_ex = p.InvalidDimensionsError
         exp_msg = (
             'If panel_pad_left, panel_pad_right, and panel_relative_width '
             'are set, the sum of the three must equal one. The given values '
@@ -232,14 +231,14 @@ class PanelTestCase(TerminalTestCase):
         """If `panel_pad_bottom`, `panel_pad_top`, and
         `panel_relative_height` are set but the sum of all
         three doesn't equal one, `Panel` should raise a
-        `panel.InvalidVerticalDimensionsError` exception.
+        `panel.InvalidDimensionsError` exception.
         """
         # Expected values.
-        exp_ex = p.InvalidVerticalDimensionsError
+        exp_ex = p.InvalidDimensionsError
         exp_msg = (
-            'If panel_pad_bottom, panel_pad_top, and panel_relative_height '
+            'If panel_pad_top, panel_pad_bottom, and panel_relative_height '
             'are set, the sum of the three must equal one. The given values '
-            'were: panel_pad_bottom=0.1, panel_pad_top=0.2, and '
+            'were: panel_pad_top=0.2, panel_pad_bottom=0.1, and '
             'panel_relative_height=0.3.'
         )
 
