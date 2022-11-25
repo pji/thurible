@@ -5,6 +5,7 @@ test_panel
 Unit tests for the `thurible.panel` module.
 """
 import unittest as ut
+from unittest.mock import patch, PropertyMock
 
 from blessed import Terminal
 from blessed.keyboard import Keystroke
@@ -41,13 +42,17 @@ kwargs_frame_opt_set = {
     'frame_fg': 'blue',
 }
 kwargs_panel_opt_default = {
-    'origin_y': 0,
-    'origin_x': 0,
-    'fg': '',
-    'bg': '',
     'height': term.height,
     'width': term.width,
     'term': term,
+    'origin_y': 0,
+    'origin_x': 0,
+    'bg': '',
+    'fg': '',
+    'panel_pad_bottom': 0.0,
+    'panel_pad_left': 0.0,
+    'panel_pad_right': 0.0,
+    'panel_pad_top': 0.0,
 }
 kwargs_panel_opt_set = {
     'height': 5,
@@ -57,6 +62,10 @@ kwargs_panel_opt_set = {
     'origin_x': 3,
     'fg': 'red',
     'bg': 'blue',
+    'panel_pad_bottom': 0.3,
+    'panel_pad_left': 0.1,
+    'panel_pad_right': 0.2,
+    'panel_pad_top': 0.4,
 }
 kwargs_panel_req = {
 }
@@ -277,6 +286,44 @@ class PanelTestCase(TerminalTestCase):
             'frame_type': 'light',
             'frame_bg': 'green',
             'frame_fg': 'white',
+        }
+        panel = p.Panel(**kwargs)
+
+        # Run test.
+        act = str(panel)
+
+        # Determine test result.
+        self.assertEqual(exp, act)
+
+    def test___str__with_panel_pad_and_frame(self):
+        """When converted to a string, a Pane object returns a string
+        that will draw the entire splash screen. If padding is set for
+        the panel, the panel should be inset by that amount.
+        """
+        # Expected values.
+        exp = (
+            f'{term.move(3, 2)}    '
+            f'{term.move(4, 2)}    '
+            f'{term.move(5, 2)}    '
+            f'{term.move(2, 1)}┌────┐'
+            f'{term.move(3, 1)}│'
+            f'{term.move(3, 6)}│'
+            f'{term.move(4, 1)}│'
+            f'{term.move(4, 6)}│'
+            f'{term.move(5, 1)}│'
+            f'{term.move(5, 6)}│'
+            f'{term.move(6, 1)}└────┘'
+        )
+
+        # Test data and state.
+        kwargs = {
+            'height': 10,
+            'width': 10,
+            'panel_pad_bottom': 0.3,
+            'panel_pad_left': 0.1,
+            'panel_pad_right': 0.3,
+            'panel_pad_top': 0.2,
+            'frame_type': 'light',
         }
         panel = p.Panel(**kwargs)
 
@@ -1034,6 +1081,41 @@ class TitleTestCase(TerminalTestCase):
         # Determine test result.
         self.assertEqual(exp, act)
 
+    def test___str__with_footer_align_right_and_panel_pad_right(self):
+        """When converted to a string, a Title object returns a
+        string that will draw the entire splash screen. If there is a
+        footer, it appears on the bottom of the panel. If there the
+        footer align is right, the footer on the right of the bottom
+        line of the panel. If there is right panel padding, the footer
+        should be offset the correct amount.
+        """
+        # Expected values.
+        exp = (
+            f'{term.move(0, 0)}          '
+            f'{term.move(1, 0)}          '
+            f'{term.move(2, 0)}          '
+            f'{term.move(3, 0)}          '
+            f'{term.move(4, 0)}          '
+            f'{term.move(4, 6)}spam'
+        )
+
+        # Test data and state.
+        kwargs = {
+            'footer_text': 'spam',
+            'footer_align': 'right',
+            'panel_pad_right': 0.5,
+            'height': 5,
+            'width': 20,
+            'term': term,
+        }
+        panel = p.Title(**kwargs)
+
+        # Run test.
+        act = str(panel)
+
+        # Determine test result.
+        self.assertEqual(exp, act)
+
     def test___str__with_footer_frame(self):
         """When converted to a string, a Title object returns a
         string that will draw the entire splash screen. If there is a
@@ -1069,6 +1151,39 @@ class TitleTestCase(TerminalTestCase):
             'frame_type': 'light',
             'height': 7,
             'width': 10,
+            'term': term,
+        }
+        panel = p.Title(**kwargs)
+
+        # Run test.
+        act = str(panel)
+
+        # Determine test result.
+        self.assertEqual(exp, act)
+
+    def test___str__with_footer_and_panel_pad_bottom(self):
+        """When converted to a string, a Title object returns a
+        string that will draw the entire splash screen. If there is a
+        footer, it appears on the bottom of the panel. If there is
+        bottom panel padding, the location of the footer should be
+        offset correctly.
+        """
+        # Expected values.
+        exp = (
+            f'{term.move(0, 0)}      '
+            f'{term.move(1, 0)}      '
+            f'{term.move(2, 0)}      '
+            f'{term.move(3, 0)}      '
+            f'{term.move(4, 0)}      '
+            f'{term.move(4, 0)}spam'
+        )
+
+        # Test data and state.
+        kwargs = {
+            'footer_text': 'spam',
+            'panel_pad_bottom': 0.5,
+            'height': 10,
+            'width': 6,
             'term': term,
         }
         panel = p.Title(**kwargs)
@@ -1262,6 +1377,70 @@ class TitleTestCase(TerminalTestCase):
         kwargs = {
             'title_text': 'spameggs',
             'height': 5,
+            'width': 6,
+            'term': term,
+        }
+        panel = p.Title(**kwargs)
+
+        # Run test.
+        act = str(panel)
+
+        # Determine test result.
+        self.assertEqual(exp, act)
+
+    def test___str__with_panel_pad_left(self):
+        """When converted to a string, a Title object returns a
+        string that will draw the entire splash screen. If there is
+        left panel padding, the location of the title should be offset
+        by the correct amount.
+        """
+        # Expected values.
+        exp = (
+            f'{term.move(1, 4)}      '
+            f'{term.move(2, 4)}      '
+            f'{term.move(3, 4)}      '
+            f'{term.move(4, 4)}      '
+            f'{term.move(0, 4)}      '
+            f'{term.move(0, 4)}spam'
+        )
+
+        # Test data and state.
+        kwargs = {
+            'title_text': 'spam',
+            'panel_pad_left': 0.4,
+            'height': 5,
+            'width': 10,
+            'term': term,
+        }
+        panel = p.Title(**kwargs)
+
+        # Run test.
+        act = str(panel)
+
+        # Determine test result.
+        self.assertEqual(exp, act)
+
+    def test___str__with_panel_pad_top(self):
+        """When converted to a string, a Title object returns a
+        string that will draw the entire splash screen. If there is
+        top panel padding, the location of the title should be offset
+        by the correct amount.
+        """
+        # Expected values.
+        exp = (
+            f'{term.move(6, 0)}      '
+            f'{term.move(7, 0)}      '
+            f'{term.move(8, 0)}      '
+            f'{term.move(9, 0)}      '
+            f'{term.move(5, 0)}      '
+            f'{term.move(5, 0)}spam'
+        )
+
+        # Test data and state.
+        kwargs = {
+            'title_text': 'spam',
+            'panel_pad_top': 0.5,
+            'height': 10,
             'width': 6,
             'term': term,
         }
@@ -1547,6 +1726,52 @@ class TitleTestCase(TerminalTestCase):
             'frame_type': 'light',
             'height': 7,
             'width': 10,
+            'term': term,
+        }
+        panel = p.Title(**kwargs)
+
+        # Run test.
+        act = str(panel)
+
+        # Determine test result.
+        self.assertEqual(exp, act)
+
+    def test___str__with_title_frame_and_panel_pad_top_left(self):
+        """When converted to a string, a Title object returns a
+        string that will draw the entire splash screen. If there is a
+        title frame, the frame is capped on either side of the title.
+        """
+        # Expected values.
+        exp = (
+            f'{term.move(4, 11)}        '
+            f'{term.move(5, 11)}        '
+            f'{term.move(6, 11)}        '
+            f'{term.move(7, 11)}        '
+            f'{term.move(8, 11)}        '
+            f'{term.move(3, 10)}┌────────┐'
+            f'{term.move(4, 10)}│'
+            f'{term.move(4, 19)}│'
+            f'{term.move(5, 10)}│'
+            f'{term.move(5, 19)}│'
+            f'{term.move(6, 10)}│'
+            f'{term.move(6, 19)}│'
+            f'{term.move(7, 10)}│'
+            f'{term.move(7, 19)}│'
+            f'{term.move(8, 10)}│'
+            f'{term.move(8, 19)}│'
+            f'{term.move(9, 10)}└────────┘'
+            f'{term.move(3, 11)}┤spam├'
+        )
+
+        # Test data and state.
+        kwargs = {
+            'title_text': 'spam',
+            'title_frame': True,
+            'frame_type': 'light',
+            'panel_pad_top': 0.3,
+            'panel_pad_left': 0.5,
+            'height': 10,
+            'width': 20,
             'term': term,
         }
         panel = p.Title(**kwargs)

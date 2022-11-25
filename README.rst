@@ -107,6 +107,8 @@ The manager can send the following message to the program:
 
 `Data(value)`
     Contains input received from the user.
+`Ending(reason, exception)`
+    Announces the manager is terminating.
 `Pong(name)`
     Is the response to a `Ping` message from the program.
 `Shown(name)`

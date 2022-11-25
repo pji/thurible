@@ -32,13 +32,17 @@ class Panel:
         height: Optional[int] = None,
         width: Optional[int] = None,
         term: Optional[Terminal] = None,
-        origin_y: int = 0,
-        origin_x: int = 0,
+        origin_y: Optional[int] = None,
+        origin_x: Optional[int] = None,
         bg: str = '',
         fg: str = '',
         frame_type: Optional[str] = None,
         frame_bg: str = '',
         frame_fg: str = '',
+        panel_pad_bottom: Optional[float] = None,
+        panel_pad_left: Optional[float] = None,
+        panel_pad_right: Optional[float] = None,
+        panel_pad_top: Optional[float] = None,
     ) -> None:
         """Initialize an instance of the class.
 
@@ -72,10 +76,14 @@ class Panel:
         """
         # Panel protocol.
         self.term = term if term else get_terminal()
+        self.panel_pad_bottom = panel_pad_bottom if panel_pad_bottom else 0.0
+        self.panel_pad_left = panel_pad_left if panel_pad_left else 0.0
+        self.panel_pad_right = panel_pad_right if panel_pad_right else 0.0
+        self.panel_pad_top = panel_pad_top if panel_pad_top else 0.0
         self.height = height if height is not None else self.term.height
         self.width = width if width is not None else self.term.width
-        self.origin_y = origin_y
-        self.origin_x = origin_x
+        self.origin_y = origin_y if origin_y else 0
+        self.origin_x = origin_x if origin_x else 0
         self.bg = bg
         self.fg = fg
 
@@ -121,19 +129,41 @@ class Panel:
         if self.frame_type is not None:
             result += self._frame(
                 frame_type=self.frame_type,
-                height=self.height,
-                width=self.width,
-                origin_y=self.origin_y,
-                origin_x=self.origin_x,
+                height=self.frame_height,
+                width=self.frame_width,
+                origin_y=self.frame_origin_y,
+                origin_x=self.frame_origin_x,
                 foreground=fg,
                 background=bg
             )
         return result
 
     @property
+    def frame_height(self) -> int:
+        height = self.height
+        height -= self._panel_pad_offset_top
+        height -= self._panel_pad_offset_bottom
+        return height
+
+    @property
+    def frame_width(self) -> int:
+        width = self.width
+        width -= self._panel_pad_offset_left
+        width -= self._panel_pad_offset_right
+        return width
+
+    @property
+    def frame_origin_x(self) -> int:
+        return self.origin_x + self._panel_pad_offset_left
+
+    @property
+    def frame_origin_y(self) -> int:
+        return self.origin_y + self._panel_pad_offset_top
+
+    @property
     def inner_height(self) -> int:
         """Returns number of rows available to content within the panel."""
-        height = self.height
+        height = self.frame_height
         if self.frame_type:
             height -= 2
         return height
@@ -143,7 +173,7 @@ class Panel:
         """Returns number of columns available to content within the
         panel.
         """
-        width = self.width
+        width = self.frame_width
         if self.frame_type:
             width -= 2
         return width
@@ -153,7 +183,7 @@ class Panel:
         """Returns the position in the terminal of the first row
         available to content within the panel.
         """
-        y = self.origin_y
+        y = self.origin_y + self._panel_pad_offset_top
         if self.frame_type:
             y += 1
         return y
@@ -163,10 +193,30 @@ class Panel:
         """Returns the position in the terminal of the first column
         available to content within the panel.
         """
-        x = self.origin_x
+        x = self.origin_x + self._panel_pad_offset_left
         if self.frame_type:
             x += 1
         return x
+
+    @property
+    def _panel_pad_offset_bottom(self) -> int:
+        offset = self.height * self.panel_pad_bottom
+        return int(offset)
+
+    @property
+    def _panel_pad_offset_left(self) -> int:
+        offset = self.width * self.panel_pad_left
+        return int(offset)
+
+    @property
+    def _panel_pad_offset_right(self) -> int:
+        offset = self.width * self.panel_pad_right
+        return int(offset)
+
+    @property
+    def _panel_pad_offset_top(self) -> int:
+        offset = self.height * self.panel_pad_top
+        return int(offset)
 
     # Public methods.
     def action(self, key: Keystroke) -> tuple[str, str]:
@@ -741,7 +791,7 @@ class Title(Panel):
         """Returns a string to write the footer of the panel to the
         terminal.
         """
-        y = self.origin_y + self.height - 1
+        y = self.frame_origin_y + self.frame_height - 1
         text = self.footer_text
         frame = self.footer_frame
         return self._title(text, self.footer_align, y, frame)
@@ -761,10 +811,10 @@ class Title(Panel):
     def frame(self) -> str:
         result = super().frame
         if not result:
-            height = self.height
-            width = self.width
-            y = self.origin_y
-            x = self.origin_x
+            height = self.frame_height
+            width = self.frame_width
+            y = self.frame_origin_y
+            x = self.frame_origin_x
             bg = self.title_bg if self.title_bg else self.bg
             fg = self.title_fg if self.title_fg else self.fg
         if not result and self.title_text:
@@ -802,7 +852,7 @@ class Title(Panel):
         """
         text = self.title_text
         frame = self.title_frame
-        return self._title(text, self.title_align, self.origin_y, frame)
+        return self._title(text, self.title_align, self.frame_origin_y, frame)
 
     @property
     def title_frame(self) -> bool:
