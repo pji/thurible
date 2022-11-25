@@ -43,6 +43,10 @@ class Panel:
         panel_pad_left: Optional[float] = None,
         panel_pad_right: Optional[float] = None,
         panel_pad_top: Optional[float] = None,
+        panel_relative_height: float = 1.0,
+        panel_relative_width: float = 1.0,
+        panel_align_h: str = 'center',
+        panel_align_v: str = 'middle'
     ) -> None:
         """Initialize an instance of the class.
 
@@ -76,6 +80,10 @@ class Panel:
         """
         # Panel protocol.
         self.term = term if term else get_terminal()
+        self.panel_relative_height = panel_relative_height
+        self.panel_relative_width = panel_relative_width
+        self.panel_align_h = panel_align_h
+        self.panel_align_v = panel_align_v
         self.panel_pad_bottom = panel_pad_bottom if panel_pad_bottom else 0.0
         self.panel_pad_left = panel_pad_left if panel_pad_left else 0.0
         self.panel_pad_right = panel_pad_right if panel_pad_right else 0.0
@@ -86,6 +94,30 @@ class Panel:
         self.origin_x = origin_x if origin_x else 0
         self.bg = bg
         self.fg = fg
+
+        # Adjust relative dimensions.
+        if panel_pad_top is None and panel_pad_bottom is None:
+            total = 1.0 - self.panel_relative_height
+            if self.panel_align_v == 'bottom':
+                self.panel_pad_bottom = 0.0
+                self.panel_pad_top = total
+            elif self.panel_align_v == 'top':
+                self.panel_pad_bottom = total
+                self.panel_pad_top = 0.0
+            else:
+                self.panel_pad_bottom = total / 2
+                self.panel_pad_top = total / 2
+        if panel_pad_left is None and panel_pad_right is None:
+            total = 1.0 - self.panel_relative_width
+            if self.panel_align_h == 'left':
+                self.panel_pad_left = 0.0
+                self.panel_pad_right = total
+            elif self.panel_align_h == 'right':
+                self.panel_pad_left = total
+                self.panel_pad_right = 0.0
+            else:
+                self.panel_pad_left = total / 2
+                self.panel_pad_right = total / 2
 
         # Frame protocol.
         self.frame_type = frame_type

@@ -134,7 +134,7 @@ The following items are still needed before initial release:
 
 *   Add documentation.
 *   Manager updates:
-    *   Allow relative panel sizing.
+    *   Address assignment of conflicting relative sizes.
     *   Allow deletion of stored panels.
     *   Allow managers to update panels with relative sizing.
     *   Allow managers to display multiple panels.

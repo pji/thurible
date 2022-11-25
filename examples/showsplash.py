@@ -44,14 +44,14 @@ if __name__ == '__main__':
         # This is the text that will be displayed in the splash screen.
         content='SPAM!',
 
-        # These inset the outside edge of the frame by a percentage of
-        # the area available to the frame. Basically, it's why there is
-        # a gap between the edge of the terminal window and the frame
-        # for the splash screen.
-        panel_pad_bottom=0.1,
-        panel_pad_left=0.1,
-        panel_pad_right=0.1,
-        panel_pad_top=0.1,
+        # Panels take up a set area in the terminal defined by their
+        # height in rows and width in columns. By default they fill
+        # the entire terminal window. These allow you to tell the
+        # panel to only fill a percentage of the area available to it.
+        # The percentage is passed as a float rather than a percentage,
+        # so the 0.9 here means 90%.
+        panel_relative_height=0.9,
+        panel_relative_width=0.9,
 
         # This adds a frame around the edge of the panel. There are
         # several different types of frames that can be used.

@@ -53,6 +53,10 @@ kwargs_panel_opt_default = {
     'panel_pad_left': 0.0,
     'panel_pad_right': 0.0,
     'panel_pad_top': 0.0,
+    'panel_relative_height': 1.0,
+    'panel_relative_width': 1.0,
+    'panel_align_h': 'center',
+    'panel_align_v': 'middle',
 }
 kwargs_panel_opt_set = {
     'height': 5,
@@ -66,6 +70,10 @@ kwargs_panel_opt_set = {
     'panel_pad_left': 0.1,
     'panel_pad_right': 0.2,
     'panel_pad_top': 0.4,
+    'panel_relative_height': 0.3,
+    'panel_relative_width': 0.7,
+    'panel_align_h': 'left',
+    'panel_align_v': 'top',
 }
 kwargs_panel_req = {
 }
@@ -323,6 +331,204 @@ class PanelTestCase(TerminalTestCase):
             'panel_pad_left': 0.1,
             'panel_pad_right': 0.3,
             'panel_pad_top': 0.2,
+            'frame_type': 'light',
+        }
+        panel = p.Panel(**kwargs)
+
+        # Run test.
+        act = str(panel)
+
+        # Determine test result.
+        self.assertEqual(exp, act)
+
+    def test___str__with_panel_rel_dims_and_frame(self):
+        """When converted to a string, a Pane object returns a string
+        that will draw the entire splash screen. If relative dimensions
+        are set on the panel, the height and width should be offset by
+        that amount.
+        """
+        # Expected values.
+        exp = (
+            f'{term.move(3, 3)}    '
+            f'{term.move(4, 3)}    '
+            f'{term.move(5, 3)}    '
+            f'{term.move(6, 3)}    '
+            f'{term.move(2, 2)}┌────┐'
+            f'{term.move(3, 2)}│'
+            f'{term.move(3, 7)}│'
+            f'{term.move(4, 2)}│'
+            f'{term.move(4, 7)}│'
+            f'{term.move(5, 2)}│'
+            f'{term.move(5, 7)}│'
+            f'{term.move(6, 2)}│'
+            f'{term.move(6, 7)}│'
+            f'{term.move(7, 2)}└────┘'
+        )
+
+        # Test data and state.
+        kwargs = {
+            'height': 10,
+            'width': 10,
+            'panel_relative_height': 0.5,
+            'panel_relative_width': 0.6,
+            'frame_type': 'light',
+        }
+        panel = p.Panel(**kwargs)
+
+        # Run test.
+        act = str(panel)
+
+        # Determine test result.
+        self.assertEqual(exp, act)
+
+    def test___str__with_panel_rel_dims_and_frame_and_align_h_left(self):
+        """When converted to a string, a Pane object returns a string
+        that will draw the entire splash screen. If relative dimensions
+        are set on the panel, the height and width should be offset by
+        that amount.
+        """
+        # Expected values.
+        exp = (
+            f'{term.move(3, 1)}    '
+            f'{term.move(4, 1)}    '
+            f'{term.move(5, 1)}    '
+            f'{term.move(6, 1)}    '
+            f'{term.move(2, 0)}┌────┐'
+            f'{term.move(3, 0)}│'
+            f'{term.move(3, 5)}│'
+            f'{term.move(4, 0)}│'
+            f'{term.move(4, 5)}│'
+            f'{term.move(5, 0)}│'
+            f'{term.move(5, 5)}│'
+            f'{term.move(6, 0)}│'
+            f'{term.move(6, 5)}│'
+            f'{term.move(7, 0)}└────┘'
+        )
+
+        # Test data and state.
+        kwargs = {
+            'height': 10,
+            'width': 10,
+            'panel_relative_height': 0.5,
+            'panel_relative_width': 0.6,
+            'panel_align_h': 'left',
+            'frame_type': 'light',
+        }
+        panel = p.Panel(**kwargs)
+
+        # Run test.
+        act = str(panel)
+
+        # Determine test result.
+        self.assertEqual(exp, act)
+
+    def test___str__with_panel_rel_dims_and_frame_and_align_h_right(self):
+        """When converted to a string, a Pane object returns a string
+        that will draw the entire splash screen. If relative dimensions
+        are set on the panel, the height and width should be offset by
+        that amount.
+        """
+        # Expected values.
+        exp = (
+            f'{term.move(3, 5)}    '
+            f'{term.move(4, 5)}    '
+            f'{term.move(5, 5)}    '
+            f'{term.move(6, 5)}    '
+            f'{term.move(2, 4)}┌────┐'
+            f'{term.move(3, 4)}│'
+            f'{term.move(3, 9)}│'
+            f'{term.move(4, 4)}│'
+            f'{term.move(4, 9)}│'
+            f'{term.move(5, 4)}│'
+            f'{term.move(5, 9)}│'
+            f'{term.move(6, 4)}│'
+            f'{term.move(6, 9)}│'
+            f'{term.move(7, 4)}└────┘'
+        )
+
+        # Test data and state.
+        kwargs = {
+            'height': 10,
+            'width': 10,
+            'panel_relative_height': 0.5,
+            'panel_relative_width': 0.6,
+            'panel_align_h': 'right',
+            'frame_type': 'light',
+        }
+        panel = p.Panel(**kwargs)
+
+        # Run test.
+        act = str(panel)
+
+        # Determine test result.
+        self.assertEqual(exp, act)
+
+    def test___str__with_panel_rel_dims_and_frame_and_align_v_bottom(self):
+        """When converted to a string, a Pane object returns a string
+        that will draw the entire splash screen. If relative dimensions
+        are set on the panel, the height and width should be offset by
+        that amount.
+        """
+        # Expected values.
+        exp = (
+            f'{term.move(6, 3)}    '
+            f'{term.move(7, 3)}    '
+            f'{term.move(8, 3)}    '
+            f'{term.move(5, 2)}┌────┐'
+            f'{term.move(6, 2)}│'
+            f'{term.move(6, 7)}│'
+            f'{term.move(7, 2)}│'
+            f'{term.move(7, 7)}│'
+            f'{term.move(8, 2)}│'
+            f'{term.move(8, 7)}│'
+            f'{term.move(9, 2)}└────┘'
+        )
+
+        # Test data and state.
+        kwargs = {
+            'height': 10,
+            'width': 10,
+            'panel_relative_height': 0.5,
+            'panel_relative_width': 0.6,
+            'panel_align_v': 'bottom',
+            'frame_type': 'light',
+        }
+        panel = p.Panel(**kwargs)
+
+        # Run test.
+        act = str(panel)
+
+        # Determine test result.
+        self.assertEqual(exp, act)
+
+    def test___str__with_panel_rel_dims_and_frame_and_align_v_top(self):
+        """When converted to a string, a Pane object returns a string
+        that will draw the entire splash screen. If relative dimensions
+        are set on the panel, the height and width should be offset by
+        that amount.
+        """
+        # Expected values.
+        exp = (
+            f'{term.move(1, 3)}    '
+            f'{term.move(2, 3)}    '
+            f'{term.move(3, 3)}    '
+            f'{term.move(0, 2)}┌────┐'
+            f'{term.move(1, 2)}│'
+            f'{term.move(1, 7)}│'
+            f'{term.move(2, 2)}│'
+            f'{term.move(2, 7)}│'
+            f'{term.move(3, 2)}│'
+            f'{term.move(3, 7)}│'
+            f'{term.move(4, 2)}└────┘'
+        )
+
+        # Test data and state.
+        kwargs = {
+            'height': 10,
+            'width': 10,
+            'panel_relative_height': 0.5,
+            'panel_relative_width': 0.6,
+            'panel_align_v': 'top',
             'frame_type': 'light',
         }
         panel = p.Panel(**kwargs)
