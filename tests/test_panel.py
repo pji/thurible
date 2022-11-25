@@ -72,7 +72,6 @@ kwargs_panel_opt_set = {
     'panel_pad_top': 0.4,
     'panel_relative_height': 0.3,
     'panel_relative_width': 0.7,
-    'panel_align_h': 'left',
     'panel_align_v': 'top',
 }
 kwargs_panel_req = {
@@ -126,6 +125,42 @@ class TerminalTestCase(ut.TestCase):
 
 # Test case.
 class PanelTestCase(TerminalTestCase):
+    def test___init__cannot_set_panel_pad_left_and_align_h(self):
+        """If `panel_pad_left` and `panel_align_h` are set, raise
+        a PanelHorizontalPaddingAndAlignmentSetError.
+        """
+        # Expected values.
+        exp_ex = p.PanelHorizontalPaddingAndAlignmentSetError
+        exp_msg = 'Cannot set both panel padding and panel alignment.'
+
+        # Test data and state.
+        kwargs = {
+            'panel_pad_left': 0.1,
+            'panel_align_h': 'left',
+        }
+
+        # Run test and determine result.
+        with self.assertRaisesRegex(exp_ex, exp_msg):
+            _ = p.Panel(**kwargs)
+
+    def test___init__cannot_set_panel_pad_right_and_align_h(self):
+        """If `panel_pad_right` and `panel_align_h` are set, raise
+        a PanelHorizontalPaddingAndAlignmentSetError.
+        """
+        # Expected values.
+        exp_ex = p.PanelHorizontalPaddingAndAlignmentSetError
+        exp_msg = 'Cannot set both panel padding and panel alignment.'
+
+        # Test data and state.
+        kwargs = {
+            'panel_pad_right': 0.1,
+            'panel_align_h': 'left',
+        }
+
+        # Run test and determine result.
+        with self.assertRaisesRegex(exp_ex, exp_msg):
+            _ = p.Panel(**kwargs)
+
     def test___init__optional_parameters(self):
         """Given any parameters, a Panel subclass should return an
         object with the expected attributes set.
@@ -166,6 +201,58 @@ class PanelTestCase(TerminalTestCase):
         # Determine test results.
         self.assertDictEqual(exp_req, act_req)
         self.assertDictEqual(exp_opt, act_opt)
+
+    def test___init__sum_of_h_rel_dims_does_not_equal_one(self):
+        """If `panel_pad_left`, `panel_pad_right`, and
+        `panel_relative_width` are set but the sum of all
+        three doesn't equal one, `Panel` should raise a
+        `panel.InvalidHorizontalDimensionsError` exception.
+        """
+        # Expected values.
+        exp_ex = p.InvalidHorizontalDimensionsError
+        exp_msg = (
+            'If panel_pad_left, panel_pad_right, and panel_relative_width '
+            'are set, the sum of the three must equal one. The given values '
+            'were: panel_pad_left=0.1, panel_pad_right=0.2, and '
+            'panel_relative_width=0.3.'
+        )
+
+        # Test data and state.
+        kwargs = {
+            'panel_pad_left': 0.1,
+            'panel_pad_right': 0.2,
+            'panel_relative_width': 0.3,
+        }
+
+        # Run test and determine result.
+        with self.assertRaisesRegex(exp_ex, exp_msg):
+            _ = p.Panel(**kwargs)
+
+    def test___init__sum_of_v_rel_dims_does_not_equal_one(self):
+        """If `panel_pad_bottom`, `panel_pad_top`, and
+        `panel_relative_height` are set but the sum of all
+        three doesn't equal one, `Panel` should raise a
+        `panel.InvalidVerticalDimensionsError` exception.
+        """
+        # Expected values.
+        exp_ex = p.InvalidVerticalDimensionsError
+        exp_msg = (
+            'If panel_pad_bottom, panel_pad_top, and panel_relative_height '
+            'are set, the sum of the three must equal one. The given values '
+            'were: panel_pad_bottom=0.1, panel_pad_top=0.2, and '
+            'panel_relative_height=0.3.'
+        )
+
+        # Test data and state.
+        kwargs = {
+            'panel_pad_bottom': 0.1,
+            'panel_pad_top': 0.2,
+            'panel_relative_height': 0.3,
+        }
+
+        # Run test and determine result.
+        with self.assertRaisesRegex(exp_ex, exp_msg):
+            _ = p.Panel(**kwargs)
 
     def test___str__(self):
         """When converted to a string, a Pane object returns a string
@@ -331,6 +418,80 @@ class PanelTestCase(TerminalTestCase):
             'panel_pad_left': 0.1,
             'panel_pad_right': 0.3,
             'panel_pad_top': 0.2,
+            'frame_type': 'light',
+        }
+        panel = p.Panel(**kwargs)
+
+        # Run test.
+        act = str(panel)
+
+        # Determine test result.
+        self.assertEqual(exp, act)
+
+    def test___str__with_panel_pad_left_rel_width_and_frame(self):
+        """When converted to a string, a Pane object returns a string
+        that will draw the entire splash screen. If padding left and
+        relative width are set for the panel, the panel should be inset
+        by the correct amount.
+        """
+        # Expected values.
+        exp = (
+            f'{term.move(1, 2)}    '
+            f'{term.move(2, 2)}    '
+            f'{term.move(3, 2)}    '
+            f'{term.move(0, 1)}┌────┐'
+            f'{term.move(1, 1)}│'
+            f'{term.move(1, 6)}│'
+            f'{term.move(2, 1)}│'
+            f'{term.move(2, 6)}│'
+            f'{term.move(3, 1)}│'
+            f'{term.move(3, 6)}│'
+            f'{term.move(4, 1)}└────┘'
+        )
+
+        # Test data and state.
+        kwargs = {
+            'height': 5,
+            'width': 10,
+            'panel_pad_left': 0.1,
+            'panel_relative_width': 0.6,
+            'frame_type': 'light',
+        }
+        panel = p.Panel(**kwargs)
+
+        # Run test.
+        act = str(panel)
+
+        # Determine test result.
+        self.assertEqual(exp, act)
+
+    def test___str__with_panel_pad_right_rel_width_and_frame(self):
+        """When converted to a string, a Pane object returns a string
+        that will draw the entire splash screen. If padding right and
+        relative width are set for the panel, the panel should be inset
+        by the correct amount.
+        """
+        # Expected values.
+        exp = (
+            f'{term.move(1, 2)}    '
+            f'{term.move(2, 2)}    '
+            f'{term.move(3, 2)}    '
+            f'{term.move(0, 1)}┌────┐'
+            f'{term.move(1, 1)}│'
+            f'{term.move(1, 6)}│'
+            f'{term.move(2, 1)}│'
+            f'{term.move(2, 6)}│'
+            f'{term.move(3, 1)}│'
+            f'{term.move(3, 6)}│'
+            f'{term.move(4, 1)}└────┘'
+        )
+
+        # Test data and state.
+        kwargs = {
+            'height': 5,
+            'width': 10,
+            'panel_pad_right': 0.3,
+            'panel_relative_width': 0.6,
             'frame_type': 'light',
         }
         panel = p.Panel(**kwargs)
