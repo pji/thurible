@@ -15,7 +15,7 @@ _term: Optional[Terminal] = None
 
 
 # Common classes.
-class Frame:
+class Box:
     """A class to track the characters used to draw a frame in a
     terminal.
 

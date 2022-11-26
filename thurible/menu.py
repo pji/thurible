@@ -11,7 +11,7 @@ from blessed import Terminal
 from blessed.keyboard import Keystroke
 
 from thurible.panel import Scroll, Title
-from thurible.util import Frame
+from thurible.util import Box
 
 
 # Utility classes.

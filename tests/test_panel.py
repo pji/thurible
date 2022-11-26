@@ -123,6 +123,748 @@ class TerminalTestCase(ut.TestCase):
 
 
 # Test case.
+class FrameTestCase(TerminalTestCase):
+    def test___init__optional_parameters(self):
+        """Given any parameters, a Panel subclass should return an
+        object with the expected attributes set.
+        """
+        # Expected values.
+        exp = {
+            **kwargs_frame_opt_set,
+            **kwargs_panel_opt_set,
+        }
+
+        # Run test.
+        panel = p.Frame(**exp)
+
+        # Gather actuals.
+        act = {key: getattr(panel, key) for key in exp}
+
+        # Determine test results.
+        self.assertDictEqual(exp, act)
+
+    def test___init__required_parameters(self):
+        """Given only the required parameters, a Panel subclass should
+        return an object with the expected attributes set.
+        """
+        # Expected values.
+        exp_req = kwargs_panel_req
+        exp_opt = {
+            **kwargs_frame_opt_default,
+            **kwargs_panel_opt_default
+        }
+
+        # Run test.
+        panel = p.Frame(**exp_req)
+
+        # Gather actuals.
+        act_req = {key: getattr(panel, key) for key in exp_req}
+        act_opt = {key: getattr(panel, key) for key in exp_opt}
+
+        # Determine test results.
+        self.assertDictEqual(exp_req, act_req)
+        self.assertDictEqual(exp_opt, act_opt)
+
+    def test___str__(self):
+        """When converted to a string, a Pane object returns a string
+        that will draw the entire splash screen.
+        """
+        # Expected values.
+        exp = (
+            f'{term.move(1, 1)}    '
+            f'{term.move(2, 1)}    '
+            f'{term.move(3, 1)}    '
+            f'{term.move(0, 0)}┌────┐'
+            f'{term.move(1, 0)}│'
+            f'{term.move(1, 5)}│'
+            f'{term.move(2, 0)}│'
+            f'{term.move(2, 5)}│'
+            f'{term.move(3, 0)}│'
+            f'{term.move(3, 5)}│'
+            f'{term.move(4, 0)}└────┘'
+        )
+
+        # Test data and state.
+        kwargs = {
+            'height': 5,
+            'width': 6,
+            'term': term,
+            'frame_type': 'light',
+        }
+        panel = p.Frame(**kwargs)
+
+        # Run test.
+        act = str(panel)
+
+        # Determine test result.
+        self.assertEqual(exp, act)
+
+    def test___str__with_frame_color_different_than_content(self):
+        """When converted to a string, a Pane object returns a string
+        that will draw the entire splash screen.
+        """
+        # Expected values.
+        exp = (
+            f'{term.blue_on_red}'
+            f'{term.move(1, 1)}    '
+            f'{term.move(2, 1)}    '
+            f'{term.move(3, 1)}    '
+            f'{term.normal}'
+            f'{term.white_on_green}'
+            f'{term.move(0, 0)}┌────┐'
+            f'{term.move(1, 0)}│'
+            f'{term.move(1, 5)}│'
+            f'{term.move(2, 0)}│'
+            f'{term.move(2, 5)}│'
+            f'{term.move(3, 0)}│'
+            f'{term.move(3, 5)}│'
+            f'{term.move(4, 0)}└────┘'
+            f'{term.normal}'
+        )
+
+        # Test data and state.
+        kwargs = {
+            'height': 5,
+            'width': 6,
+            'term': term,
+            'bg': 'red',
+            'fg': 'blue',
+            'frame_type': 'light',
+            'frame_bg': 'green',
+            'frame_fg': 'white',
+        }
+        panel = p.Frame(**kwargs)
+
+        # Run test.
+        act = str(panel)
+
+        # Determine test result.
+        self.assertEqual(exp, act)
+
+    def test___str__with_panel_pad(self):
+        """When converted to a string, a Pane object returns a string
+        that will draw the entire splash screen. If padding is set for
+        the panel, the panel should be inset by that amount.
+        """
+        # Expected values.
+        exp = (
+            f'{term.move(3, 2)}    '
+            f'{term.move(4, 2)}    '
+            f'{term.move(5, 2)}    '
+            f'{term.move(2, 1)}┌────┐'
+            f'{term.move(3, 1)}│'
+            f'{term.move(3, 6)}│'
+            f'{term.move(4, 1)}│'
+            f'{term.move(4, 6)}│'
+            f'{term.move(5, 1)}│'
+            f'{term.move(5, 6)}│'
+            f'{term.move(6, 1)}└────┘'
+        )
+
+        # Test data and state.
+        kwargs = {
+            'height': 10,
+            'width': 10,
+            'panel_pad_bottom': 0.3,
+            'panel_pad_left': 0.1,
+            'panel_pad_right': 0.3,
+            'panel_pad_top': 0.2,
+            'frame_type': 'light',
+        }
+        panel = p.Frame(**kwargs)
+
+        # Run test.
+        act = str(panel)
+
+        # Determine test result.
+        self.assertEqual(exp, act)
+
+    def test___str__with_panel_pad_left_rel_width(self):
+        """When converted to a string, a Pane object returns a string
+        that will draw the entire splash screen. If padding left and
+        relative width are set for the panel, the panel should be inset
+        by the correct amount.
+        """
+        # Expected values.
+        exp = (
+            f'{term.move(1, 2)}    '
+            f'{term.move(2, 2)}    '
+            f'{term.move(3, 2)}    '
+            f'{term.move(0, 1)}┌────┐'
+            f'{term.move(1, 1)}│'
+            f'{term.move(1, 6)}│'
+            f'{term.move(2, 1)}│'
+            f'{term.move(2, 6)}│'
+            f'{term.move(3, 1)}│'
+            f'{term.move(3, 6)}│'
+            f'{term.move(4, 1)}└────┘'
+        )
+
+        # Test data and state.
+        kwargs = {
+            'height': 5,
+            'width': 10,
+            'panel_pad_left': 0.1,
+            'panel_relative_width': 0.6,
+            'frame_type': 'light',
+        }
+        panel = p.Frame(**kwargs)
+
+        # Run test.
+        act = str(panel)
+
+        # Determine test result.
+        self.assertEqual(exp, act)
+
+    def test___str__with_panel_pad_right_rel_width(self):
+        """When converted to a string, a Pane object returns a string
+        that will draw the entire splash screen. If padding right and
+        relative width are set for the panel, the panel should be inset
+        by the correct amount.
+        """
+        # Expected values.
+        exp = (
+            f'{term.move(1, 2)}    '
+            f'{term.move(2, 2)}    '
+            f'{term.move(3, 2)}    '
+            f'{term.move(0, 1)}┌────┐'
+            f'{term.move(1, 1)}│'
+            f'{term.move(1, 6)}│'
+            f'{term.move(2, 1)}│'
+            f'{term.move(2, 6)}│'
+            f'{term.move(3, 1)}│'
+            f'{term.move(3, 6)}│'
+            f'{term.move(4, 1)}└────┘'
+        )
+
+        # Test data and state.
+        kwargs = {
+            'height': 5,
+            'width': 10,
+            'panel_pad_right': 0.3,
+            'panel_relative_width': 0.6,
+            'frame_type': 'light',
+        }
+        panel = p.Frame(**kwargs)
+
+        # Run test.
+        act = str(panel)
+
+        # Determine test result.
+        self.assertEqual(exp, act)
+
+    def test___str__with_panel_rel_dim(self):
+        """When converted to a string, a Pane object returns a string
+        that will draw the entire splash screen. If relative dimensions
+        are set on the panel, the height and width should be offset by
+        that amount.
+        """
+        # Expected values.
+        exp = (
+            f'{term.move(3, 3)}    '
+            f'{term.move(4, 3)}    '
+            f'{term.move(5, 3)}    '
+            f'{term.move(6, 3)}    '
+            f'{term.move(2, 2)}┌────┐'
+            f'{term.move(3, 2)}│'
+            f'{term.move(3, 7)}│'
+            f'{term.move(4, 2)}│'
+            f'{term.move(4, 7)}│'
+            f'{term.move(5, 2)}│'
+            f'{term.move(5, 7)}│'
+            f'{term.move(6, 2)}│'
+            f'{term.move(6, 7)}│'
+            f'{term.move(7, 2)}└────┘'
+        )
+
+        # Test data and state.
+        kwargs = {
+            'height': 10,
+            'width': 10,
+            'panel_relative_height': 0.5,
+            'panel_relative_width': 0.6,
+            'frame_type': 'light',
+        }
+        panel = p.Frame(**kwargs)
+
+        # Run test.
+        act = str(panel)
+
+        # Determine test result.
+        self.assertEqual(exp, act)
+
+    def test___str__with_panel_rel_dims_and_align_h_left(self):
+        """When converted to a string, a Pane object returns a string
+        that will draw the entire splash screen. If relative dimensions
+        are set on the panel, the height and width should be offset by
+        that amount.
+        """
+        # Expected values.
+        exp = (
+            f'{term.move(3, 1)}    '
+            f'{term.move(4, 1)}    '
+            f'{term.move(5, 1)}    '
+            f'{term.move(6, 1)}    '
+            f'{term.move(2, 0)}┌────┐'
+            f'{term.move(3, 0)}│'
+            f'{term.move(3, 5)}│'
+            f'{term.move(4, 0)}│'
+            f'{term.move(4, 5)}│'
+            f'{term.move(5, 0)}│'
+            f'{term.move(5, 5)}│'
+            f'{term.move(6, 0)}│'
+            f'{term.move(6, 5)}│'
+            f'{term.move(7, 0)}└────┘'
+        )
+
+        # Test data and state.
+        kwargs = {
+            'height': 10,
+            'width': 10,
+            'panel_relative_height': 0.5,
+            'panel_relative_width': 0.6,
+            'panel_align_h': 'left',
+            'frame_type': 'light',
+        }
+        panel = p.Frame(**kwargs)
+
+        # Run test.
+        act = str(panel)
+
+        # Determine test result.
+        self.assertEqual(exp, act)
+
+    def test___str__with_panel_rel_dims_and_align_h_right(self):
+        """When converted to a string, a Pane object returns a string
+        that will draw the entire splash screen. If relative dimensions
+        are set on the panel, the height and width should be offset by
+        that amount.
+        """
+        # Expected values.
+        exp = (
+            f'{term.move(3, 5)}    '
+            f'{term.move(4, 5)}    '
+            f'{term.move(5, 5)}    '
+            f'{term.move(6, 5)}    '
+            f'{term.move(2, 4)}┌────┐'
+            f'{term.move(3, 4)}│'
+            f'{term.move(3, 9)}│'
+            f'{term.move(4, 4)}│'
+            f'{term.move(4, 9)}│'
+            f'{term.move(5, 4)}│'
+            f'{term.move(5, 9)}│'
+            f'{term.move(6, 4)}│'
+            f'{term.move(6, 9)}│'
+            f'{term.move(7, 4)}└────┘'
+        )
+
+        # Test data and state.
+        kwargs = {
+            'height': 10,
+            'width': 10,
+            'panel_relative_height': 0.5,
+            'panel_relative_width': 0.6,
+            'panel_align_h': 'right',
+            'frame_type': 'light',
+        }
+        panel = p.Frame(**kwargs)
+
+        # Run test.
+        act = str(panel)
+
+        # Determine test result.
+        self.assertEqual(exp, act)
+
+    def test___str__with_panel_rel_dims_and_align_v_bottom(self):
+        """When converted to a string, a Pane object returns a string
+        that will draw the entire splash screen. If relative dimensions
+        are set on the panel, the height and width should be offset by
+        that amount.
+        """
+        # Expected values.
+        exp = (
+            f'{term.move(6, 3)}    '
+            f'{term.move(7, 3)}    '
+            f'{term.move(8, 3)}    '
+            f'{term.move(5, 2)}┌────┐'
+            f'{term.move(6, 2)}│'
+            f'{term.move(6, 7)}│'
+            f'{term.move(7, 2)}│'
+            f'{term.move(7, 7)}│'
+            f'{term.move(8, 2)}│'
+            f'{term.move(8, 7)}│'
+            f'{term.move(9, 2)}└────┘'
+        )
+
+        # Test data and state.
+        kwargs = {
+            'height': 10,
+            'width': 10,
+            'panel_relative_height': 0.5,
+            'panel_relative_width': 0.6,
+            'panel_align_v': 'bottom',
+            'frame_type': 'light',
+        }
+        panel = p.Frame(**kwargs)
+
+        # Run test.
+        act = str(panel)
+
+        # Determine test result.
+        self.assertEqual(exp, act)
+
+    def test___str__with_panel_rel_dims_and_align_v_top(self):
+        """When converted to a string, a Pane object returns a string
+        that will draw the entire splash screen. If relative dimensions
+        are set on the panel, the height and width should be offset by
+        that amount.
+        """
+        # Expected values.
+        exp = (
+            f'{term.move(1, 3)}    '
+            f'{term.move(2, 3)}    '
+            f'{term.move(3, 3)}    '
+            f'{term.move(0, 2)}┌────┐'
+            f'{term.move(1, 2)}│'
+            f'{term.move(1, 7)}│'
+            f'{term.move(2, 2)}│'
+            f'{term.move(2, 7)}│'
+            f'{term.move(3, 2)}│'
+            f'{term.move(3, 7)}│'
+            f'{term.move(4, 2)}└────┘'
+        )
+
+        # Test data and state.
+        kwargs = {
+            'height': 10,
+            'width': 10,
+            'panel_relative_height': 0.5,
+            'panel_relative_width': 0.6,
+            'panel_align_v': 'top',
+            'frame_type': 'light',
+        }
+        panel = p.Frame(**kwargs)
+
+        # Run test.
+        act = str(panel)
+
+        # Determine test result.
+        self.assertEqual(exp, act)
+
+    def test_clear_contents(self):
+        """When called, Panel.clear_contents will return a string that
+        clears the area within the panel in the terminal. If there is
+        a frame set for the panel, the cleared area should not affect
+        the frame.
+        """
+        # Expected values.
+        exp = (
+            f'{term.move(1, 1)}    '
+            f'{term.move(2, 1)}    '
+            f'{term.move(3, 1)}    '
+        )
+
+        # Test data and state.
+        kwargs = {
+            'height': 5,
+            'width': 6,
+            'term': term,
+            'frame_type': 'light',
+        }
+        panel = p.Frame(**kwargs)
+
+        # Run test.
+        act = panel.clear_contents()
+
+        # Determine test result.
+        self.assertEqual(exp, act)
+
+    def test_frame(self):
+        """When referenced, the Panel.frame property should return a
+        string that will draw the panel's frame in the terminal.
+        """
+        # Expected values.
+        exp = (
+            f'{term.move(0, 0)}┌────┐'
+            f'{term.move(1, 0)}│'
+            f'{term.move(1, 5)}│'
+            f'{term.move(2, 0)}│'
+            f'{term.move(2, 5)}│'
+            f'{term.move(3, 0)}│'
+            f'{term.move(3, 5)}│'
+            f'{term.move(4, 0)}└────┘'
+        )
+
+        # Test data and state.
+        kwargs = {
+            'height': 5,
+            'width': 6,
+            'term': term,
+            'frame_type': 'light',
+        }
+        panel = p.Frame(**kwargs)
+
+        # Run test.
+        act = panel.frame
+
+        # Determine test result.
+        self.assertEqual(exp, act)
+
+    def test_frame_with_bg(self):
+        """When referenced, the Panel.frame property should return a
+        string that will draw the panel's frame in the terminal. If
+        there is a background color, the frame should have that color.
+        """
+        # Expected values.
+        exp = (
+            f'{term.on_blue}'
+            f'{term.move(0, 0)}┌────┐'
+            f'{term.move(1, 0)}│'
+            f'{term.move(1, 5)}│'
+            f'{term.move(2, 0)}│'
+            f'{term.move(2, 5)}│'
+            f'{term.move(3, 0)}│'
+            f'{term.move(3, 5)}│'
+            f'{term.move(4, 0)}└────┘'
+            f'{term.normal}'
+        )
+
+        # Test data and state.
+        kwargs = {
+            'height': 5,
+            'width': 6,
+            'term': term,
+            'bg': 'blue',
+            'frame_type': 'light',
+        }
+        panel = p.Frame(**kwargs)
+
+        # Run test.
+        act = panel.frame
+
+        # Determine test result.
+        self.assertEqual(exp, act)
+
+    def test_frame_with_bg_and_fg(self):
+        """When referenced, the Panel.frame property should return a
+        string that will draw the panel's frame in the terminal. If
+        there are background and a foreground colors, the frame should
+        have those colors.
+        """
+        # Expected values.
+        exp = (
+            f'{term.red_on_blue}'
+            f'{term.move(0, 0)}┌────┐'
+            f'{term.move(1, 0)}│'
+            f'{term.move(1, 5)}│'
+            f'{term.move(2, 0)}│'
+            f'{term.move(2, 5)}│'
+            f'{term.move(3, 0)}│'
+            f'{term.move(3, 5)}│'
+            f'{term.move(4, 0)}└────┘'
+            f'{term.normal}'
+        )
+
+        # Test data and state.
+        kwargs = {
+            'height': 5,
+            'width': 6,
+            'term': term,
+            'bg': 'blue',
+            'fg': 'red',
+            'frame_type': 'light',
+        }
+        panel = p.Frame(**kwargs)
+
+        # Run test.
+        act = panel.frame
+
+        # Determine test result.
+        self.assertEqual(exp, act)
+
+    def test_frame_with_fg(self):
+        """When referenced, the Panel.frame property should return a
+        string that will draw the panel's frame in the terminal. If
+        there is a foreground color, the frame should have that color.
+        """
+        # Expected values.
+        exp = (
+            f'{term.blue}'
+            f'{term.move(0, 0)}┌────┐'
+            f'{term.move(1, 0)}│'
+            f'{term.move(1, 5)}│'
+            f'{term.move(2, 0)}│'
+            f'{term.move(2, 5)}│'
+            f'{term.move(3, 0)}│'
+            f'{term.move(3, 5)}│'
+            f'{term.move(4, 0)}└────┘'
+            f'{term.normal}'
+        )
+
+        # Test data and state.
+        kwargs = {
+            'height': 5,
+            'width': 6,
+            'term': term,
+            'fg': 'blue',
+            'frame_type': 'light',
+        }
+        panel = p.Frame(**kwargs)
+
+        # Run test.
+        act = panel.frame
+
+        # Determine test result.
+        self.assertEqual(exp, act)
+
+    def test_frame_with_frame_bg(self):
+        """When referenced, the Panel.frame property should return a
+        string that will draw the panel's frame in the terminal. If
+        there is a frame background color, the frame should have that
+        color.
+        """
+        # Expected values.
+        exp = (
+            f'{term.on_blue}'
+            f'{term.move(0, 0)}┌────┐'
+            f'{term.move(1, 0)}│'
+            f'{term.move(1, 5)}│'
+            f'{term.move(2, 0)}│'
+            f'{term.move(2, 5)}│'
+            f'{term.move(3, 0)}│'
+            f'{term.move(3, 5)}│'
+            f'{term.move(4, 0)}└────┘'
+            f'{term.normal}'
+        )
+
+        # Test data and state.
+        kwargs = {
+            'height': 5,
+            'width': 6,
+            'term': term,
+            'frame_bg': 'blue',
+            'frame_type': 'light',
+        }
+        panel = p.Frame(**kwargs)
+
+        # Run test.
+        act = panel.frame
+
+        # Determine test result.
+        self.assertEqual(exp, act)
+
+    def test_frame_with_frame_bg_and_bg(self):
+        """When referenced, the Panel.frame property should return a
+        string that will draw the panel's frame in the terminal. If
+        there is a frame background color and a background color, the
+        frame should have the frame background color.
+        """
+        # Expected values.
+        exp = (
+            f'{term.on_blue}'
+            f'{term.move(0, 0)}┌────┐'
+            f'{term.move(1, 0)}│'
+            f'{term.move(1, 5)}│'
+            f'{term.move(2, 0)}│'
+            f'{term.move(2, 5)}│'
+            f'{term.move(3, 0)}│'
+            f'{term.move(3, 5)}│'
+            f'{term.move(4, 0)}└────┘'
+            f'{term.normal}'
+        )
+
+        # Test data and state.
+        kwargs = {
+            'height': 5,
+            'width': 6,
+            'term': term,
+            'bg': 'red',
+            'frame_bg': 'blue',
+            'frame_type': 'light',
+        }
+        panel = p.Frame(**kwargs)
+
+        # Run test.
+        act = panel.frame
+
+        # Determine test result.
+        self.assertEqual(exp, act)
+
+    def test_frame_with_frame_fg(self):
+        """When referenced, the Panel.frame property should return a
+        string that will draw the panel's frame in the terminal. If
+        there is a frame foreground color, the frame should have that
+        color.
+        """
+        # Expected values.
+        exp = (
+            f'{term.blue}'
+            f'{term.move(0, 0)}┌────┐'
+            f'{term.move(1, 0)}│'
+            f'{term.move(1, 5)}│'
+            f'{term.move(2, 0)}│'
+            f'{term.move(2, 5)}│'
+            f'{term.move(3, 0)}│'
+            f'{term.move(3, 5)}│'
+            f'{term.move(4, 0)}└────┘'
+            f'{term.normal}'
+        )
+
+        # Test data and state.
+        kwargs = {
+            'height': 5,
+            'width': 6,
+            'term': term,
+            'frame_fg': 'blue',
+            'frame_type': 'light',
+        }
+        panel = p.Frame(**kwargs)
+
+        # Run test.
+        act = panel.frame
+
+        # Determine test result.
+        self.assertEqual(exp, act)
+
+    def test_frame_with_frame_fg_and_fg(self):
+        """When referenced, the Panel.frame property should return a
+        string that will draw the panel's frame in the terminal. If
+        there is a frame foreground color, the frame should have that
+        color. If there is a frame foreground color and a foreground
+        color, the frame should have the frame foreground color.
+        """
+        # Expected values.
+        exp = (
+            f'{term.blue}'
+            f'{term.move(0, 0)}┌────┐'
+            f'{term.move(1, 0)}│'
+            f'{term.move(1, 5)}│'
+            f'{term.move(2, 0)}│'
+            f'{term.move(2, 5)}│'
+            f'{term.move(3, 0)}│'
+            f'{term.move(3, 5)}│'
+            f'{term.move(4, 0)}└────┘'
+            f'{term.normal}'
+        )
+
+        # Test data and state.
+        kwargs = {
+            'height': 5,
+            'width': 6,
+            'term': term,
+            'fg': 'red',
+            'frame_fg': 'blue',
+            'frame_type': 'light',
+        }
+        panel = p.Frame(**kwargs)
+
+        # Run test.
+        act = panel.frame
+
+        # Determine test result.
+        self.assertEqual(exp, act)
+
+
 class PanelTestCase(TerminalTestCase):
     def test___init__cannot_set_panel_pad_left_and_align_h(self):
         """If `panel_pad_left` and `panel_align_h` are set, raise
@@ -165,10 +907,7 @@ class PanelTestCase(TerminalTestCase):
         object with the expected attributes set.
         """
         # Expected values.
-        exp = {
-            **kwargs_frame_opt_set,
-            **kwargs_panel_opt_set,
-        }
+        exp = kwargs_panel_opt_set
 
         # Run test.
         panel = p.Panel(**exp)
@@ -185,10 +924,7 @@ class PanelTestCase(TerminalTestCase):
         """
         # Expected values.
         exp_req = kwargs_panel_req
-        exp_opt = {
-            **kwargs_frame_opt_default,
-            **kwargs_panel_opt_default
-        }
+        exp_opt = kwargs_panel_opt_default
 
         # Run test.
         panel = p.Panel(**exp_req)
@@ -313,392 +1049,6 @@ class PanelTestCase(TerminalTestCase):
         # Determine test result.
         self.assertEqual(exp, act)
 
-    def test___str__with_frame(self):
-        """When converted to a string, a Pane object returns a string
-        that will draw the entire splash screen.
-        """
-        # Expected values.
-        exp = (
-            f'{term.move(1, 1)}    '
-            f'{term.move(2, 1)}    '
-            f'{term.move(3, 1)}    '
-            f'{term.move(0, 0)}┌────┐'
-            f'{term.move(1, 0)}│'
-            f'{term.move(1, 5)}│'
-            f'{term.move(2, 0)}│'
-            f'{term.move(2, 5)}│'
-            f'{term.move(3, 0)}│'
-            f'{term.move(3, 5)}│'
-            f'{term.move(4, 0)}└────┘'
-        )
-
-        # Test data and state.
-        kwargs = {
-            'height': 5,
-            'width': 6,
-            'term': term,
-            'frame_type': 'light',
-        }
-        panel = p.Panel(**kwargs)
-
-        # Run test.
-        act = str(panel)
-
-        # Determine test result.
-        self.assertEqual(exp, act)
-
-    def test___str__with_frame_and_frame_color_different_than_content(self):
-        """When converted to a string, a Pane object returns a string
-        that will draw the entire splash screen.
-        """
-        # Expected values.
-        exp = (
-            f'{term.blue_on_red}'
-            f'{term.move(1, 1)}    '
-            f'{term.move(2, 1)}    '
-            f'{term.move(3, 1)}    '
-            f'{term.normal}'
-            f'{term.white_on_green}'
-            f'{term.move(0, 0)}┌────┐'
-            f'{term.move(1, 0)}│'
-            f'{term.move(1, 5)}│'
-            f'{term.move(2, 0)}│'
-            f'{term.move(2, 5)}│'
-            f'{term.move(3, 0)}│'
-            f'{term.move(3, 5)}│'
-            f'{term.move(4, 0)}└────┘'
-            f'{term.normal}'
-        )
-
-        # Test data and state.
-        kwargs = {
-            'height': 5,
-            'width': 6,
-            'term': term,
-            'bg': 'red',
-            'fg': 'blue',
-            'frame_type': 'light',
-            'frame_bg': 'green',
-            'frame_fg': 'white',
-        }
-        panel = p.Panel(**kwargs)
-
-        # Run test.
-        act = str(panel)
-
-        # Determine test result.
-        self.assertEqual(exp, act)
-
-    def test___str__with_panel_pad_and_frame(self):
-        """When converted to a string, a Pane object returns a string
-        that will draw the entire splash screen. If padding is set for
-        the panel, the panel should be inset by that amount.
-        """
-        # Expected values.
-        exp = (
-            f'{term.move(3, 2)}    '
-            f'{term.move(4, 2)}    '
-            f'{term.move(5, 2)}    '
-            f'{term.move(2, 1)}┌────┐'
-            f'{term.move(3, 1)}│'
-            f'{term.move(3, 6)}│'
-            f'{term.move(4, 1)}│'
-            f'{term.move(4, 6)}│'
-            f'{term.move(5, 1)}│'
-            f'{term.move(5, 6)}│'
-            f'{term.move(6, 1)}└────┘'
-        )
-
-        # Test data and state.
-        kwargs = {
-            'height': 10,
-            'width': 10,
-            'panel_pad_bottom': 0.3,
-            'panel_pad_left': 0.1,
-            'panel_pad_right': 0.3,
-            'panel_pad_top': 0.2,
-            'frame_type': 'light',
-        }
-        panel = p.Panel(**kwargs)
-
-        # Run test.
-        act = str(panel)
-
-        # Determine test result.
-        self.assertEqual(exp, act)
-
-    def test___str__with_panel_pad_left_rel_width_and_frame(self):
-        """When converted to a string, a Pane object returns a string
-        that will draw the entire splash screen. If padding left and
-        relative width are set for the panel, the panel should be inset
-        by the correct amount.
-        """
-        # Expected values.
-        exp = (
-            f'{term.move(1, 2)}    '
-            f'{term.move(2, 2)}    '
-            f'{term.move(3, 2)}    '
-            f'{term.move(0, 1)}┌────┐'
-            f'{term.move(1, 1)}│'
-            f'{term.move(1, 6)}│'
-            f'{term.move(2, 1)}│'
-            f'{term.move(2, 6)}│'
-            f'{term.move(3, 1)}│'
-            f'{term.move(3, 6)}│'
-            f'{term.move(4, 1)}└────┘'
-        )
-
-        # Test data and state.
-        kwargs = {
-            'height': 5,
-            'width': 10,
-            'panel_pad_left': 0.1,
-            'panel_relative_width': 0.6,
-            'frame_type': 'light',
-        }
-        panel = p.Panel(**kwargs)
-
-        # Run test.
-        act = str(panel)
-
-        # Determine test result.
-        self.assertEqual(exp, act)
-
-    def test___str__with_panel_pad_right_rel_width_and_frame(self):
-        """When converted to a string, a Pane object returns a string
-        that will draw the entire splash screen. If padding right and
-        relative width are set for the panel, the panel should be inset
-        by the correct amount.
-        """
-        # Expected values.
-        exp = (
-            f'{term.move(1, 2)}    '
-            f'{term.move(2, 2)}    '
-            f'{term.move(3, 2)}    '
-            f'{term.move(0, 1)}┌────┐'
-            f'{term.move(1, 1)}│'
-            f'{term.move(1, 6)}│'
-            f'{term.move(2, 1)}│'
-            f'{term.move(2, 6)}│'
-            f'{term.move(3, 1)}│'
-            f'{term.move(3, 6)}│'
-            f'{term.move(4, 1)}└────┘'
-        )
-
-        # Test data and state.
-        kwargs = {
-            'height': 5,
-            'width': 10,
-            'panel_pad_right': 0.3,
-            'panel_relative_width': 0.6,
-            'frame_type': 'light',
-        }
-        panel = p.Panel(**kwargs)
-
-        # Run test.
-        act = str(panel)
-
-        # Determine test result.
-        self.assertEqual(exp, act)
-
-    def test___str__with_panel_rel_dims_and_frame(self):
-        """When converted to a string, a Pane object returns a string
-        that will draw the entire splash screen. If relative dimensions
-        are set on the panel, the height and width should be offset by
-        that amount.
-        """
-        # Expected values.
-        exp = (
-            f'{term.move(3, 3)}    '
-            f'{term.move(4, 3)}    '
-            f'{term.move(5, 3)}    '
-            f'{term.move(6, 3)}    '
-            f'{term.move(2, 2)}┌────┐'
-            f'{term.move(3, 2)}│'
-            f'{term.move(3, 7)}│'
-            f'{term.move(4, 2)}│'
-            f'{term.move(4, 7)}│'
-            f'{term.move(5, 2)}│'
-            f'{term.move(5, 7)}│'
-            f'{term.move(6, 2)}│'
-            f'{term.move(6, 7)}│'
-            f'{term.move(7, 2)}└────┘'
-        )
-
-        # Test data and state.
-        kwargs = {
-            'height': 10,
-            'width': 10,
-            'panel_relative_height': 0.5,
-            'panel_relative_width': 0.6,
-            'frame_type': 'light',
-        }
-        panel = p.Panel(**kwargs)
-
-        # Run test.
-        act = str(panel)
-
-        # Determine test result.
-        self.assertEqual(exp, act)
-
-    def test___str__with_panel_rel_dims_and_frame_and_align_h_left(self):
-        """When converted to a string, a Pane object returns a string
-        that will draw the entire splash screen. If relative dimensions
-        are set on the panel, the height and width should be offset by
-        that amount.
-        """
-        # Expected values.
-        exp = (
-            f'{term.move(3, 1)}    '
-            f'{term.move(4, 1)}    '
-            f'{term.move(5, 1)}    '
-            f'{term.move(6, 1)}    '
-            f'{term.move(2, 0)}┌────┐'
-            f'{term.move(3, 0)}│'
-            f'{term.move(3, 5)}│'
-            f'{term.move(4, 0)}│'
-            f'{term.move(4, 5)}│'
-            f'{term.move(5, 0)}│'
-            f'{term.move(5, 5)}│'
-            f'{term.move(6, 0)}│'
-            f'{term.move(6, 5)}│'
-            f'{term.move(7, 0)}└────┘'
-        )
-
-        # Test data and state.
-        kwargs = {
-            'height': 10,
-            'width': 10,
-            'panel_relative_height': 0.5,
-            'panel_relative_width': 0.6,
-            'panel_align_h': 'left',
-            'frame_type': 'light',
-        }
-        panel = p.Panel(**kwargs)
-
-        # Run test.
-        act = str(panel)
-
-        # Determine test result.
-        self.assertEqual(exp, act)
-
-    def test___str__with_panel_rel_dims_and_frame_and_align_h_right(self):
-        """When converted to a string, a Pane object returns a string
-        that will draw the entire splash screen. If relative dimensions
-        are set on the panel, the height and width should be offset by
-        that amount.
-        """
-        # Expected values.
-        exp = (
-            f'{term.move(3, 5)}    '
-            f'{term.move(4, 5)}    '
-            f'{term.move(5, 5)}    '
-            f'{term.move(6, 5)}    '
-            f'{term.move(2, 4)}┌────┐'
-            f'{term.move(3, 4)}│'
-            f'{term.move(3, 9)}│'
-            f'{term.move(4, 4)}│'
-            f'{term.move(4, 9)}│'
-            f'{term.move(5, 4)}│'
-            f'{term.move(5, 9)}│'
-            f'{term.move(6, 4)}│'
-            f'{term.move(6, 9)}│'
-            f'{term.move(7, 4)}└────┘'
-        )
-
-        # Test data and state.
-        kwargs = {
-            'height': 10,
-            'width': 10,
-            'panel_relative_height': 0.5,
-            'panel_relative_width': 0.6,
-            'panel_align_h': 'right',
-            'frame_type': 'light',
-        }
-        panel = p.Panel(**kwargs)
-
-        # Run test.
-        act = str(panel)
-
-        # Determine test result.
-        self.assertEqual(exp, act)
-
-    def test___str__with_panel_rel_dims_and_frame_and_align_v_bottom(self):
-        """When converted to a string, a Pane object returns a string
-        that will draw the entire splash screen. If relative dimensions
-        are set on the panel, the height and width should be offset by
-        that amount.
-        """
-        # Expected values.
-        exp = (
-            f'{term.move(6, 3)}    '
-            f'{term.move(7, 3)}    '
-            f'{term.move(8, 3)}    '
-            f'{term.move(5, 2)}┌────┐'
-            f'{term.move(6, 2)}│'
-            f'{term.move(6, 7)}│'
-            f'{term.move(7, 2)}│'
-            f'{term.move(7, 7)}│'
-            f'{term.move(8, 2)}│'
-            f'{term.move(8, 7)}│'
-            f'{term.move(9, 2)}└────┘'
-        )
-
-        # Test data and state.
-        kwargs = {
-            'height': 10,
-            'width': 10,
-            'panel_relative_height': 0.5,
-            'panel_relative_width': 0.6,
-            'panel_align_v': 'bottom',
-            'frame_type': 'light',
-        }
-        panel = p.Panel(**kwargs)
-
-        # Run test.
-        act = str(panel)
-
-        # Determine test result.
-        self.assertEqual(exp, act)
-
-    def test___str__with_panel_rel_dims_and_frame_and_align_v_top(self):
-        """When converted to a string, a Pane object returns a string
-        that will draw the entire splash screen. If relative dimensions
-        are set on the panel, the height and width should be offset by
-        that amount.
-        """
-        # Expected values.
-        exp = (
-            f'{term.move(1, 3)}    '
-            f'{term.move(2, 3)}    '
-            f'{term.move(3, 3)}    '
-            f'{term.move(0, 2)}┌────┐'
-            f'{term.move(1, 2)}│'
-            f'{term.move(1, 7)}│'
-            f'{term.move(2, 2)}│'
-            f'{term.move(2, 7)}│'
-            f'{term.move(3, 2)}│'
-            f'{term.move(3, 7)}│'
-            f'{term.move(4, 2)}└────┘'
-        )
-
-        # Test data and state.
-        kwargs = {
-            'height': 10,
-            'width': 10,
-            'panel_relative_height': 0.5,
-            'panel_relative_width': 0.6,
-            'panel_align_v': 'top',
-            'frame_type': 'light',
-        }
-        panel = p.Panel(**kwargs)
-
-        # Run test.
-        act = str(panel)
-
-        # Determine test result.
-        self.assertEqual(exp, act)
-
     def test_action(self):
         """If passed a keystroke, Panel.action() should return a tuple
         containing the string for the keystroke and an empty string.
@@ -812,34 +1162,6 @@ class PanelTestCase(TerminalTestCase):
         # Determine test result.
         self.assertEqual(exp, act)
 
-    def test_clear_contents_with_frame(self):
-        """When called, Panel.clear_contents will return a string that
-        clears the area within the panel in the terminal. If there is
-        a frame set for the panel, the cleared area should not affect
-        the frame.
-        """
-        # Expected values.
-        exp = (
-            f'{term.move(1, 1)}    '
-            f'{term.move(2, 1)}    '
-            f'{term.move(3, 1)}    '
-        )
-
-        # Test data and state.
-        kwargs = {
-            'height': 5,
-            'width': 6,
-            'term': term,
-            'frame_type': 'light',
-        }
-        panel = p.Panel(**kwargs)
-
-        # Run test.
-        act = panel.clear_contents()
-
-        # Determine test result.
-        self.assertEqual(exp, act)
-
     def test_clear_contents_with_fg(self):
         """When called, Panel.clear_contents will return a string that
         clears the area within the panel in the terminal. If there is a
@@ -867,291 +1189,6 @@ class PanelTestCase(TerminalTestCase):
 
         # Run test.
         act = panel.clear_contents()
-
-        # Determine test result.
-        self.assertEqual(exp, act)
-
-    def test_frame(self):
-        """When referenced, the Panel.frame property should return a
-        string that will draw the panel's frame in the terminal.
-        """
-        # Expected values.
-        exp = (
-            f'{term.move(0, 0)}┌────┐'
-            f'{term.move(1, 0)}│'
-            f'{term.move(1, 5)}│'
-            f'{term.move(2, 0)}│'
-            f'{term.move(2, 5)}│'
-            f'{term.move(3, 0)}│'
-            f'{term.move(3, 5)}│'
-            f'{term.move(4, 0)}└────┘'
-        )
-
-        # Test data and state.
-        kwargs = {
-            'height': 5,
-            'width': 6,
-            'term': term,
-            'frame_type': 'light',
-        }
-        panel = p.Panel(**kwargs)
-
-        # Run test.
-        act = panel.frame
-
-        # Determine test result.
-        self.assertEqual(exp, act)
-
-    def test_frame_with_bg(self):
-        """When referenced, the Panel.frame property should return a
-        string that will draw the panel's frame in the terminal. If
-        there is a background color, the frame should have that color.
-        """
-        # Expected values.
-        exp = (
-            f'{term.on_blue}'
-            f'{term.move(0, 0)}┌────┐'
-            f'{term.move(1, 0)}│'
-            f'{term.move(1, 5)}│'
-            f'{term.move(2, 0)}│'
-            f'{term.move(2, 5)}│'
-            f'{term.move(3, 0)}│'
-            f'{term.move(3, 5)}│'
-            f'{term.move(4, 0)}└────┘'
-            f'{term.normal}'
-        )
-
-        # Test data and state.
-        kwargs = {
-            'height': 5,
-            'width': 6,
-            'term': term,
-            'bg': 'blue',
-            'frame_type': 'light',
-        }
-        panel = p.Panel(**kwargs)
-
-        # Run test.
-        act = panel.frame
-
-        # Determine test result.
-        self.assertEqual(exp, act)
-
-    def test_frame_with_bg_and_fg(self):
-        """When referenced, the Panel.frame property should return a
-        string that will draw the panel's frame in the terminal. If
-        there are background and a foreground colors, the frame should
-        have those colors.
-        """
-        # Expected values.
-        exp = (
-            f'{term.red_on_blue}'
-            f'{term.move(0, 0)}┌────┐'
-            f'{term.move(1, 0)}│'
-            f'{term.move(1, 5)}│'
-            f'{term.move(2, 0)}│'
-            f'{term.move(2, 5)}│'
-            f'{term.move(3, 0)}│'
-            f'{term.move(3, 5)}│'
-            f'{term.move(4, 0)}└────┘'
-            f'{term.normal}'
-        )
-
-        # Test data and state.
-        kwargs = {
-            'height': 5,
-            'width': 6,
-            'term': term,
-            'bg': 'blue',
-            'fg': 'red',
-            'frame_type': 'light',
-        }
-        panel = p.Panel(**kwargs)
-
-        # Run test.
-        act = panel.frame
-
-        # Determine test result.
-        self.assertEqual(exp, act)
-
-    def test_frame_with_fg(self):
-        """When referenced, the Panel.frame property should return a
-        string that will draw the panel's frame in the terminal. If
-        there is a foreground color, the frame should have that color.
-        """
-        # Expected values.
-        exp = (
-            f'{term.blue}'
-            f'{term.move(0, 0)}┌────┐'
-            f'{term.move(1, 0)}│'
-            f'{term.move(1, 5)}│'
-            f'{term.move(2, 0)}│'
-            f'{term.move(2, 5)}│'
-            f'{term.move(3, 0)}│'
-            f'{term.move(3, 5)}│'
-            f'{term.move(4, 0)}└────┘'
-            f'{term.normal}'
-        )
-
-        # Test data and state.
-        kwargs = {
-            'height': 5,
-            'width': 6,
-            'term': term,
-            'fg': 'blue',
-            'frame_type': 'light',
-        }
-        panel = p.Panel(**kwargs)
-
-        # Run test.
-        act = panel.frame
-
-        # Determine test result.
-        self.assertEqual(exp, act)
-
-    def test_frame_with_frame_bg(self):
-        """When referenced, the Panel.frame property should return a
-        string that will draw the panel's frame in the terminal. If
-        there is a frame background color, the frame should have that
-        color.
-        """
-        # Expected values.
-        exp = (
-            f'{term.on_blue}'
-            f'{term.move(0, 0)}┌────┐'
-            f'{term.move(1, 0)}│'
-            f'{term.move(1, 5)}│'
-            f'{term.move(2, 0)}│'
-            f'{term.move(2, 5)}│'
-            f'{term.move(3, 0)}│'
-            f'{term.move(3, 5)}│'
-            f'{term.move(4, 0)}└────┘'
-            f'{term.normal}'
-        )
-
-        # Test data and state.
-        kwargs = {
-            'height': 5,
-            'width': 6,
-            'term': term,
-            'frame_bg': 'blue',
-            'frame_type': 'light',
-        }
-        panel = p.Panel(**kwargs)
-
-        # Run test.
-        act = panel.frame
-
-        # Determine test result.
-        self.assertEqual(exp, act)
-
-    def test_frame_with_frame_bg_and_bg(self):
-        """When referenced, the Panel.frame property should return a
-        string that will draw the panel's frame in the terminal. If
-        there is a frame background color and a background color, the
-        frame should have the frame background color.
-        """
-        # Expected values.
-        exp = (
-            f'{term.on_blue}'
-            f'{term.move(0, 0)}┌────┐'
-            f'{term.move(1, 0)}│'
-            f'{term.move(1, 5)}│'
-            f'{term.move(2, 0)}│'
-            f'{term.move(2, 5)}│'
-            f'{term.move(3, 0)}│'
-            f'{term.move(3, 5)}│'
-            f'{term.move(4, 0)}└────┘'
-            f'{term.normal}'
-        )
-
-        # Test data and state.
-        kwargs = {
-            'height': 5,
-            'width': 6,
-            'term': term,
-            'bg': 'red',
-            'frame_bg': 'blue',
-            'frame_type': 'light',
-        }
-        panel = p.Panel(**kwargs)
-
-        # Run test.
-        act = panel.frame
-
-        # Determine test result.
-        self.assertEqual(exp, act)
-
-    def test_frame_with_frame_fg(self):
-        """When referenced, the Panel.frame property should return a
-        string that will draw the panel's frame in the terminal. If
-        there is a frame foreground color, the frame should have that
-        color.
-        """
-        # Expected values.
-        exp = (
-            f'{term.blue}'
-            f'{term.move(0, 0)}┌────┐'
-            f'{term.move(1, 0)}│'
-            f'{term.move(1, 5)}│'
-            f'{term.move(2, 0)}│'
-            f'{term.move(2, 5)}│'
-            f'{term.move(3, 0)}│'
-            f'{term.move(3, 5)}│'
-            f'{term.move(4, 0)}└────┘'
-            f'{term.normal}'
-        )
-
-        # Test data and state.
-        kwargs = {
-            'height': 5,
-            'width': 6,
-            'term': term,
-            'frame_fg': 'blue',
-            'frame_type': 'light',
-        }
-        panel = p.Panel(**kwargs)
-
-        # Run test.
-        act = panel.frame
-
-        # Determine test result.
-        self.assertEqual(exp, act)
-
-    def test_frame_with_frame_fg_and_fg(self):
-        """When referenced, the Panel.frame property should return a
-        string that will draw the panel's frame in the terminal. If
-        there is a frame foreground color, the frame should have that
-        color. If there is a frame foreground color and a foreground
-        color, the frame should have the frame foreground color.
-        """
-        # Expected values.
-        exp = (
-            f'{term.blue}'
-            f'{term.move(0, 0)}┌────┐'
-            f'{term.move(1, 0)}│'
-            f'{term.move(1, 5)}│'
-            f'{term.move(2, 0)}│'
-            f'{term.move(2, 5)}│'
-            f'{term.move(3, 0)}│'
-            f'{term.move(3, 5)}│'
-            f'{term.move(4, 0)}└────┘'
-            f'{term.normal}'
-        )
-
-        # Test data and state.
-        kwargs = {
-            'height': 5,
-            'width': 6,
-            'term': term,
-            'fg': 'red',
-            'frame_fg': 'blue',
-            'frame_type': 'light',
-        }
-        panel = p.Panel(**kwargs)
-
-        # Run test.
-        act = panel.frame
 
         # Determine test result.
         self.assertEqual(exp, act)

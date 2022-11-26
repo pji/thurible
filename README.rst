@@ -127,6 +127,11 @@ examples/showsplash.py
     A terminal application that uses `thurible` to display a simple
     splash screen.
 
+If you want to run them to see what they do, you need to run them like
+modules. For example, to run filereader from the root of the repository,
+run the following::
+
+    python3 -m examples.filereader
 
 To-Do List
 ==========

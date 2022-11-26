@@ -9,7 +9,7 @@ import unittest as ut
 from thurible import util
 
 
-class FrameTestCase(ut.TestCase):
+class BoxTestCase(ut.TestCase):
     def test_normal(self):
         "A Box object should return box characters."""
         # Expected value.
@@ -29,7 +29,7 @@ class FrameTestCase(ut.TestCase):
         }
 
         # Test data and state.
-        box = util.Frame()
+        box = util.Box()
 
         # Run test and gather actuals.
         for attr in expected:
@@ -46,7 +46,7 @@ class FrameTestCase(ut.TestCase):
         expected = ['\u2500', '\u2501', '\u2508']
 
         # Test data and state.
-        box = util.Frame('light')
+        box = util.Box('light')
 
         # Run test and gather actuals.
         actual = [box.top,]
@@ -69,7 +69,7 @@ class FrameTestCase(ut.TestCase):
         exp_sample = 'g'
 
         # Test data and state.
-        box = util.Frame(custom=exp_chars)
+        box = util.Box(custom=exp_chars)
 
         # Run test and gather actuals.
         act_kind = box.kind
@@ -90,4 +90,4 @@ class FrameTestCase(ut.TestCase):
 
         # Run test and determine result.
         with self.assertRaises(expected):
-            box = util.Frame(custom='bad')
+            box = util.Box(custom='bad')

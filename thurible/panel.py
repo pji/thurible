@@ -9,7 +9,7 @@ from typing import Optional
 from blessed import Terminal
 from blessed.keyboard import Keystroke
 
-from thurible.util import get_terminal, Frame
+from thurible.util import Box, get_terminal
 
 
 # Exceptions.
@@ -46,9 +46,6 @@ class Panel:
         origin_x: Optional[int] = None,
         bg: str = '',
         fg: str = '',
-        frame_type: Optional[str] = None,
-        frame_bg: str = '',
-        frame_fg: str = '',
         panel_pad_bottom: Optional[float] = None,
         panel_pad_left: Optional[float] = None,
         panel_pad_right: Optional[float] = None,
@@ -74,6 +71,47 @@ class Panel:
         :param bg: (Optional.) A string describing the background color
             of the pane. See the documentation for `blessed` for more
             detail on the available options.
+        :param panel_pad_top: (Optional.) Distance between the
+            `origin_y` of the panel and the top of the interior of the
+            panel. It is a percentage expressed as a :class:float
+            between 0.0 and 1.0, inclusive. See Sizing below for more
+            information.
+        :param panel_relative_height: (Optional.) The height of the
+            interior of the panel in comparison of the full `height` of
+            the panel. It is a percentage expressed as a :class:float
+            between 0.0 and 1.0, inclusive. See Sizing below for more
+            information.
+        :param panel_pad_bottom: (Optional.) Distance between the
+            full `height` of the panel and the interior of the panel.
+            It is a percentage expressed as a :class:float between 0.0
+            and 1.0, inclusive. See Sizing below for more information.
+        :param panel_pad_left: (Optional.) Distance between the
+            `origin_x` of the panel and the left side of the interior
+            of the panel. It is a percentage expressed as a :class:float
+            between 0.0 and 1.0, inclusive. See Sizing below for more
+            information.
+        :param panel_relative_width: (Optional.) The width of the
+            interior of the panel in comparison of the full `width` of
+            the panel. It is a percentage expressed as a :class:float
+            between 0.0 and 1.0, inclusive. See Sizing below for more
+            information.
+        :param panel_pad_right: (Optional.) Distance between the full
+            `width` of the panel and the right side of the interior of
+            the panel. It is a percentage expressed as a :class:float
+            between 0.0 and 1.0, inclusive. See Sizing below for more
+            information.
+        :param panel_align_h: (Optional.) If the interior of the panel
+            is smaller than the full `width` of the panel, this sets
+            how the interior of the panel is aligned within the full
+            height. It is a percentage expressed as a :class:float
+            between 0.0 and 1.0, inclusive. See Sizing below for more
+            information.
+        :param panel_align_v: (Optional.) If the interior of the panel
+            is smaller than the full `width` of the panel, this sets
+            how the interior of the panel is aligned within the full
+            height. It is a percentage expressed as a :class:float
+            between 0.0 and 1.0, inclusive. See Sizing below for more
+            information.
         :param frame_type: (Optional.) If a string, the string determines
             the frame used for the pane. If None, the pane doesn't have a
             frame.
@@ -109,11 +147,6 @@ class Panel:
         self.bg = bg
         self.fg = fg
 
-        # Frame protocol.
-        self.frame_type = frame_type
-        self.frame_bg = frame_bg
-        self.frame_fg = frame_fg
-
     def __eq__(self, other) -> bool:
         if not isinstance(other, self.__class__):
             return NotImplemented
@@ -124,70 +157,21 @@ class Panel:
             and self.origin_x == other.origin_x
             and self.bg == other.bg
             and self.fg == other.fg
-            and self.frame_type == other.frame_type
-            and self.frame_bg == other.frame_bg
-            and self.frame_fg == other.frame_fg
         )
 
     def __str__(self) -> str:
         """Return a string that will draw the entire display."""
         result = ''
         result += self.clear_contents()
-        result += self.frame
         return result
 
     # Properties
     @property
-    def frame(self) -> str:
-        """Returns a string that will draw the panel's frame in a
-        terminal.
-        """
-        # Handle frame coloration.
-        bg = self.frame_bg if self.frame_bg else self.bg
-        fg = self.frame_fg if self.frame_fg else self.fg
-
-        # Create the frame string and return.
-        result = ''
-        if self.frame_type is not None:
-            result += self._frame(
-                frame_type=self.frame_type,
-                height=self.frame_height,
-                width=self.frame_width,
-                origin_y=self.frame_origin_y,
-                origin_x=self.frame_origin_x,
-                foreground=fg,
-                background=bg
-            )
-        return result
-
-    @property
-    def frame_height(self) -> int:
+    def inner_height(self) -> int:
+        """Returns number of rows available to content within the panel."""
         height = self.height
         height -= self._panel_pad_offset_top
         height -= self._panel_pad_offset_bottom
-        return height
-
-    @property
-    def frame_width(self) -> int:
-        width = self.width
-        width -= self._panel_pad_offset_left
-        width -= self._panel_pad_offset_right
-        return width
-
-    @property
-    def frame_origin_x(self) -> int:
-        return self.origin_x + self._panel_pad_offset_left
-
-    @property
-    def frame_origin_y(self) -> int:
-        return self.origin_y + self._panel_pad_offset_top
-
-    @property
-    def inner_height(self) -> int:
-        """Returns number of rows available to content within the panel."""
-        height = self.frame_height
-        if self.frame_type:
-            height -= 2
         return height
 
     @property
@@ -195,30 +179,24 @@ class Panel:
         """Returns number of columns available to content within the
         panel.
         """
-        width = self.frame_width
-        if self.frame_type:
-            width -= 2
+        width = self.width
+        width -= self._panel_pad_offset_left
+        width -= self._panel_pad_offset_right
         return width
-
-    @property
-    def inner_y(self) -> int:
-        """Returns the position in the terminal of the first row
-        available to content within the panel.
-        """
-        y = self.origin_y + self._panel_pad_offset_top
-        if self.frame_type:
-            y += 1
-        return y
 
     @property
     def inner_x(self) -> int:
         """Returns the position in the terminal of the first column
         available to content within the panel.
         """
-        x = self.origin_x + self._panel_pad_offset_left
-        if self.frame_type:
-            x += 1
-        return x
+        return self.origin_x + self._panel_pad_offset_left
+
+    @property
+    def inner_y(self) -> int:
+        """Returns the position in the terminal of the first row
+        available to content within the panel.
+        """
+        return self.origin_y + self._panel_pad_offset_top
 
     @property
     def _panel_pad_offset_bottom(self) -> int:
@@ -277,40 +255,6 @@ class Panel:
         return result
 
     # Private helper methods.
-    def _frame(
-        self,
-        frame_type: str,
-        height: int,
-        width: int,
-        origin_y: int = 0,
-        origin_x: int = 0,
-        foreground: str = '',
-        background: str = ''
-    ) -> str:
-        frame = Frame(frame_type)
-        result = self._get_color(foreground, background)
-        result += (
-            self.term.move(origin_y, origin_x)
-            + frame.ltop
-            + frame.top * (width - 2)
-            + frame.rtop
-        )
-        for y in range(origin_y + 1, origin_y + height - 1):
-            line = (
-                self.term.move(y, origin_x) + frame.side
-                + self.term.move(y, origin_x + width - 1) + frame.side
-            )
-            result += line
-        result += (
-            self.term.move(origin_y + height - 1, origin_x)
-            + frame.lbot
-            + frame.bot * (width - 2)
-            + frame.rbot
-        )
-        if background or foreground:
-            result += self.term.normal
-        return result
-
     def _get_color(self, fg: str = '', bg: str = '') -> str:
         color = fg
         if color and bg:
@@ -464,7 +408,155 @@ class Panel:
 
 
 # Protocols.
-class Content(Panel):
+class Frame(Panel):
+    """A :class: Panel subclass that can have a frame surrounding its
+    interior.
+    """
+    def __init__(
+        self,
+        frame_type: Optional[str] = None,
+        frame_bg: str = '',
+        frame_fg: str = '',
+        *args, **kwargs
+    ) -> None:
+        """Initialize an instance of the class.
+        """
+        super().__init__(*args, **kwargs)
+        self.frame_type = frame_type
+        self.frame_bg = frame_bg
+        self.frame_fg = frame_fg
+
+    def __eq__(self, other) -> bool:
+        if not isinstance(other, self.__class__):
+            return NotImplemented
+        return (
+            super().__eq__(other)
+            and self.frame_type == other.frame_type
+            and self.frame_bg == other.frame_bg
+            and self.frame_fg == other.frame_fg
+        )
+
+    def __str__(self) -> str:
+        """Return a string that will draw the entire display."""
+        result = super().__str__()
+        result += self.frame
+        return result
+
+    # Properties
+    @property
+    def frame(self) -> str:
+        """Returns a string that will draw the panel's frame in a
+        terminal.
+        """
+        # Handle frame coloration.
+        bg = self.frame_bg if self.frame_bg else self.bg
+        fg = self.frame_fg if self.frame_fg else self.fg
+
+        # Create the frame string and return.
+        result = ''
+        if self.frame_type is not None:
+            result += self._frame(
+                frame_type=self.frame_type,
+                height=self.frame_height,
+                width=self.frame_width,
+                origin_y=self.frame_origin_y,
+                origin_x=self.frame_origin_x,
+                foreground=fg,
+                background=bg
+            )
+        return result
+
+    @property
+    def frame_height(self) -> int:
+        return super().inner_height
+
+    @property
+    def frame_width(self) -> int:
+        return super().inner_width
+
+    @property
+    def frame_origin_x(self) -> int:
+        return super().inner_x
+
+    @property
+    def frame_origin_y(self) -> int:
+        return super().inner_y
+
+    @property
+    def inner_height(self) -> int:
+        """Returns number of rows available to content within the panel."""
+        height = super().inner_height
+        if self.frame_type:
+            height -= 2
+        return height
+
+    @property
+    def inner_width(self) -> int:
+        """Returns number of columns available to content within the
+        panel.
+        """
+        width = super().inner_width
+        if self.frame_type:
+            width -= 2
+        return width
+
+    @property
+    def inner_x(self) -> int:
+        """Returns the position in the terminal of the first column
+        available to content within the panel.
+        """
+        x = super().inner_x
+        if self.frame_type:
+            x += 1
+        return x
+
+    @property
+    def inner_y(self) -> int:
+        """Returns the position in the terminal of the first row
+        available to content within the panel.
+        """
+        y = super().inner_y
+        if self.frame_type:
+            y += 1
+        return y
+
+    # Private helper methods.
+    def _frame(
+        self,
+        frame_type: str,
+        height: int,
+        width: int,
+        origin_y: int = 0,
+        origin_x: int = 0,
+        foreground: str = '',
+        background: str = ''
+    ) -> str:
+        frame = Box(frame_type)
+        result = self._get_color(foreground, background)
+        result += (
+            self.term.move(origin_y, origin_x)
+            + frame.ltop
+            + frame.top * (width - 2)
+            + frame.rtop
+        )
+        for y in range(origin_y + 1, origin_y + height - 1):
+            line = (
+                self.term.move(y, origin_x) + frame.side
+                + self.term.move(y, origin_x + width - 1) + frame.side
+            )
+            result += line
+        result += (
+            self.term.move(origin_y + height - 1, origin_x)
+            + frame.lbot
+            + frame.bot * (width - 2)
+            + frame.rbot
+        )
+        if background or foreground:
+            result += self.term.normal
+        return result
+
+
+class Content(Frame):
     """A panel that contains text content."""
     # Magic methods.
     def __init__(
@@ -853,7 +945,7 @@ class Scroll(Content):
         return update
 
 
-class Title(Panel):
+class Title(Frame):
     """A panel with a title."""
     # Magic methods.
     def __init__(
@@ -1086,7 +1178,7 @@ class Title(Panel):
 
     def _title_frame(self, title: str, frame_type: str) -> str:
         """Apply the frame cap to the title or footer."""
-        frame = Frame(frame_type)
+        frame = Box(frame_type)
         bg = self.frame_bg if self.frame_bg else self.bg
         fg = self.frame_fg if self.frame_fg else self.fg
         color = self._get_color(fg, bg)
