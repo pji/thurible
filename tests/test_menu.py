@@ -5,7 +5,7 @@ test_menu
 Unit tests for the termui.menu module.
 """
 import unittest as ut
-from unittest.mock import patch, PropertyMock
+from unittest.mock import patch
 
 from blessed import Terminal
 from blessed.keyboard import Keystroke

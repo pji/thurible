@@ -15,6 +15,7 @@ from thurible.panel import Panel
 from thurible.util import get_terminal
 
 
+# Manager.
 def queued_manager(
     q_to: Queue,
     q_from: Queue,
@@ -65,46 +66,40 @@ def queued_manager(
         displays = {}
     showing: str = ''
     farewell = ''
-    ending_reason = ''
+    reason = ''
     exception: Optional[Exception] = None
+    last_height = term.height
+    last_width = term.width
 
     # Program loop.
     with term.fullscreen(), term.cbreak(), term.hidden_cursor():
         while True:
-            try:
-                if not q_to.empty():
-                    msg = q_to.get()
-                    if isinstance(msg, tm.End):
-                        farewell = msg.text
-                        ending_reason = 'Received End message.'
-                        break
-                    elif isinstance(msg, tm.Ping):
-                        pong = tm.Pong(msg.name)
-                        q_from.put(pong)
-                    elif isinstance(msg, tm.Show):
-                        showing = msg.name
-                        print(str(displays[showing]), end='', flush=True)
-                    elif isinstance(msg, tm.Showing):
-                        shown = tm.Shown(showing)
-                        q_from.put(shown)
-                    elif isinstance(msg, tm.Store):
-                        displays[msg.name] = msg.display
+            if showing and displays[showing].height == last_height:
+                if term.height != last_height:
+                    displays[showing].height = term.height
+                    last_height = term.height
+                    print(term.clear, end='', flush=True)
+                    print(str(displays[showing]), end='', flush=True)
+            if showing and displays[showing].width == last_width:
+                if term.width != last_width:
+                    displays[showing].width = term.width
+                    last_width = term.width
+                    print(term.clear, end='', flush=True)
+                    print(str(displays[showing]), end='', flush=True)
 
-                key = term.inkey(timeout=.01)
-                if key:
-                    acted = False
-                    update = ''
-                    data = str(key)
-                    if showing and isinstance(displays[showing], Panel):
-                        data, update = displays[showing].action(key)
-                    if update:
-                        print(update, end='', flush=True)
-                    if data:
-                        msg = tm.Data(data)
-                        q_from.put(msg)
+            try:
+                displays, showing, end, farewell, reason = check_messages(
+                    q_to,
+                    q_from,
+                    displays,
+                    showing
+                )
+                if end:
+                    break
+                check_input(q_from, displays, showing, term)
 
             except Exception as ex:
-                ending_reason = 'Exception.'
+                reason = 'Exception.'
                 exception = ex
                 break
 
@@ -112,4 +107,67 @@ def queued_manager(
     # inform the program the manager is ending..
     if farewell:
         print(farewell)
-    q_from.put(tm.Ending(ending_reason, exception))
+    q_from.put(tm.Ending(reason, exception))
+
+
+# Core functions.
+def check_input(
+    q_from: Queue,
+    displays: dict[str, Panel],
+    showing: str,
+    term: Terminal
+) -> None:
+    """Check if input from the user was received and act on any
+    received.
+    """
+    key = term.inkey(timeout=.01)
+    if key:
+        update = ''
+        data = str(key)
+        if showing and isinstance(displays[showing], Panel):
+            data, update = displays[showing].action(key)
+        if update:
+            print(update, end='', flush=True)
+        if data:
+            msg = tm.Data(data)
+            q_from.put(msg)
+
+
+def check_messages(
+    q_to: Queue,
+    q_from: Queue,
+    displays: dict[str, Panel],
+    showing: str
+) -> tuple[dict[str, Panel], str, bool, str, str]:
+    """Check if messages from the program were received and act on any
+    received.
+    """
+    end = False
+    reason = ''
+    farewell = ''
+    if not q_to.empty():
+        msg = q_to.get()
+        if isinstance(msg, tm.End):
+            farewell = msg.text
+            reason = 'Received End message.'
+            end = True
+        elif isinstance(msg, tm.Ping):
+            pong = tm.Pong(msg.name)
+            q_from.put(pong)
+        elif isinstance(msg, tm.Show):
+            showing = msg.name
+            print(str(displays[showing]), end='', flush=True)
+        elif isinstance(msg, tm.Showing):
+            shown = tm.Shown(msg.name, showing)
+            q_from.put(shown)
+        elif isinstance(msg, tm.Store):
+            displays[msg.name] = msg.display
+        elif isinstance(msg, tm.Delete):
+            del displays[msg.name]
+        elif isinstance(msg, tm.Storing):
+            stored = tm.Stored(
+                msg.name,
+                tuple(key for key in displays)
+            )
+            q_from.put(stored)
+    return displays, showing, end, farewell, reason

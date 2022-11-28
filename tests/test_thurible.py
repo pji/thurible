@@ -7,7 +7,7 @@ Unit tests for the `thurible.thurible` module.
 from collections.abc import Iterator
 from queue import Queue
 import unittest as ut
-from unittest.mock import call, patch
+from unittest.mock import call, patch, PropertyMock
 from threading import Thread
 from time import sleep
 
@@ -72,65 +72,6 @@ class QueuedManagerTestCase(ut.TestCase):
             self.q_to.put(tm.End())
 
     @patch('blessed.Terminal.fullscreen')
-    @patch('thurible.thurible.print')
-    def _get_msg_response(
-        self,
-        msgs,
-        name,
-        mock_print,
-        mock_fullscreen
-    ):
-        self.t.start()
-        msgs.append(tm.Ping(name))
-        for msg in msgs:
-            self.q_to.put(msg)
-        resps = []
-        count = 0
-        while True:
-            resp = None
-            if not self.q_from.empty():
-                resp = self.q_from.get()
-                if resp == tm.Pong(name):
-                    break
-                if resp:
-                    resps.append(resp)
-                if isinstance(resp, tm.Ending):
-                    break
-            if count > 100:
-                raise RuntimeError('Ran too long.')
-            count += 1
-            sleep(.01)
-        return resps
-
-    @patch('blessed.Terminal.fullscreen')
-    @patch('thurible.thurible.print')
-    def _send_msgs(
-        self,
-        msgs,
-        name,
-        will_end,
-        mock_print,
-        mock_fullscreen
-    ):
-        self.t.start()
-        pong = tm.Ending('Received End message.')
-        if not will_end:
-            msgs.append(tm.Ping(name))
-            pong = tm.Pong(name)
-        for msg in msgs:
-            self.q_to.put(msg)
-        resp = None
-        count = 0
-        while resp != pong:
-            if not self.q_from.empty():
-                resp = self.q_from.get()
-            if count > 100:
-                raise RuntimeError('Ran too long.')
-            count += 1
-            sleep(.01)
-        return mock_print.mock_calls
-
-    @patch('blessed.Terminal.fullscreen')
     @patch('blessed.Terminal.inkey')
     @patch('blessed.Terminal.cbreak')
     @patch('thurible.thurible.print')
@@ -193,29 +134,183 @@ class QueuedManagerTestCase(ut.TestCase):
             sleep(.01)
         return act
 
+    @patch('blessed.Terminal.fullscreen')
+    @patch('thurible.thurible.print')
+    def _get_msg_response(
+        self,
+        msgs,
+        name,
+        mock_print,
+        mock_fullscreen
+    ):
+        self.t.start()
+        for msg in msgs:
+            self.q_to.put(msg)
+        resps = self._watch_for_pong(name)
+        return resps
+
+    @patch('blessed.Terminal.fullscreen')
+    @patch('thurible.thurible.print')
+    def _send_msgs(
+        self,
+        msgs,
+        name,
+        will_end,
+        mock_print,
+        mock_fullscreen
+    ):
+        self.t.start()
+        pong = tm.Ending('Received End message.')
+        if not will_end:
+            msgs.append(tm.Ping(name))
+            pong = tm.Pong(name)
+        for msg in msgs:
+            self.q_to.put(msg)
+        resp = None
+        count = 0
+        while resp != pong:
+            if not self.q_from.empty():
+                resp = self.q_from.get()
+            if count > 100:
+                raise RuntimeError('Ran too long.')
+            count += 1
+            sleep(.01)
+        return mock_print.mock_calls
+
+    def _watch_for_pong(self, name):
+        """Send a ping to the queued_manager and wait for the pong
+        response, collecting all responses received before the pong.
+        This is usually done to ensure the queue_manager thread has
+        had time to process all of the previous messages sent to it.
+        """
+        msg = tm.Ping(name)
+        self.q_to.put(msg)
+        count = 0
+        resp = None
+        resps = []
+        while resp != tm.Pong(name):
+            if resp:
+                resps.append(resp)
+                if isinstance(resp, tm.Ending):
+                    break
+                resp = None
+            if not self.q_from.empty():
+                resp = self.q_from.get()
+            if count > 100:
+                raise RuntimeError('Ran too long.')
+            count += 1
+            sleep(.01)
+        return resps
+
     # Tests.
+    @patch('blessed.Terminal.height', new_callable=PropertyMock)
+    @patch('blessed.Terminal.width', new_callable=PropertyMock)
+    @patch('blessed.Terminal.fullscreen')
+    @patch('thurible.thurible.print')
+    def test_change_terminal_dimensions_changes_panel_dimensions(
+        self,
+        mock_print,
+        mock_fullscreen,
+        mock_width,
+        mock_height
+    ):
+        """When the size of the terminal changes and a fullscreen panel
+        is showing, the size of the panel should be updated to match the
+        new size of the terminal.
+        """
+        # Expected values.
+        exp_before = {'height': 24, 'width': 80,}
+        exp_after = {'height': 31, 'width': 43,}
+
+        # Test data and state.
+        mock_height.return_value = exp_before['height']
+        mock_width.return_value = exp_before['width']
+        msgs = [
+            tm.Store('spam', splash.Splash('spam')),
+            tm.Show('spam'),
+        ]
+        self.t.start()
+        for msg in msgs:
+            self.q_to.put(msg)
+        _ = self._watch_for_pong('before_change')
+
+        # Run test.
+        act_before = {
+            'height': self.displays['spam'].height,
+            'width': self.displays['spam'].width,
+        }
+        mock_height.return_value = exp_after['height']
+        mock_width.return_value = exp_after['width']
+        _ = self._watch_for_pong('after_change')
+        act_after = {
+            'height': self.displays['spam'].height,
+            'width': self.displays['spam'].width,
+        }
+
+        # Determine test result.
+        self.assertEqual(exp_before, act_before)
+        self.assertEqual(exp_after, act_after)
+
+    def test_delete_display(self):
+        """Sent a Delete message, queued_manager() should delete the
+        Panel with the given name from the stored panels.
+        """
+        # Expected value.
+        exp = {'spam': splash.Splash('spam'),}
+
+        # Test data and state.
+        eggs = splash.Splash('eggs')
+        msgs = [
+            tm.Store('eggs', eggs),
+            tm.Store('spam', exp['spam']),
+            tm.Delete('eggs'),
+        ]
+
+        # Run test and gather actual.
+        self._send_msgs(msgs, 'test_store_display', False)
+        act = self.displays
+
+        # Determine test result.
+        self.assertDictEqual(exp, act)
+
     def test_get_display(self):
         """Sent a `Showing` message, queued_manager() should return a
         `Shown` message with the currently displayed panel.
         """
         # Expected value.
-        exp = [tm.Shown('spam'),]
+        exp = [tm.Shown('test_get_display', 'spam'),]
 
         # Test data and state.
-        s = splash.Splash(
-            content='spam',
-            height=5,
-            width=6,
-            term=Terminal()
-        )
+        s = splash.Splash('eggs')
         msgs = [
-            tm.Store('spam', s),
-            tm.Show('spam'),
-            tm.Showing(),
+            tm.Store(exp[0].display, s),
+            tm.Show(exp[0].display),
+            tm.Showing(exp[0].name),
         ]
 
         # Run test.
         act = self._get_msg_response(msgs, 'test_show_display')
+
+        # Determine test result.
+        self.assertListEqual(exp, act)
+
+    def test_list_stored_display(self):
+        """Sent a `Storing` message, queued_manager() should return a
+        `Stored` message with a list of stored panels.
+        """
+        # Expected value.
+        exp = [tm.Stored('ham', ('spam', 'eggs', 'bacon',)),]
+
+        # Test data and state.
+        msgs = [
+            tm.Store(exp[0].stored[0], splash.Splash(exp[0].stored[0])),
+            tm.Store(exp[0].stored[1], splash.Splash(exp[0].stored[1])),
+            tm.Store(exp[0].stored[2], splash.Splash(exp[0].stored[2])),
+            tm.Storing(exp[0].name),
+        ]
+
+        # Run test.
+        act = self._get_msg_response(msgs, 'test_list_stored_display')
 
         # Determine test result.
         self.assertListEqual(exp, act)
@@ -392,6 +487,7 @@ class QueuedManagerTestCase(ut.TestCase):
 
         # Run test and gather actuals.
         self.t.start()
+        _ = self._watch_for_pong('test_terminal_modes')
         act_fs = mock_fullscreen.mock_calls
         act_cb = mock_cbreak.mock_calls
 

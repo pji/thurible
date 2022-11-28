@@ -23,6 +23,12 @@ class Data(Message):
 
 
 @dataclass
+class Delete(Message):
+    """Delete a stored panel."""
+    name: str
+
+
+@dataclass
 class End(Message):
     """Terminate the manager."""
     text: str = ''
@@ -62,12 +68,14 @@ class Showing(Message):
     """Query for the key for the currently shown display in the
     terminal.
     """
+    name: str = ''
 
 
 @dataclass
 class Shown(Message):
     """The answer to the Showing query."""
     name: str
+    display: str
 
 
 @dataclass
@@ -75,3 +83,18 @@ class Store(Message):
     """Store a display for later use."""
     name: str
     display: Panel
+
+
+@dataclass
+class Stored(Message):
+    """The response to a Storing message, containing the list the names
+    of the stored panels.
+    """
+    name: str
+    stored: tuple[str, ...]
+
+
+@dataclass
+class Storing(Message):
+    """Query for the names of stored panels."""
+    name: str = ''
