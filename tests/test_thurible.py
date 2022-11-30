@@ -71,6 +71,35 @@ class QueuedManagerTestCase(ut.TestCase):
         if self.t.is_alive():
             self.q_to.put(tm.End())
 
+    # Utility methods.
+    def _watch_for_pong(self, name='', msg=None):
+        """Send a ping to the queued_manager and wait for the pong
+        response, collecting all responses received before the pong.
+        This is usually done to ensure the queue_manager thread has
+        had time to process all of the previous messages sent to it.
+        """
+        if not msg:
+            ping = tm.Ping(name)
+            msg = tm.Pong(name)
+            self.q_to.put(ping)
+        count = 0
+        resp = None
+        resps = []
+        while resp != msg:
+            if resp:
+                resps.append(resp)
+                if isinstance(resp, tm.Ending):
+                    break
+                resp = None
+            if not self.q_from.empty():
+                resp = self.q_from.get()
+            if count > 100:
+                raise RuntimeError('Ran too long.')
+            count += 1
+            sleep(.01)
+        return resps
+
+    # Patching handlers for simple tests.
     @patch('blessed.Terminal.fullscreen')
     @patch('blessed.Terminal.inkey')
     @patch('blessed.Terminal.cbreak')
@@ -160,97 +189,16 @@ class QueuedManagerTestCase(ut.TestCase):
         mock_fullscreen
     ):
         self.t.start()
-        pong = tm.Ending('Received End message.')
-        if not will_end:
-            msgs.append(tm.Ping(name))
-            pong = tm.Pong(name)
         for msg in msgs:
             self.q_to.put(msg)
-        resp = None
-        count = 0
-        while resp != pong:
-            if not self.q_from.empty():
-                resp = self.q_from.get()
-            if count > 100:
-                raise RuntimeError('Ran too long.')
-            count += 1
-            sleep(.01)
+        if not will_end:
+            _ = self._watch_for_pong(name)
+        else:
+            end = tm.Ending('Received End message.')
+            _ = self._watch_for_pong(msg=end)
         return mock_print.mock_calls
 
-    def _watch_for_pong(self, name):
-        """Send a ping to the queued_manager and wait for the pong
-        response, collecting all responses received before the pong.
-        This is usually done to ensure the queue_manager thread has
-        had time to process all of the previous messages sent to it.
-        """
-        msg = tm.Ping(name)
-        self.q_to.put(msg)
-        count = 0
-        resp = None
-        resps = []
-        while resp != tm.Pong(name):
-            if resp:
-                resps.append(resp)
-                if isinstance(resp, tm.Ending):
-                    break
-                resp = None
-            if not self.q_from.empty():
-                resp = self.q_from.get()
-            if count > 100:
-                raise RuntimeError('Ran too long.')
-            count += 1
-            sleep(.01)
-        return resps
-
-    # Tests.
-    @patch('blessed.Terminal.height', new_callable=PropertyMock)
-    @patch('blessed.Terminal.width', new_callable=PropertyMock)
-    @patch('blessed.Terminal.fullscreen')
-    @patch('thurible.thurible.print')
-    def test_change_terminal_dimensions_changes_panel_dimensions(
-        self,
-        mock_print,
-        mock_fullscreen,
-        mock_width,
-        mock_height
-    ):
-        """When the size of the terminal changes and a fullscreen panel
-        is showing, the size of the panel should be updated to match the
-        new size of the terminal.
-        """
-        # Expected values.
-        exp_before = {'height': 24, 'width': 80,}
-        exp_after = {'height': 31, 'width': 43,}
-
-        # Test data and state.
-        mock_height.return_value = exp_before['height']
-        mock_width.return_value = exp_before['width']
-        msgs = [
-            tm.Store('spam', splash.Splash('spam')),
-            tm.Show('spam'),
-        ]
-        self.t.start()
-        for msg in msgs:
-            self.q_to.put(msg)
-        _ = self._watch_for_pong('before_change')
-
-        # Run test.
-        act_before = {
-            'height': self.displays['spam'].height,
-            'width': self.displays['spam'].width,
-        }
-        mock_height.return_value = exp_after['height']
-        mock_width.return_value = exp_after['width']
-        _ = self._watch_for_pong('after_change')
-        act_after = {
-            'height': self.displays['spam'].height,
-            'width': self.displays['spam'].width,
-        }
-
-        # Determine test result.
-        self.assertEqual(exp_before, act_before)
-        self.assertEqual(exp_after, act_after)
-
+    # Simple tests.
     def test_delete_display(self):
         """Sent a Delete message, queued_manager() should delete the
         Panel with the given name from the stored panels.
@@ -474,6 +422,55 @@ class QueuedManagerTestCase(ut.TestCase):
 
         # Determine test result.
         self.assertDictEqual(exp, act)
+
+    # Complex tests.
+    @patch('blessed.Terminal.height', new_callable=PropertyMock)
+    @patch('blessed.Terminal.width', new_callable=PropertyMock)
+    @patch('blessed.Terminal.fullscreen')
+    @patch('thurible.thurible.print')
+    def test_change_terminal_dimensions_changes_panel_dimensions(
+        self,
+        mock_print,
+        mock_fullscreen,
+        mock_width,
+        mock_height
+    ):
+        """When the size of the terminal changes and a fullscreen panel
+        is showing, the size of the panel should be updated to match the
+        new size of the terminal.
+        """
+        # Expected values.
+        exp_before = {'height': 24, 'width': 80,}
+        exp_after = {'height': 31, 'width': 43,}
+
+        # Test data and state.
+        mock_height.return_value = exp_before['height']
+        mock_width.return_value = exp_before['width']
+        msgs = [
+            tm.Store('spam', splash.Splash('spam')),
+            tm.Show('spam'),
+        ]
+        self.t.start()
+        for msg in msgs:
+            self.q_to.put(msg)
+        _ = self._watch_for_pong('before_change')
+
+        # Run test.
+        act_before = {
+            'height': self.displays['spam'].height,
+            'width': self.displays['spam'].width,
+        }
+        mock_height.return_value = exp_after['height']
+        mock_width.return_value = exp_after['width']
+        _ = self._watch_for_pong('after_change')
+        act_after = {
+            'height': self.displays['spam'].height,
+            'width': self.displays['spam'].width,
+        }
+
+        # Determine test result.
+        self.assertEqual(exp_before, act_before)
+        self.assertEqual(exp_after, act_after)
 
     @patch('blessed.Terminal.cbreak')
     @patch('blessed.Terminal.fullscreen')
