@@ -5,7 +5,7 @@ test_panel
 Unit tests for the `thurible.panel` module.
 """
 import unittest as ut
-from unittest.mock import patch, PropertyMock
+from unittest.mock import call, patch, PropertyMock
 
 from blessed import Terminal
 from blessed.keyboard import Keystroke
@@ -109,6 +109,23 @@ class TerminalTestCase(ut.TestCase):
         ):
             for a_, b_ in zip(a, b):
                 self.assertEqual(a_, b_)
+        elif (
+            isinstance(a, list)
+            and isinstance(b, list)
+            and len(a) == len(b)
+            and all(isinstance(a_, type(call)) for a_ in a)
+            and all(isinstance(b_, type(call)) for b_ in b)
+        ):
+            for a_, b_ in zip(a, b):
+                self.assertEqual(a_, b_)
+        elif (
+            isinstance(a, type(call))
+            and isinstance(b, type(call))
+        ):
+            self.assertEqual(a[0], b[0])
+            for a_, b_ in zip(a[1], b[1]):
+                self.assertEqual(a_, b_)
+            self.assertEqual(a[1], b[1])
         if isinstance(a, str) and '\x1b' in a:
             a = a.split('\x1b')
             if not a[0]:

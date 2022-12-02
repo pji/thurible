@@ -12,6 +12,7 @@ from blessed import Terminal
 
 from thurible import messages as tm
 from thurible.panel import Panel
+from thurible.dialog import Dialog
 from thurible.util import get_terminal
 
 
@@ -170,4 +171,19 @@ def check_messages(
                 tuple(key for key in displays)
             )
             q_from.put(stored)
+        elif isinstance(msg, tm.Alert):
+            displays[msg.name] = Dialog(
+                message_text=msg.text,
+                options=msg.options,
+                title_text=msg.title,
+                frame_type='light',
+                panel_align_h='center',
+                panel_align_v='middle',
+                panel_relative_height=0.4,
+                panel_relative_width=0.6,
+                height=10,
+                width=30
+            )
+            showing = msg.name
+            print(str(displays[showing]), end='', flush=True)
     return displays, showing, end, farewell, reason

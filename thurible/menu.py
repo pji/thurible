@@ -117,7 +117,7 @@ class Menu(Scroll, Title):
         super().__init__(*args, **kwargs)
 
         self._selected = 0
-        self._active_keys['KEY_ENTER'] = self._enter
+        self._active_keys['KEY_ENTER'] = self._select
         for option in self.options:
             hotkey = f"'{option.hotkey}'"
             self._active_keys[hotkey] = self._hotkey
@@ -226,10 +226,6 @@ class Menu(Scroll, Title):
         self._stop = length
         return ''
 
-    def _enter(self, key: Optional[Keystroke] = None) -> str:
-        """Return the name of the selected option."""
-        return self.options[self._selected].name
-
     def _home(self, key: Optional[Keystroke] = None) -> str:
         """Select the first option and scroll to it."""
         self._selected = 0
@@ -292,6 +288,10 @@ class Menu(Scroll, Title):
             self._start += 1
             self._stop += 1
         return ''
+
+    def _select(self, key: Optional[Keystroke] = None) -> str:
+        """Return the name of the selected option."""
+        return self.options[self._selected].name
 
     # Private helper methods.
     def _color_selection(self) -> str:

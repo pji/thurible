@@ -5,8 +5,10 @@ messages
 Classes for communicating with `thurible` managers.
 """
 from dataclasses import dataclass
-from typing import Optional
+from typing import Optional, Sequence
 
+from thurible.dialog import cont
+from thurible.menu import Option
 from thurible.panel import Panel
 
 
@@ -16,6 +18,15 @@ class Message:
 
 
 # Messages.
+@dataclass
+class Alert(Message):
+    """Display an alert dialog to the user."""
+    name: str = 'alert'
+    title: str = ''
+    text: str = 'Error.'
+    options: Sequence[Option] = cont
+
+
 @dataclass
 class Data(Message):
     """Input from the user."""

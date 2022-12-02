@@ -16,7 +16,8 @@ from blessed.keyboard import Keystroke
 
 from thurible import messages as tm
 from thurible import thurible as thb
-from thurible import menu, splash
+from thurible import dialog, menu, splash
+from tests import test_panel as tp
 
 
 # Common data.
@@ -56,7 +57,7 @@ def empty_response():
 
 
 # Test cases.
-class QueuedManagerTestCase(ut.TestCase):
+class QueuedManagerTestCase(tp.TerminalTestCase):
     def setUp(self):
         self.q_to = Queue()
         self.q_from = Queue()
@@ -221,6 +222,67 @@ class QueuedManagerTestCase(ut.TestCase):
         # Determine test result.
         self.assertDictEqual(exp, act)
 
+    def test_display_alert(self):
+        """Sent an Alert message, queued_manager() should display an
+        alert panel over the top of the current panel. Sent a Dismiss
+        message, queued_manager() should restore the current panel.
+        """
+        # Expected values.
+        exp = [
+            call((
+                f'{term.move(0, 0)}                              '
+                f'{term.move(1, 0)}                              '
+                f'{term.move(2, 0)}                              '
+                f'{term.move(3, 0)}                              '
+                f'{term.move(4, 0)}                              '
+                f'{term.move(5, 0)}                              '
+                f'{term.move(6, 0)}                              '
+                f'{term.move(7, 0)}                              '
+                f'{term.move(8, 0)}                              '
+                f'{term.move(9, 0)}                              '
+                f'{term.move(4, 13)}spam'
+            ), end='', flush=True),
+            call((
+                f'{term.move(4, 7)}                '
+                f'{term.move(5, 7)}                '
+                f'{term.move(3, 6)}┌────────────────┐'
+                f'{term.move(4, 6)}│'
+                f'{term.move(4, 23)}│'
+                f'{term.move(5, 6)}│'
+                f'{term.move(5, 23)}│'
+                f'{term.move(6, 6)}└────────────────┘'
+                f'{term.move(4, 7)}?spam spam spam spam?'
+                f'{term.reverse}'
+                f'{term.move(5, 19)}[No]'
+                f'{term.normal}'
+                f'{term.move(5, 13)}[Yes]'
+            ), end='', flush=True),
+        ]
+
+        # Test data and state.
+        s = splash.Splash(
+            content='spam',
+            height=10,
+            width=30,
+            term=Terminal()
+        )
+        msgs = [
+            tm.Store('spam', s),
+            tm.Show('spam'),
+            tm.Alert(
+                'test_display_alert',
+                '',
+                '?spam spam spam spam?',
+                dialog.yes_no
+            ),
+        ]
+
+        # Run test.
+        act = self._send_msgs(msgs, 'test_show_display', False)
+
+        # Determine test result.
+        self.assertEqual(exp, act)
+
     def test_get_display(self):
         """Sent a `Showing` message, queued_manager() should return a
         `Shown` message with the currently displayed panel.
@@ -375,19 +437,19 @@ class QueuedManagerTestCase(ut.TestCase):
         """
         # Expected value.
         exp = [call((
-            f'{term.move(0, 0)}      '
-            f'{term.move(1, 0)}      '
-            f'{term.move(2, 0)}      '
-            f'{term.move(3, 0)}      '
-            f'{term.move(4, 0)}      '
-            f'{term.move(2, 1)}spam'
+            f'{term.move(0, 0)}                    '
+            f'{term.move(1, 0)}                    '
+            f'{term.move(2, 0)}                    '
+            f'{term.move(3, 0)}                    '
+            f'{term.move(4, 0)}                    '
+            f'{term.move(2, 8)}spam'
         ), end='', flush=True),]
 
         # Test data and state.
         s = splash.Splash(
             content='spam',
             height=5,
-            width=6,
+            width=20,
             term=Terminal()
         )
         msgs = [

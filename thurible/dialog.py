@@ -4,7 +4,7 @@ dialog
 
 A dialog for terminal applications.
 """
-from typing import Sequence
+from typing import Sequence, Optional
 
 from blessed.keyboard import Keystroke
 
@@ -13,6 +13,7 @@ from thurible.panel import Content, Title
 
 
 # Common dialog options.
+cont = (Option('Continue', ''),)
 yes_no = (
     Option('Yes', 'y'),
     Option('No', 'n'),
@@ -33,24 +34,30 @@ class Dialog(Content, Title):
         self.options = options
 
         self._active_keys = {
+            'KEY_ENTER': self._select,
             'KEY_LEFT': self._select_left,
+            'KEY_RIGHT': self._select_right,
         }
+        for option in self.options:
+            hotkey = f"'{option.hotkey}'"
+            self._active_keys[hotkey] = self._hotkey
         self._selected = len(self.options) - 1
 
     def __str__(self) -> str:
         result = super().__str__()
+
         result += self.message
 
         height = self.inner_height
         width = self.inner_width
-        y = self._align_v('bottom', 1, height)
+        y = self._align_v('bottom', 1, height) + self.inner_y
         for i, option in enumerate(self.options[::-1]):
             opt_text = ''
             if i == len(self.options) - 1 - self._selected:
                 opt_text += self.term.reverse
             name = option.name
             length = len(name) + 2
-            x = self._align_h('right', length, width)
+            x = self._align_h('right', length, width) + self.inner_x
             opt_text += f'{self.term.move(y, x)}[{name}]'
             if i == len(self.options) - 1 - self._selected:
                 opt_text += self.term.normal
@@ -62,8 +69,9 @@ class Dialog(Content, Title):
     # Properties
     @property
     def message(self) -> str:
-        length = 1
-        y = self._align_v('middle', length, self.inner_height)
+        wrapped = self.term.wrap(self.message_text, width=self.inner_width)
+        length = len(wrapped)
+        y = self._align_v('middle', length, self.inner_height) + self.inner_y
         x = self.inner_x
         result = f'{self.term.move(y, x)}{self.message_text}'
         return result
@@ -100,7 +108,24 @@ class Dialog(Content, Title):
         return data, update
 
     # Private action handlers.
-    def _select_left(self, key: Keystroke) -> str:
+    def _hotkey(self, key: Optional[Keystroke] = None) -> str:
+        """Select the option assigned to the hot key."""
+        hotkeys = [option.hotkey for option in self.options]
+        self._selected = hotkeys.index(str(key))
+        return ''
+
+    def _select(self, key: Optional[Keystroke] = None) -> str:
+        """Return the name of the selected option."""
+        return self.options[self._selected].name
+
+    def _select_left(self, key: Optional[Keystroke] = None) -> str:
         """Select the next option to the left."""
-        self._selected -= 1
+        if self._selected > 0:
+            self._selected -= 1
+        return ''
+
+    def _select_right(self, key: Optional[Keystroke] = None) -> str:
+        """Select the next option to the right."""
+        if self._selected < len(self.options) - 1:
+            self._selected += 1
         return ''
