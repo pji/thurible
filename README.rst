@@ -139,14 +139,11 @@ The following items are still needed before initial release:
 
 *   Add documentation.
 *   Manager updates:
-    *   Allow managers to display multiple panels.
-    *   Allow managers to track the history of what panels have been shown.
     *   Allow managers to catch sigkill and pass it on to the program.
+    *   Add coroutine manager.
 *   Panel updates:
     *   Add a logging panel.
     *   Add a progress panel.
-    *   Add an alert panel.
-    *   Add a dialog panel.
     *   Add a textfield panel.
     *   Add a textform panel.
     *   Add a tableform panel.

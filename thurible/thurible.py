@@ -189,8 +189,8 @@ def check_messages(
                 panel_align_v='middle',
                 panel_relative_height=0.4,
                 panel_relative_width=0.6,
-                height=10,
-                width=30
+                height=displays[showing].height,
+                width=displays[showing].width
             )
             history.appendleft(showing)
             showing = msg.name

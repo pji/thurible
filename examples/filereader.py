@@ -14,6 +14,7 @@ from typing import Optional, Sequence
 
 import thurible as thb
 from thurible import messages as tm
+from thurible.dialog import cont
 
 
 # Classes.
@@ -30,7 +31,7 @@ class FileReaderMenu(thb.Menu):
         """Send the key pressed and the selected option back to the
         program.
         """
-        resp = self._enter(key)
+        resp = self._select(key)
 
         # Since we are using the record separator as a delimiter, we
         # have to make sure the user isn't passing a record separator
@@ -437,10 +438,10 @@ def main(
     # to check if there are messages in the queue and act on them.
     # There are probably many ways to do that. Here we are using a
     # simple while loop.
+    alerting = ''
     while True:
 
-        # If we've received a message from the manager, we may need
-        # to act.
+        # If we've received a message, we may need to act.
         if not q_from.empty():
 
             # Get the message from the queue.
@@ -452,8 +453,22 @@ def main(
             # representation of that input is returned to you as a
             # Data message, so that your code can act on it.
             #
+            # If an alert is showing, enter closes the alert.
+            if (
+                alerting
+                and isinstance(msg, tm.Data)
+                and msg.value == 'Continue'
+            ):
+                msg = tm.Dismiss(alerting)
+                q_to.put(msg)
+                alerting = ''
+
+            # If an alert is showing, other keys do nothing.
+            elif alerting and isinstance(msg, tm.Data):
+                pass
+
             # If the user pressed the `q` key, quit the program.
-            if isinstance(msg, tm.Data) and msg.value == 'q':
+            elif isinstance(msg, tm.Data) and msg.value == 'q':
                 break
 
             # If the user pressed the escape key, send the directory
@@ -475,13 +490,24 @@ def main(
                     show_hidden
                 )
 
+            # If the user supplied other input, show an alert.
+            elif isinstance(msg, tm.Data):
+                alerting = f'{msg.value} alert'
+                msg = tm.Alert(
+                    name=alerting,
+                    title='Alert',
+                    text=f'Unknown input: {msg.value}',
+                    options=cont
+                )
+                q_to.put(msg)
+
             # If the queued_manager ends unexpectedly, it should send an
             # Ending message explaining why. The main cause of that
             # would be when an exception is raised. In that case, the
             # exception will be returned in the Ending message, so your
             # code can react to it.
-            elif isinstance(msg, tm.Ending) and msg.exception:
-                raise msg.exception
+            elif isinstance(msg, tm.Ending) and msg.ex:
+                raise msg.ex
 
             # This is just here as a catch all in case there is some
             # reason other than an Exception that could cause the
