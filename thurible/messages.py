@@ -40,6 +40,12 @@ class Delete(Message):
 
 
 @dataclass
+class Dismiss(Message):
+    """Dismiss an alert dialog displayed tp the user."""
+    name: str = 'alert'
+
+
+@dataclass
 class End(Message):
     """Terminate the manager."""
     text: str = ''

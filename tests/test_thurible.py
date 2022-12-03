@@ -257,6 +257,19 @@ class QueuedManagerTestCase(tp.TerminalTestCase):
                 f'{term.normal}'
                 f'{term.move(5, 13)}[Yes]'
             ), end='', flush=True),
+            call((
+                f'{term.move(0, 0)}                              '
+                f'{term.move(1, 0)}                              '
+                f'{term.move(2, 0)}                              '
+                f'{term.move(3, 0)}                              '
+                f'{term.move(4, 0)}                              '
+                f'{term.move(5, 0)}                              '
+                f'{term.move(6, 0)}                              '
+                f'{term.move(7, 0)}                              '
+                f'{term.move(8, 0)}                              '
+                f'{term.move(9, 0)}                              '
+                f'{term.move(4, 13)}spam'
+            ), end='', flush=True),
         ]
 
         # Test data and state.
@@ -275,6 +288,7 @@ class QueuedManagerTestCase(tp.TerminalTestCase):
                 '?spam spam spam spam?',
                 dialog.yes_no
             ),
+            tm.Dismiss('test_display_alert'),
         ]
 
         # Run test.

@@ -4,6 +4,7 @@ thurible
 
 Managers for the data displays.
 """
+from collections import deque
 from dataclasses import dataclass
 from queue import Queue
 from typing import Optional
@@ -66,6 +67,7 @@ def queued_manager(
     if displays is None:
         displays = {}
     showing: str = ''
+    history: deque[str] = deque(maxlen=100)
     farewell = ''
     reason = ''
     exception: Optional[Exception] = None
@@ -89,11 +91,14 @@ def queued_manager(
                     print(str(displays[showing]), end='', flush=True)
 
             try:
-                displays, showing, end, farewell, reason = check_messages(
+                (
+                    displays, showing, end, farewell, reason, history
+                ) = check_messages(
                     q_to,
                     q_from,
                     displays,
-                    showing
+                    showing,
+                    history
                 )
                 if end:
                     break
@@ -138,8 +143,9 @@ def check_messages(
     q_to: Queue,
     q_from: Queue,
     displays: dict[str, Panel],
-    showing: str
-) -> tuple[dict[str, Panel], str, bool, str, str]:
+    showing: str,
+    history: deque[str]
+) -> tuple[dict[str, Panel], str, bool, str, str, deque[str]]:
     """Check if messages from the program were received and act on any
     received.
     """
@@ -156,6 +162,8 @@ def check_messages(
             pong = tm.Pong(msg.name)
             q_from.put(pong)
         elif isinstance(msg, tm.Show):
+            if showing:
+                history.appendleft(showing)
             showing = msg.name
             print(str(displays[showing]), end='', flush=True)
         elif isinstance(msg, tm.Showing):
@@ -184,6 +192,11 @@ def check_messages(
                 height=10,
                 width=30
             )
+            history.appendleft(showing)
             showing = msg.name
             print(str(displays[showing]), end='', flush=True)
-    return displays, showing, end, farewell, reason
+        elif isinstance(msg, tm.Dismiss) and msg.name == showing:
+            history.appendleft(showing)
+            showing = history[1]
+            print(str(displays[showing]), end='', flush=True)
+    return displays, showing, end, farewell, reason, history
