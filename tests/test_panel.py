@@ -4,6 +4,7 @@ test_panel
 
 Unit tests for the `thurible.panel` module.
 """
+from dataclasses import dataclass
 import unittest as ut
 from unittest.mock import call, patch, PropertyMock
 
@@ -11,6 +12,7 @@ from blessed import Terminal
 from blessed.keyboard import Keystroke
 
 from thurible import panel as p
+from thurible.messages import Message
 from thurible.util import get_terminal
 
 
@@ -1206,6 +1208,31 @@ class PanelTestCase(TerminalTestCase):
 
         # Run test.
         act = panel.clear_contents()
+
+        # Determine test result.
+        self.assertEqual(exp, act)
+
+    def test_update(self):
+        """If passed a message, Panel.update() should return an empty
+        string.
+        """
+        # Expected value.
+        exp = ''
+
+        # Test data and state.
+        @dataclass
+        class Spam(Message):
+            value: str
+
+        msg = Spam('eggs')
+        kwargs = {
+            'height': 5,
+            'width': 6,
+        }
+        panel = p.Panel(**kwargs)
+
+        # Run test.
+        act = panel.update(msg)
 
         # Determine test result.
         self.assertEqual(exp, act)

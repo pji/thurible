@@ -9,12 +9,7 @@ from typing import Optional, Sequence
 
 from thurible.dialog import cont
 from thurible.menu import Option
-from thurible.panel import Panel
-
-
-# Base class.
-class Message:
-    """A base class to allow all messages to be identified."""
+from thurible.panel import Message, Panel
 
 
 # Messages.

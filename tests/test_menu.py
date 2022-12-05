@@ -2,7 +2,7 @@
 test_menu
 ~~~~~~~~~
 
-Unit tests for the termui.menu module.
+Unit tests for the `thurible.menu` module.
 """
 import unittest as ut
 from unittest.mock import patch

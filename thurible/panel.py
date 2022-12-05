@@ -33,7 +33,11 @@ class PanelPaddingAndAlignmentSetError(Exception):
     """You cannot set both panel padding and alignment."""
 
 
-# Base class.
+# Base classes.
+class Message:
+    """A base class to allow all messages to be identified."""
+
+
 class Panel:
     """A class covering displaying text to the terminal."""
     # Magic methods.
@@ -405,6 +409,9 @@ class Panel:
         if color:
             result += self.term.normal
         return result
+
+    def update(self, msg: Message) -> str:
+        return ''
 
     # Private helper methods.
     def _get_color(self, fg: str = '', bg: str = '') -> str:
