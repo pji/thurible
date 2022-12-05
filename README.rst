@@ -91,6 +91,10 @@ These messages are the dataclasses found in `thurible.thurible`.
 
 Programs can send the following messages to a manager:
 
+`Alert(name, title, text, options)`
+    Tell the manager to display an alert dialog.
+`Dismiss`
+    Tell the manager to dismiss the alert dialog.
 `End(text)`
     Tell the manager to terminate.
 `Ping(name)`
@@ -139,12 +143,13 @@ The following items are still needed before initial release:
 
 *   Add documentation.
 *   Manager updates:
+    *   Allow unrecognized messages from programs to go to panels.
     *   Allow managers to catch sigkill and pass it on to the program.
     *   Add coroutine manager.
 *   Panel updates:
+    *   Allow panels to react to messages sent by managers.
     *   Add a logging panel.
     *   Add a progress panel.
     *   Add a textfield panel.
     *   Add a textform panel.
     *   Add a tableform panel.
-    *   Add a coroutine manager.

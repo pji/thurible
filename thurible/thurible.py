@@ -180,6 +180,11 @@ def check_messages(
             )
             q_from.put(stored)
         elif isinstance(msg, tm.Alert):
+            height = len(get_terminal().wrap(
+                msg.text,
+                width=int(displays[showing].width * 0.6)
+            ))
+            rel_height = (height + 3) / displays[showing].height
             displays[msg.name] = Dialog(
                 message_text=msg.text,
                 options=msg.options,
@@ -187,7 +192,7 @@ def check_messages(
                 frame_type='light',
                 panel_align_h='center',
                 panel_align_v='middle',
-                panel_relative_height=0.4,
+                panel_relative_height=rel_height,
                 panel_relative_width=0.6,
                 height=displays[showing].height,
                 width=displays[showing].width
