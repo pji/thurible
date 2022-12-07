@@ -14,6 +14,7 @@ from time import sleep
 from blessed import Terminal
 from blessed.keyboard import Keystroke
 
+from thurible import log
 from thurible import messages as tm
 from thurible import thurible as thb
 from thurible import dialog, menu, splash
@@ -504,6 +505,50 @@ class QueuedManagerTestCase(tp.TerminalTestCase):
 
         # Determine test result.
         self.assertDictEqual(exp, act)
+
+    def test_updates_display(self):
+        """Sent a `log.Update` message, `queued_manager()` should
+        route the message to the currently showing panel and print
+        any resulting update.
+        """
+        # Expected value.
+        exp = [
+            call((
+                f'{term.move(0, 0)}                    '
+                f'{term.move(1, 0)}                    '
+                f'{term.move(2, 0)}                    '
+                f'{term.move(3, 0)}                    '
+                f'{term.move(4, 0)}                    '
+                f'{term.move(0, 0)}spam'
+            ), end='', flush=True),
+            call((
+                f'{term.move(0, 0)}                    '
+                f'{term.move(1, 0)}                    '
+                f'{term.move(2, 0)}                    '
+                f'{term.move(3, 0)}                    '
+                f'{term.move(4, 0)}                    '
+                f'{term.move(0, 0)}eggs'
+                f'{term.move(1, 0)}spam'
+            ), end='', flush=True),
+        ]
+
+        # Test data and state.
+        p = log.Log(
+            content=('spam',),
+            height=5,
+            width=20,
+        )
+        msgs = [
+            tm.Store('spam', p),
+            tm.Show('spam'),
+            log.Update('eggs'),
+        ]
+
+        # Run test.
+        act = self._send_msgs(msgs, 'test_updates_display', False)
+
+        # Determine test result.
+        self.assertEqual(exp, act)
 
     # Complex tests.
     @patch('blessed.Terminal.height', new_callable=PropertyMock)

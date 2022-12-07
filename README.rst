@@ -1,6 +1,6 @@
-###########
+########
 thurible
-###########
+########
 
 Tools for creating fullscreen terminal UIs on top of blessed.
 
@@ -41,10 +41,16 @@ Panels
 While you can create your own custom `Panel` objects, there are several
 subclasses in `thurible` that may cover basic needs:
 
-*   `Menu`: a menu of options a user can select from.
-*   `Splash`: a splash screen.
-*   `Table`: a simple table for viewing dataclasses.
-*   `Text`: a simple text display.
+`Log`
+    A rolling log.
+`Menu`
+    A menu of options a user can select from.
+`Splash`
+    A splash screen.
+`Table`
+    A simple table for viewing dataclasses.
+`Text`
+    A simple text display.
 
 If you use a manager with a pre-built `Panel`, it will handle passing
 input to and getting output from the `Panel` for you. If you aren't
@@ -107,6 +113,12 @@ Programs can send the following messages to a manager:
     Tell the manager to store the given `Panel` as the given name for
     future display.
 
+Some panels can be updated while they are being shown to the user. Those
+panels have specific messages the program can send to the manager:
+
+`log.Update(text)`
+    Tell the manager to add a new line to the `Log` panel.
+
 The manager can send the following message to the program:
 
 `Data(value)`
@@ -143,12 +155,9 @@ The following items are still needed before initial release:
 
 *   Add documentation.
 *   Manager updates:
-    *   Allow unrecognized messages from programs to go to panels.
     *   Allow managers to catch sigkill and pass it on to the program.
     *   Add coroutine manager.
 *   Panel updates:
-    *   Allow panels to react to messages sent by managers.
-    *   Add a logging panel.
     *   Add a progress panel.
     *   Add a textfield panel.
     *   Add a textform panel.

@@ -204,4 +204,8 @@ def check_messages(
             history.appendleft(showing)
             showing = history[1]
             print(str(displays[showing]), end='', flush=True)
+        else:
+            update = displays[showing].update(msg)
+            if update:
+                print(update, end='', flush=True)
     return displays, showing, end, farewell, reason, history
