@@ -14,7 +14,10 @@ from tests import test_panel as tp
 
 # Common data.
 term = tp.term
+KEY_BACKSPACE = Keystroke('\x08', term.KEY_ENTER, 'KEY_BACKSPACE')
 KEY_ENTER = Keystroke('\n', term.KEY_ENTER, 'KEY_ENTER')
+KEY_LEFT = Keystroke('\x1b[D', term.KEY_LEFT, 'KEY_LEFT')
+KEY_RIGHT = Keystroke('\x1b[C', term.KEY_RIGHT, 'KEY_RIGHT')
 KEY_S = Keystroke('s')
 
 
@@ -102,7 +105,36 @@ class TextDialogTestCase(tp.TerminalTestCase):
         # Determine test result.
         self.assertEqual(exp, act)
 
-    def test_action_enter_key(self):
+    def test_action_backspace(self):
+        """When a backspace is received, `TextDialog.action()` should
+        return the previously entered text as data.
+        """
+        # Expected values.
+        exp = ('', (
+            f'{term.move(4, 2)}s       '
+            f'{term.reverse}'
+            f'{term.move(4, 3)} '
+            f'{term.normal}'
+        ))
+
+        # Test data and state.
+        kwargs = {
+            'message_text': 'spam',
+            'height': 5,
+            'width': 10,
+        }
+        d = textdialog.TextDialog(**kwargs)
+        d.value = 'ss'
+        d._selected = 2
+        key = KEY_BACKSPACE
+
+        # Run test.
+        act = d.action(key)
+
+        # Determine test result.
+        self.assertEqual(exp, act)
+
+    def test_action_enter(self):
         """When an enter is received, `TextDialog.action()` should
         return the previously entered text as data.
         """
@@ -125,16 +157,15 @@ class TextDialogTestCase(tp.TerminalTestCase):
         # Determine test result.
         self.assertEqual(exp, act)
 
-    def test_action_s_key(self):
-        """When an `s` is received, `TextDialog.action()` should update
-        the text entry area to include the `s` and move the cursor one
-        column to the right.
+    def test_action_left_arrow(self):
+        """When a left arrow is received, `TextDialog.action()` should
+        move the cursor to the previous character.
         """
         # Expected values.
         exp = ('', (
-            f'{term.move(4, 2)}s'
+            f'{term.move(4, 2)}ss      '
             f'{term.reverse}'
-            f' '
+            f'{term.move(4, 3)}s'
             f'{term.normal}'
         ))
 
@@ -145,6 +176,66 @@ class TextDialogTestCase(tp.TerminalTestCase):
             'width': 10,
         }
         d = textdialog.TextDialog(**kwargs)
+        d.value = 'ss'
+        d._selected = 2
+        key = KEY_LEFT
+
+        # Run test.
+        act = d.action(key)
+
+        # Determine test result.
+        self.assertEqual(exp, act)
+
+    def test_action_right_arrow(self):
+        """When a right arrow is received, `TextDialog.action()` should
+        move the cursor to the next character.
+        """
+        # Expected values.
+        exp = ('', (
+            f'{term.move(4, 2)}ss      '
+            f'{term.reverse}'
+            f'{term.move(4, 3)}s'
+            f'{term.normal}'
+        ))
+
+        # Test data and state.
+        kwargs = {
+            'message_text': 'spam',
+            'height': 5,
+            'width': 10,
+        }
+        d = textdialog.TextDialog(**kwargs)
+        d.value = 'ss'
+        d._selected = 0
+        key = KEY_RIGHT
+
+        # Run test.
+        act = d.action(key)
+
+        # Determine test result.
+        self.assertEqual(exp, act)
+
+    def test_action_s(self):
+        """When an `s` is received, `TextDialog.action()` should update
+        the text entry area to include the `s` and move the cursor one
+        column to the right.
+        """
+        # Expected values.
+        exp = ('', (
+            f'{term.move(4, 2)}s       '
+            f'{term.reverse}'
+            f'{term.move(4, 3)} '
+            f'{term.normal}'
+        ))
+
+        # Test data and state.
+        kwargs = {
+            'message_text': 'spam',
+            'height': 5,
+            'width': 10,
+        }
+        d = textdialog.TextDialog(**kwargs)
+        d._selected = 0
         key = KEY_S
 
         # Run test.
@@ -153,16 +244,16 @@ class TextDialogTestCase(tp.TerminalTestCase):
         # Determine test result.
         self.assertEqual(exp, act)
 
-    def test_action_s_key_with_value(self):
+    def test_action_s_with_value(self):
         """When an `s` is received, `TextDialog.action()` should update
         the text entry area to include the `s` and move the cursor one
         column to the right.
         """
         # Expected values.
         exp = ('', (
-            f'{term.move(4, 3)}s'
+            f'{term.move(4, 2)}ss      '
             f'{term.reverse}'
-            f' '
+            f'{term.move(4, 4)} '
             f'{term.normal}'
         ))
 
@@ -173,6 +264,7 @@ class TextDialogTestCase(tp.TerminalTestCase):
             'width': 10,
         }
         d = textdialog.TextDialog(**kwargs)
+        d._selected = 1
         d.value = 's'
         key = KEY_S
 

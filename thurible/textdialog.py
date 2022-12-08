@@ -4,7 +4,7 @@ textdialog
 
 A text-entry dialog for terminal applications.
 """
-from typing import Optional
+from typing import Callable, Optional
 
 from blessed.keyboard import Keystroke
 
@@ -22,9 +22,13 @@ class TextDialog(Content, Title):
         super().__init__(*args, **kwargs)
         self.message_text = message_text
 
-        self._active_keys = {
+        self._active_keys: dict[str, Callable] = {
+            'KEY_BACKSPACE': self._delete_backwards,
             'KEY_ENTER': self._select,
+            'KEY_LEFT': self._move_back,
+            'KEY_RIGHT': self._move_foreward,
         }
+        self._selected = 0
         self.value = ''
 
     def __str__(self) -> str:
@@ -61,7 +65,8 @@ class TextDialog(Content, Title):
         update = ''
 
         height = self.inner_height
-        x = self.inner_x + 2 + len(self.value)
+        width = self.inner_width - 2
+        x = self.inner_x + 2
         y = self._align_v('bottom', 1, height) + self.inner_y
 
         if repr(key) in self._active_keys:
@@ -70,14 +75,39 @@ class TextDialog(Content, Title):
 
         else:
             self.value += str(key)
-            update += self.term.move(y, x) + str(key)
+            self._selected += 1
+
+        if not data:
+            update += self.term.move(y, x) + f'{self.value:<{width}}'
             update += self.term.reverse
-            update += ' '
+            update += self.term.move(y, x + self._selected)
+            if self._selected < len(self.value):
+                selected_char = self.value[self._selected]
+            else:
+                selected_char = ' '
+            update += selected_char
             update += self.term.normal
 
         return data, update
 
     # Private action handlers.
+    def _delete_backwards(self, key: Optional[Keystroke]) -> str:
+        """Delete the previous character."""
+        self._selected -= 1
+        index = self._selected
+        self.value = self.value[:index] + self.value[index + 1:]
+        return ''
+
+    def _move_back(self, key: Optional[Keystroke]) -> str:
+        """Move the cursor back one character."""
+        self._selected -= 1
+        return ''
+
+    def _move_foreward(self, key: Optional[Keystroke]) -> str:
+        """Move the cursor foreward one character."""
+        self._selected += 1
+        return ''
+
     def _select(self, key: Optional[Keystroke] = None) -> str:
         """Return the name of the selected option."""
         return self.value
