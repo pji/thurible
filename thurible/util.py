@@ -5,6 +5,8 @@ util
 Miscellaneous utility functions and classes for the `thurible`
 package.
 """
+from queue import Queue
+
 from typing import Optional
 
 from blessed import Terminal
@@ -96,6 +98,12 @@ class Box:
 
 
 # Common functions.
+def get_queues() -> tuple[Queue, Queue]:
+    q_to: Queue = Queue()
+    q_from: Queue = Queue()
+    return q_to, q_from
+
+
 def get_terminal() -> Terminal:
     """Retrieve an instance of `blessed.Terminal` for use by `thurible`
     objects. Every time this is called, it will return the same

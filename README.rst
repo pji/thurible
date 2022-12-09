@@ -136,6 +136,9 @@ Usage Example
 -------------
 Usage examples are found in the `examples/` directory.
 
+examples/favword.py
+    A terminal application that uses `thurible` to ask the user for
+    their favorite word.
 examples/filereader.py
     A terminal application that uses `thurible` to navigate the
     filesystem and read files.
