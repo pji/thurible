@@ -110,6 +110,40 @@ class TextDialogTestCase(tp.TerminalTestCase):
         # Determine test result.
         self.assertEqual(exp, act)
 
+    def test___str__message_wraps(self):
+        """When converted to a string, a `TextDialog` object returns a
+        string that will draw the dialog. If the message is longer than
+        the width of the Dialog, the message text wraps to the next line.
+        """
+        # Expected values.
+        exp = (
+            f'{term.move(0, 0)}          '
+            f'{term.move(1, 0)}          '
+            f'{term.move(2, 0)}          '
+            f'{term.move(3, 0)}          '
+            f'{term.move(4, 0)}          '
+            f'{term.move(1, 0)}spam eggs'
+            f'{term.move(2, 0)}bacon'
+            f'{term.move(4, 0)}> '
+            f'{term.reverse}'
+            f'{term.move(4, 2)} '
+            f'{term.normal}'
+        )
+
+        # Test data and state.
+        kwargs = {
+            'message_text': 'spam eggs bacon',
+            'height': 5,
+            'width': 10,
+        }
+        d = textdialog.TextDialog(**kwargs)
+
+        # Run test.
+        act = str(d)
+
+        # Determine test result.
+        self.assertEqual(exp, act)
+
     def test_action_backspace(self):
         """When a backspace is received, `TextDialog.action()` should
         delete the previous character.

@@ -109,6 +109,40 @@ class DialogTestCase(tp.TerminalTestCase):
         # Determine test result.
         self.assertEqual(exp, act)
 
+    def test___str__message_wraps(self):
+        """When converted to a string, a Dialog object returns a string
+        that will draw the dialog. If the message is longer than the
+        width of the Dialog, the message text wraps to the next line.
+        """
+        # Expected values.
+        exp = (
+            f'{term.move(0, 0)}          '
+            f'{term.move(1, 0)}          '
+            f'{term.move(2, 0)}          '
+            f'{term.move(3, 0)}          '
+            f'{term.move(4, 0)}          '
+            f'{term.move(1, 0)}spam eggs'
+            f'{term.move(2, 0)}bacon'
+            f'{term.reverse}'
+            f'{term.move(4, 6)}[No]'
+            f'{term.normal}'
+            f'{term.move(4, 0)}[Yes]'
+        )
+
+        # Test data and state.
+        kwargs = {
+            'message_text': 'spam eggs bacon',
+            'height': 5,
+            'width': 10,
+        }
+        d = dialog.Dialog(**kwargs)
+
+        # Run test.
+        act = str(d)
+
+        # Determine test result.
+        self.assertEqual(exp, act)
+
     def test_action_enter(self):
         """When a enter is received, `Dialog.action()` should return
         the name of the option selected.

@@ -73,7 +73,9 @@ class Dialog(Content, Title):
         length = len(wrapped)
         y = self._align_v('middle', length, self.inner_height) + self.inner_y
         x = self.inner_x
-        result = f'{self.term.move(y, x)}{self.message_text}'
+        result = ''
+        for i, line in enumerate(wrapped):
+            result += f'{self.term.move(y + i, x)}{line}'
         return result
 
     # Public methods.

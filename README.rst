@@ -32,47 +32,52 @@ There are three key parts of `thurible` to understand:
 
 Panels
 ------
-`Panel` objects do the following:
+:class:Panel objects do the following:
 
 *   Store data to be displayed in the terminal,
 *   Generate the text to display in the terminal,
 *   Respond to navigation input from the user.
 
-While you can create your own custom `Panel` objects, there are several
+While you can create your own custom :class:Panel objects, there are several
 subclasses in `thurible` that may cover basic needs:
 
-`Log`
+Dialog
+    A prompt to choose between pre-defined options.
+Log
     A rolling log.
-`Menu`
+Menu
     A menu of options a user can select from.
-`Splash`
+Splash
     A splash screen.
-`Table`
+Table
     A simple table for viewing dataclasses.
-`Text`
+Text
     A simple text display.
+TextDialog
+    A prompt to input text.
 
-If you use a manager with a pre-built `Panel`, it will handle passing
-input to and getting output from the `Panel` for you. If you aren't
-using a manager or are creating a custom `Panel`, there are two core
-features of `Panel` object to be aware of:
+If you use a manager with a pre-built :class:Panel, it will handle passing
+input to and getting output from the :class:Panel for you. If you aren't
+using a manager or are creating a custom :class:Panel, there are two core
+features of :class:Panel object to be aware of:
 
-*   Getting a string representation of a `Panel` object, such as by
+*   Getting a string representation of a :class:Panel object, such as by
     using the `str()` function, will return all of the content of the
-    `Panel` complete with the terminal escape codes needed to redraw
-    the entire `Panel` with a simple `print()` function.
-*   Passing keyboard input, as a `blessed.Keystroke` object, into the
-    `action()` method of the `Panel` will return a `tuple` of two
+    :class:Panel complete with the terminal escape codes needed to redraw
+    the entire :class:Panel with a simple `print()` function.
+*   Passing keyboard input, as a :class:blessed.Keystroke object, into the
+    `action()` method of the :class:Panel will return a `tuple` of two
     values:
     
-    *   data: If the `Panel` doesn't know what to do with the `Keystroke`,
-        the string value of the `Keystroke` will be returned here.
-    *   update: If the `Panel` needs to make changes to the terminal due
-        to the `Keystroke`, these changes will be returned here as a
-        string that can be passed to a simple `print()` function.
+    *   data: If the :class:Panel doesn't know what to do with the 
+        :class:Keystroke, the string value of the `Keystroke` will be
+        returned here.
+    *   update: If the :class:Panel needs to make changes to the terminal
+        due to the :class:Keystroke, these changes will be returned here as
+        a string that can be passed to a simple `print()` function.
 
 .. note::
-    Despite the name, `Panel` objects do not create curses-style panels
+    Despite the name, :class:Panel objects do not create curses-style panels
     in the terminal. As far as I'm aware, the `blessed` package doesn't
     offer the capability of creating those kinds of panels. However, the
     idea is, eventually, for `thurible` to provide that type of
@@ -106,11 +111,11 @@ Programs can send the following messages to a manager:
 `Ping(name)`
     Tell the manager to respond with a `Pong` message.
 `Show(name)`
-    Tell the manager to switch to displaying the named `Panel`.
+    Tell the manager to switch to displaying the named :class:Panel.
 `Showing()`
-    Ask the manager for the name of the currently displayed `Panel`.
+    Ask the manager for the name of the currently displayed :class:Panel.
 `Store(name, panel)`
-    Tell the manager to store the given `Panel` as the given name for
+    Tell the manager to store the given :class:Panel as the given name for
     future display.
 
 Some panels can be updated while they are being shown to the user. Those
@@ -126,10 +131,10 @@ The manager can send the following message to the program:
 `Ending(reason, exception)`
     Announces the manager is terminating.
 `Pong(name)`
-    Is the response to a `Ping` message from the program.
+    Is the response to a :class:Ping message from the program.
 `Shown(name)`
-    Is the response to a `Showing` message from the program, containing
-    the name of the currently displayed `Panel`.
+    Is the response to a :class:Showing message from the program, containing
+    the name of the currently displayed :class:Panel.
 
 
 Usage Example
@@ -158,9 +163,12 @@ The following items are still needed before initial release:
 
 *   Add documentation.
 *   Manager updates:
+
     *   Allow managers to catch sigkill and pass it on to the program.
     *   Add coroutine manager.
+    
 *   Panel updates:
+
     *   Add a progress panel.
     *   Add a textfield panel.
     *   Add a textform panel.
