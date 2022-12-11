@@ -12,6 +12,7 @@ import glob
 import importlib
 from itertools import zip_longest
 import os
+from pathlib import Path
 import sys
 import unittest as ut
 from textwrap import wrap
@@ -19,6 +20,7 @@ from textwrap import wrap
 import mypy.api
 import pycodestyle as pcs
 import rstcheck_core.checker as rstchecker
+from rstcheck_core.config import RstcheckConfig
 
 
 # Script configuration.
@@ -86,10 +88,9 @@ def check_rst(file_paths, ignore):
     """Run syntax checks on any ReStructured Text documents."""
     def action(files):
         results = []
+        config = RstcheckConfig()
         for file in files:
-            with open(file) as fh:
-                lines = fh.read()
-            result = list(rstchecker.check_source(lines))
+            result = list(rstchecker.check_file(Path(file), config))
             if result:
                 for item in result:
                     msg = f'{file}:{item["line_number"]} {item["message"]}'

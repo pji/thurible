@@ -29,18 +29,30 @@ class Dialog(Content, Title):
         options: Sequence[Option] = yes_no,
         *args, **kwargs
     ) -> None:
+        """Create a new :class:thurible.Dialog object. This class displays
+        a message to the user and offers pre-defined options for the
+        user to chose from. As a subclass of :class:thurible.panel.Content
+        and :class:thurible.panel.Title, it can also take those parameters
+        and has those public methods and properties.
+
+        :param message_text: The text of the prompt to be displayed to
+            the user.
+        :param options: The options the user can chose from. This is a
+            sequence of :class:thurible.Option objects.
+        :return: None.
+        :rtype: NoneType.
+        """
         super().__init__(*args, **kwargs)
         self.message_text = message_text
         self.options = options
 
-        self._active_keys = {
-            'KEY_ENTER': self._select,
-            'KEY_LEFT': self._select_left,
-            'KEY_RIGHT': self._select_right,
-        }
+        # Defined action keys.
+        self.register_key('KEY_ENTER', self._select)
+        self.register_key('KEY_LEFT', self._select_left)
+        self.register_key('KEY_RIGHT', self._select_right)
         for option in self.options:
             hotkey = f"'{option.hotkey}'"
-            self._active_keys[hotkey] = self._hotkey
+            self.register_key(hotkey, self._hotkey)
         self._selected = len(self.options) - 1
 
     def __str__(self) -> str:
@@ -69,6 +81,12 @@ class Dialog(Content, Title):
     # Properties
     @property
     def message(self) -> str:
+        """
+        The message as a string that could be used to update the terminal.
+
+        :return: A :class:str object.
+        :rtype: str
+        """
         wrapped = self.term.wrap(self.message_text, width=self.inner_width)
         length = len(wrapped)
         y = self._align_v('middle', length, self.inner_height) + self.inner_y
@@ -80,6 +98,16 @@ class Dialog(Content, Title):
 
     # Public methods.
     def action(self, key: Keystroke) -> tuple[str, str]:
+        """Act on a keystroke typed by the user.
+
+        :param key: A :class:blessed.keyboard.Keystroke object representing
+            the key pressed by the user.
+        :return: A :class:tuple object containing two :class:str objects.
+            The first string is any data that needs to be sent to the
+            application. The second string contains any updates needed
+            to be made to the terminal display.
+        :rtype: tuple
+        """
         # These are the results that are returned.
         data = ''
         update = ''

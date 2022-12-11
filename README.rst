@@ -173,3 +173,4 @@ The following items are still needed before initial release:
     *   Add a textfield panel.
     *   Add a textform panel.
     *   Add a tableform panel.
+    *   Figure out what to do if dialog message overflows.

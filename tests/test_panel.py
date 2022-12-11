@@ -7,6 +7,7 @@ Unit tests for the `thurible.panel` module.
 from dataclasses import dataclass
 import unittest as ut
 from unittest.mock import call, patch, PropertyMock
+from types import MethodType
 
 from blessed import Terminal
 from blessed.keyboard import Keystroke
@@ -1208,6 +1209,64 @@ class PanelTestCase(TerminalTestCase):
 
         # Run test.
         act = panel.clear_contents()
+
+        # Determine test result.
+        self.assertEqual(exp, act)
+
+    def test_register_key(self):
+        """Given a string with the name of a control key as used by
+        :mod:blessed and a method that follows the action handler
+        protocol, :meth:Panel.register_key() should add the key and
+        method to the dictionary of active keys.
+        """
+        # Expected value data and state.
+        def spam(self, key=None) -> str:
+            return ''
+
+        # Expected value.
+        exp = {'KEY_SPAM': spam,}
+
+        # Test data and state.
+        kwargs = {
+            'height': 5,
+            'width': 6,
+        }
+        panel = p.Panel(**kwargs)
+        setattr(panel, 'spam', spam)
+
+        # Run test.
+        panel.register_key('KEY_SPAM', spam)
+        act = panel.active_keys
+
+        # Determine test result.
+        self.assertEqual(exp, act)
+
+    def test_register_key_given_unbound_method(self):
+        """Given a string with the name of a control key as used by
+        :mod:blessed and a method that follows the action handler
+        protocol, :meth:Panel.register_key() should add the key and
+        method to the dictionary of active keys. If the callable is
+        not a bound method of the :class:Panel object, the callable
+        should be bound as a method to the panel before it is added
+        to the dictionary of active keys.
+        """
+        # Expected value data and state.
+        def spam(self, key=None) -> str:
+            return ''
+
+        # Expected value.
+        exp = {'KEY_SPAM': spam,}
+
+        # Test data and state.
+        kwargs = {
+            'height': 5,
+            'width': 6,
+        }
+        panel = p.Panel(**kwargs)
+
+        # Run test.
+        panel.register_key('KEY_SPAM', spam)
+        act = panel.active_keys
 
         # Determine test result.
         self.assertEqual(exp, act)

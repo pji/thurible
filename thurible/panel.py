@@ -4,6 +4,7 @@ panel
 
 Base classes for objects that display data in an area in a terminal.
 """
+from collections.abc import Callable
 from typing import Optional
 
 from blessed import Terminal
@@ -303,6 +304,9 @@ class Panel:
         self.bg = bg
         self.fg = fg
 
+        # Private attributes.
+        self._active_keys: dict[str, Callable] = {}
+
     def __eq__(self, other) -> bool:
         if not isinstance(other, self.__class__):
             return NotImplemented
@@ -323,8 +327,27 @@ class Panel:
 
     # Properties
     @property
+    def active_keys(self) -> dict[str, Callable]:
+        """The key presses the class will react to and the handler that
+        acts on that key press.
+
+        :return: A :class:dict object where the keys are the representation
+            of the :class:blessed.keyboard.Keystroke object emitted when
+            the key is pressed and the values are the action handler
+            methods called when the key is pressed.
+        :rtype: dict
+        """
+        return self._active_keys.copy()
+
+    @property
     def inner_height(self) -> int:
-        """Returns number of rows available to content within the panel."""
+        """
+        The number of rows in the terminal contained within the interior
+        of the panel.
+
+        :return: :class:int
+        :rtype: int
+        """
         height = self.height
         height -= self._panel_pad_offset_top
         height -= self._panel_pad_offset_bottom
@@ -332,8 +355,11 @@ class Panel:
 
     @property
     def inner_width(self) -> int:
-        """Returns number of columns available to content within the
-        panel.
+        """The number of columns in the terminal contained within the
+        interior of the panel.
+
+        :return: :class:int
+        :rtype: int
         """
         width = self.width
         width -= self._panel_pad_offset_left
@@ -342,15 +368,20 @@ class Panel:
 
     @property
     def inner_x(self) -> int:
-        """Returns the position in the terminal of the first column
-        available to content within the panel.
+        """The left-most column in the terminal of the interior of the
+        panel.
+
+        :return: :class:int
+        :rtype: int
         """
         return self.origin_x + self._panel_pad_offset_left
 
     @property
     def inner_y(self) -> int:
-        """Returns the position in the terminal of the first row
-        available to content within the panel.
+        """The top-most row in the terminal of the interior of the panel.
+
+        :return: :class:int
+        :rtype: int
         """
         return self.origin_y + self._panel_pad_offset_top
 
@@ -376,12 +407,14 @@ class Panel:
 
     # Public methods.
     def action(self, key: Keystroke) -> tuple[str, str]:
-        """React to input from the user.
+        """Act on a keystroke typed by the user.
 
-        :param key: A keystroke from the user.
-        :return: A :class:tuple that contains a :class:str containing
-            any data that needs to go back to the application and a
-            :class:str containing any updates to the terminal.
+        :param key: A :class:blessed.keyboard.Keystroke object representing
+            the key pressed by the user.
+        :return: A :class:tuple object containing two :class:str objects.
+            The first string is any data that needs to be sent to the
+            application. The second string contains any updates needed
+            to be made to the terminal display.
         :rtype: tuple
         """
         data = str(key)
@@ -389,10 +422,10 @@ class Panel:
         return (data, update)
 
     def clear_contents(self) -> str:
-        """Return a string that will clear the contents of the panel.
+        """Clear the interior area of the panel.
 
-        :return: A :class:str that fills the interior of the panel
-            with spaces.
+        :return: A :class:str object containing the update needed to be
+            made to the terminal display.
         :rtype: str
         """
         # Set up.
@@ -410,7 +443,34 @@ class Panel:
             result += self.term.normal
         return result
 
+    def register_key(self, key: str, handler: Callable) -> None:
+        """Declare the key presses the class will react to, and define
+        the action the class will take when that key is pressed.
+
+        :param key: The name of the key pressed as returned by the
+            representation of the :class:blessed.keyboard.Keystroke
+            emitted by the key press.
+        :param handler: And action handler to invoke when the key is
+            pressed. An action handler is a function that takes an
+            optional :class:blessed.keyboard.Keystroke object and
+            returns a string that contains any changes that need to be
+            made to the terminal display as a result of the key press.
+        :return: None.
+        :rtype: NoneType
+        """
+        items = [getattr(self, name) for name in self.__dict__]
+        if handler not in items:
+            setattr(self, key, handler)
+        self._active_keys[key] = handler
+
     def update(self, msg: Message) -> str:
+        """Act on a message sent by the application.
+
+        :param msg: A message sent by the application.
+        :return: A :class:str object containing any updates needed to be
+            made to the terminal display.
+        :rtype: str
+        """
         return ''
 
     # Private helper methods.
@@ -578,9 +638,11 @@ class Frame(Panel):
         frame_fg: str = '',
         *args, **kwargs
     ) -> None:
-        """Initialize an instance of the class.
-
-        For other parameters, see the documentation for :class:Panel.
+        """Create a new :class:thurible.panel.Frame object. This class
+        serves as a parent class for all panels that can have a frame
+        surrounding the interior of the panel. As a subclass of
+        :class:thurible.panel.Panel, it can also take those parameters
+        and has those public methods.
 
         :param frame_type: (Optional.) If a string, the string determines
             the frame used for the pane. If None, the pane doesn't have a
@@ -742,7 +804,12 @@ class Content(Frame):
         content_pad_right: float = 0.0,
         *args, **kwargs
     ) -> None:
-        """Initialize an instance of the class.
+        """Create a new :class:thurible.panel.Content object. This class
+        serves as a parent class for all panels that allow padding between
+        the frame surrounding the interior of the panel and the content
+        contained by the panel. The nature of that content is defined by
+        the subclass. As a subclass of :class:thurible.panel.Frame, it
+        can also take those parameters and has those public methods.
 
         :param content_align_h: (Optional.) The horizontal alignment
             of the contents of the panel. It defaults to center.
@@ -758,31 +825,6 @@ class Content(Frame):
             It is measured as a float between 0.0 and 1.0, where 0.0
             is no padding and 1.0 is the entire width of the panel is
             padding. The default is 0.0.
-        :param height: The height of the pane.
-        :param width: The width of the pane.
-        :param term: A blessed.Terminal instance for formatting text
-            for terminal display.
-        :param origin_y: (Optional.) The terminal row for the top of the
-            panel.
-        :param origin_x: (Optional.) The terminal column for the left
-            side of the panel.
-        :param fg: (Optional.) A string describing the foreground color
-            of the pane. See the documentation for `blessed` for more
-            detail on the available options.
-        :param bg: (Optional.) A string describing the background color
-            of the pane. See the documentation for `blessed` for more
-            detail on the available options.
-        :param frame_type: (Optional.) If a string, the string determines
-            the frame used for the pane. If None, the pane doesn't have a
-            frame.
-        :param frame_fg: (Optional.) A string describing the foreground
-            color of the frame. See the documentation for `blessed` for
-            more detail on the available options. If `fg` is set and
-            this is not, the frame will have the `fg` color.
-        :param frame_bg: (Optional.) A string describing the background
-            color of the frame. See the documentation for `blessed` for
-            more detail on the available options. If `bg` is set and
-            this is not, the frame will have the `bg` color.
         :return: None.
         :rtype: NoneType
         """
@@ -873,47 +915,22 @@ class Scroll(Content):
         self,
         *args, **kwargs
     ) -> None:
-        """Initialize an instance of the class.
+        """
+        Create a new :class:thurible.panel.Scroll object. This class
+        serves as a parent class for all panels that allow the user
+        to scroll through content that overflows the interior of the
+        panel. As a subclass of :class:thurible.panel.Content, it can
+        also take those parameters and has those public methods.
 
-        :param content_align_h: (Optional.) The horizontal alignment
-            of the contents of the panel. It defaults to center.
-        :param content_align_v: (Optional.) The vertical alignment of
-            the contents of the penal. It defaults to middle.
-        :param content_pad_left: (Optional.) The amount of padding
-            between the left inner margin of the panel and the content.
-            It is measured as a float between 0.0 and 1.0, where 0.0
-            is no padding and 1.0 is the entire width of the panel is
-            padding. The default is 0.0.
-        :param content_pad_right: (Optional.) The amount of padding
-            between the right inner margin of the panel and the content.
-            It is measured as a float between 0.0 and 1.0, where 0.0
-            is no padding and 1.0 is the entire width of the panel is
-            padding. The default is 0.0.
-        :param height: The height of the pane.
-        :param width: The width of the pane.
-        :param term: A blessed.Terminal instance for formatting text
-            for terminal display.
-        :param origin_y: (Optional.) The terminal row for the top of the
-            panel.
-        :param origin_x: (Optional.) The terminal column for the left
-            side of the panel.
-        :param fg: (Optional.) A string describing the foreground color
-            of the pane. See the documentation for `blessed` for more
-            detail on the available options.
-        :param bg: (Optional.) A string describing the background color
-            of the pane. See the documentation for `blessed` for more
-            detail on the available options.
-        :param frame_type: (Optional.) If a string, the string determines
-            the frame used for the pane. If None, the pane doesn't have a
-            frame.
-        :param frame_fg: (Optional.) A string describing the foreground
-            color of the frame. See the documentation for `blessed` for
-            more detail on the available options. If `fg` is set and
-            this is not, the frame will have the `fg` color.
-        :param frame_bg: (Optional.) A string describing the background
-            color of the frame. See the documentation for `blessed` for
-            more detail on the available options. If `bg` is set and
-            this is not, the frame will have the `bg` color.
+        This class defines the following active keys:
+
+        *   KEY_END: Scroll to the end of the content.
+        *   KEY_DOWN: Scroll down in the content.
+        *   KEY_HOME: Scroll to the top of the content.
+        *   KEY_PGDOWN: Scroll one screen down in the content.
+        *   KEY_PGUP: Scroll one page up in the content.
+        *   KEY_UP: Scroll one line up in the content.
+
         :return: None.
         :rtype: NoneType
         """
@@ -928,14 +945,13 @@ class Scroll(Content):
         self._stop = self.inner_height
         self._wrapped_width = -1
 
-        self._active_keys = {
-            'KEY_END': self._end,
-            'KEY_DOWN': self._line_down,
-            'KEY_HOME': self._home,
-            'KEY_PGDOWN': self._page_down,
-            'KEY_PGUP': self._page_up,
-            'KEY_UP': self._line_up,
-        }
+        # Register the keyboard input the class responds to.
+        self.register_key('KEY_END', self._end)
+        self.register_key('KEY_DOWN', self._line_down)
+        self.register_key('KEY_HOME', self._home)
+        self.register_key('KEY_PGDOWN', self._page_down)
+        self.register_key('KEY_PGUP', self._page_up)
+        self.register_key('KEY_UP', self._line_up)
 
     def __eq__(self, other) -> bool:
         if not isinstance(other, self.__class__):
@@ -1135,47 +1151,31 @@ class Title(Frame):
         title_text: str = '',
         *args, **kwargs
     ) -> None:
-        """Initialize an instance of the class.
+        """Create a new :class:thurible.panel.Title object. This class
+        serves as a parent class for all panels that all the user to put
+        a title on the top of the panel and a footer on the bottom of
+        the frame. As a subclass of :class:thurible.panel.Frame, it can
+        alse take those parameters and has those public methods and
+        properties.
 
-        :param footer_align: (Optional.) The horizontal alignment of
-            the footer. Valid options include: left, center, right.
-        :param footer_frame: (Optional.) Sets whether to add a cap to
-            the frame on either side of the footer. You must set the
-            `frame_type` parameter if you set this.
-        :param footer_text: (Optional.) The footer for the panel.
-        :param title_align: (Optional.) The horizontal alignment of
-            the title. Valid options include: left, center, and right.
-        :param title_bg: (Optional.) The background title of the title.
-        :param title_fg: (Optional.) The foreground title of the title.
-        :param title_frame: (Optional.) Sets whether to add a cap to
-            the frame on either side of the title. You must set the
-            `frame_type` parameter if you set this.
-        :param title_text: (Optional.) A title for the panel.
-        :param height: The height of the pane.
-        :param width: The width of the pane.
-        :param term: A blessed.Terminal instance for formatting text
-            for terminal display.
-        :param origin_y: (Optional.) The terminal row for the top of the
-            panel.
-        :param origin_x: (Optional.) The terminal column for the left
-            side of the panel.
-        :param fg: (Optional.) A string describing the foreground color
-            of the pane. See the documentation for `blessed` for more
-            detail on the available options.
-        :param bg: (Optional.) A string describing the background color
-            of the pane. See the documentation for `blessed` for more
-            detail on the available options.
-        :param frame_type: (Optional.) If a string, the string determines
-            the frame used for the pane. If None, the pane doesn't have a
-            frame.
-        :param frame_fg: (Optional.) A string describing the foreground
-            color of the frame. See the documentation for `blessed` for
-            more detail on the available options. If `fg` is set and
-            this is not, the frame will have the `fg` color.
-        :param frame_bg: (Optional.) A string describing the background
-            color of the frame. See the documentation for `blessed` for
-            more detail on the available options. If `bg` is set and
-            this is not, the frame will have the `bg` color.
+        :param footer_align: (Optional.) The horizontal alignment of the
+            footer. The available options are "left", "center", and "right".
+        :param footer_frame: (Optional.) Whether the frame should be capped
+            on either side of the footer.
+        :param footer_text: (Optional.) The text contained within the
+            footer.
+        :param title_align: (Optional.) The horizontal alignment of the
+            title. The available options are "left", "center", and "right".
+        :param title_bg: (Optional.) The background color of the title and
+            footer. See the documentation for :mod:blessed for more detail
+            on the available options.
+        :param title_fg: (Optional.) The foreground color of the title and
+            footer. See the documentation for :mod:blessed for more detail
+            on the available options.
+        :param title_frame: (Optional.) Whether the frame should be capped
+            on either side of the title.
+        :param title_text: (Optional.) The text contained within the
+            title.
         :return: None.
         :rtype: NoneType
         """
@@ -1220,8 +1220,11 @@ class Title(Frame):
     # Properties.
     @property
     def footer(self) -> str:
-        """Returns a string to write the footer of the panel to the
-        terminal.
+        """
+        The footer as a string that could be used to update the terminal.
+
+        :return: A :class:str object.
+        :rtype: str
         """
         y = self.frame_origin_y + self.frame_height - 1
         text = self.footer_text
