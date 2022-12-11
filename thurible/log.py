@@ -28,6 +28,26 @@ class Log(Content, Title):
         maxlen: int = 50,
         *args, **kwargs
     ) -> None:
+        """Create a new :class:`thurible.Log` object. This class displays
+        messages from the application in "last in first out" (LIFO)
+        format. It's intended for situations were you want to provide
+        the user a rolling display of status messages. As a subclass of
+        :class:`thurible.panel.Content` and :class:`thurible.panel.Title`,
+        it can also take those parameters and has those public methods
+        and properties.
+
+        :param content: (Optional.) A sequence of strings to display
+            in the panel when it is first displayed in the terminal.
+            The first item in the sequence is considered the most
+            recent.
+        :param maxlen: (Optional.) The total number of entries the
+            :class:thurible.Log will store. This is used to allow the
+            terminal window to be resized without causing the loss of
+            any messages. It's not intended for the user to be able to
+            scroll to view messages that have rolled off the terminal.
+        :return: None.
+        :rtype: NoneType
+        """
         super().__init__(*args, **kwargs)
         self.maxlen = maxlen
         if content is None:
@@ -61,8 +81,14 @@ class Log(Content, Title):
     # Properties.
     @property
     def lines(self) -> list[str]:
-        """Returns the content of the panel as a list of strings, where
-        each string represents a row in the panel.
+        """The lines of text available to be displayed in the panel
+        after they have been wrapped to fit the width of the
+        interior of the panel. A message from the application may
+        be split into multiple lines.
+
+        :return: A :class:list object containing each line of
+            text as a :class:str.
+        :rtype: list
         """
         width = self.inner_width
         if width != self._wrapped_width:

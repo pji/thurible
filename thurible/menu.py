@@ -40,72 +40,40 @@ class Menu(Scroll, Title):
         content_align_v: str = 'top',
         *args, **kwargs
     ) -> None:
-        """Initialize an instance of the class.
+        """Create a new :class:`thurible.Menu` object. This class provides
+        a list of options the user can select. As a subclass of
+        :class:`thurible.panel.Scroll` and :class:`thurible.panel.Title`,
+        it can also take those parameters and has those public methods,
+        properties, and active keys.
 
-        :param options: (Optional.) The menu options.
-        :param select_bg: (Optional.) A string describing the background
-            color of the selection.  See the documentation for `blessed`
-            for more detail on the available options.
-        :param select_fg: (Optional.) A string describing the foreground
-            color of the selection.  See the documentation for `blessed`
-            for more detail on the available options.
-        :param content_align_h: (Optional.) Horizontal alignment of the
-            of the menu options.
-        :param content_align_v: (Optional.) Vertical alignment of the
-            of the menu options.
-        :param footer_align: (Optional.) The horizontal alignment of
-            the footer. Valid options include: left, center, right.
-        :param footer_frame: (Optional.) Sets whether to add a cap to
-            the frame on either side of the footer. You must set the
-            `frame_type` parameter if you set this.
-        :param footer_text: (Optional.) The footer for the panel.
-        :param title_align: (Optional.) The horizontal alignment of
-            the title. Valid options include: left, center, and right.
-        :param title_bg: (Optional.) The background title of the title.
-        :param title_fg: (Optional.) The foreground title of the title.
-        :param title_frame: (Optional.) Sets whether to add a cap to
-            the frame on either side of the title. You must set the
-            `frame_type` parameter if you set this.
-        :param title_text: (Optional.) A title for the panel.
+        :class:`thurible.Menu` adds the additional active key:
+
+        *   KEY_ENTER: Select the highlighted option.
+        *   Optional hot keys to highlight the options, as defined in the
+            :class:`thurible.Option` object for the option.
+
+        :class:`thurible.Menu` modifies the behavior of the following
+        active keys:
+
+        *   KEY_END: Highlight the last option, scrolling if needed.
+        *   KEY_DOWN: Highlight the next option, scrolling if needed.
+        *   KEY_HOME: Highlight the first option, scrolling if needed.
+        *   KEY_PGDOWN: Scroll to and highlight the option one screen down.
+        *   KEY_PGUP: Scroll to and highlight the option one screen up.
+        *   KEY_UP: Highlight the previous option, scrolling if needed.
+
+        For more information on active keys, see :ref:`active`.
+
+        :param options: A sequence of :class:`thurible.Option` objects
+            defining the options available to the user.
+        :param select_bg: (Optional.) The background color used to
+            highlight an option.
+        :param select_fg: (Optional.) The foreground color used to
+            highlight an option.
         :param content_align_h: (Optional.) The horizontal alignment
-            of the contents of the panel. It defaults to center.
-        :param content_align_v: (Optional.) The vertical alignment of
-            the contents of the penal. It defaults to middle.
-        :param content_pad_left: (Optional.) The amount of padding
-            between the left inner margin of the panel and the content.
-            It is measured as a float between 0.0 and 1.0, where 0.0
-            is no padding and 1.0 is the entire width of the panel is
-            padding. The default is 0.0.
-        :param content_pad_right: (Optional.) The amount of padding
-            between the right inner margin of the panel and the content.
-            It is measured as a float between 0.0 and 1.0, where 0.0
-            is no padding and 1.0 is the entire width of the panel is
-            padding. The default is 0.0.
-        :param height: The height of the pane.
-        :param width: The width of the pane.
-        :param term: A blessed.Terminal instance for formatting text
-            for terminal display.
-        :param origin_y: (Optional.) The terminal row for the top of the
-            panel.
-        :param origin_x: (Optional.) The terminal column for the left
-            side of the panel.
-        :param fg: (Optional.) A string describing the foreground color
-            of the pane. See the documentation for `blessed` for more
-            detail on the available options.
-        :param bg: (Optional.) A string describing the background color
-            of the pane. See the documentation for `blessed` for more
-            detail on the available options.
-        :param frame_type: (Optional.) If a string, the string determines
-            the frame used for the pane. If None, the pane doesn't have a
-            frame.
-        :param frame_fg: (Optional.) A string describing the foreground
-            color of the frame. See the documentation for `blessed` for
-            more detail on the available options. If `fg` is set and
-            this is not, the frame will have the `fg` color.
-        :param frame_bg: (Optional.) A string describing the background
-            color of the frame. See the documentation for `blessed` for
-            more detail on the available options. If `bg` is set and
-            this is not, the frame will have the `bg` color.
+            of the contents of the panel. It defaults to "left".
+        :param content_align_v: (Optional.) The vertical alignment
+            of the contents of the panel. It defaults to "top".
         :return: None.
         :rtype: NoneType
         """
@@ -155,10 +123,22 @@ class Menu(Scroll, Title):
     # Properties.
     @property
     def field_width(self) -> int:
+        """The width of the highlightable area of each option as
+        determined by the option with the most characters.
+
+        :return: A :class:`int` object.
+        :rtype: int
+        """
         return max(len(opt.name) for opt in self.options)
 
     @property
     def lines(self) -> list[str]:
+        """A :class:`list` of :class:`str` objects used to display
+        the panel in the terminal.
+
+        :return: A :class:`list` object of :class:`str` objects.
+        :rtype: list
+        """
         lines = []
         fwidth = self.field_width
         align = '<'

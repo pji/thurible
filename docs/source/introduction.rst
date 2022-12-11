@@ -4,15 +4,15 @@
 Introduction
 ************
 
-The :mod:thurible package provides tools for creating user interfaces
-in terminal applications. It's built on top of the :mod:blessed package,
-but no interaction with the :mod:blessed package is required. The
+The :mod:`thurible` package provides tools for creating user interfaces
+in terminal applications. It's built on top of the :mod:`blessed` package,
+but no interaction with the :mod:`blessed` package is required. The
 intention is for all interactions with terminal to be abstracted into
 "panels" that are displayed to the user.
 
 A "thurible" is a metal vessel hanging from chains used to burn incense
 during religious ceremonies. It seemed a reasonable name for a package
-build on top of :mod:blessed. Plus, it's just a fun word.
+build on top of :mod:`blessed`. Plus, it's just a fun word.
 
 .. _using:
 
@@ -23,8 +23,8 @@ Using thurible
 to working with graphical user interfaces, you can think of them like
 windows. They are how the application puts data on the screen.
 
-While :mod:thurible has tools for handling displaying panels for you,
-you can display a panel yourself just by using :func:print. Let's
+While :mod:`thurible` has tools for handling displaying panels for you,
+you can display a panel yourself just by using :func:`print`. Let's
 say you just want to put the word "SPAM" in the middle of the terminal::
 
     from thurible import Splash
@@ -32,15 +32,15 @@ say you just want to put the word "SPAM" in the middle of the terminal::
     splash = Splash('spam')
     print(splash, end='', flush=True)
 
-Do you have to add the :attr:end and :attr:flush attributes to the
-:func:print? Yes. Or, at least, it works better if you do. Without
-:attr:end, :func:print will add a new line after it prints the panel,
+Do you have to add the :attr:`end` and :attr:`flush` attributes to the
+:func:`print`? Yes. Or, at least, it works better if you do. Without
+:attr:`end`, :func:`print` will add a new line after it prints the panel,
 which will cause the top of the panel to scroll up off the top of the
-terminal window. Without :attr:flush, :func:print may delay printing
+terminal window. Without :attr:`flush`, :func:`print` may delay printing
 the panel until there is more text to display in the terminal, causing
 your panel to be displayed after it is relevant to the user.
 
-Using :func:print to display the panel only shows the panel in the
+Using :func:`print` to display the panel only shows the panel in the
 terminal. It won't all users to interact with the panel by, for example
 scrolling through its text or selecting a menu option. While it's
 possible to create your own code for handling that, the easiest way to
