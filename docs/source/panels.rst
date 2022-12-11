@@ -245,6 +245,8 @@ see :ref:`active`.
     *   KEY_PGUP: Scroll one page up in the content.
     *   KEY_UP: Scroll one line up in the content.
 
+    For more information on active keys, see :ref:`active`.
+
     :return: None.
     :rtype: NoneType
 
@@ -323,7 +325,7 @@ use cases.
         :return: A :class:`str` object.
         :rtype: str
 
-.. class:: thurible.Log(content=None, maxlen=50)
+.. class:: thurible.Log(content=None, maxlen=50, *args, **kwargs)
 
     Create a new :class:`thurible.Log` object. This class displays
     messages from the application in "last in first out" (LIFO)
@@ -411,6 +413,149 @@ use cases.
         
         :return: A :class:`list` object of :class:`str` objects.
         :rtype: list
+
+.. class:: thurible.Splash(content='', *args, **kwargs)
+
+    Create a new :class:`thurible.Splash` object. This class creates a
+    splash screen that can be displayed in the terminal. As a subclass
+    of :class:`thurible.panel.Content` and
+    :class:`thurible.panel.Title`, it can also take those parameters
+    and has those public methods and properties.
+    
+    :param content: (Optional.) The text to display within the
+        interior of the panel.
+    :return: None.
+    :rtype: NoneType
+    
+    .. property:: lines
+    
+        The lines of text available to be displayed in the panel
+        after they have been wrapped to fit the width of the
+        interior of the panel.
+        
+        :return: A :class:`list` object containing each line of
+            text as a :class:`str`.
+        :rtype: list
+
+.. class:: thurible.Table(records, inner_frame=False, \
+    content_align_h='left', content_align_v='top', *args, **kwargs)
+    
+    Create a new :class:`thurible.Table` object. This class displays
+    a table of data to the user. As a subclass of
+    :class:`thurible.panel.Scroll` and :class:`thurible.panel.Title`,
+    it can also take those parameters and has those public methods,
+    properties, and active keys.
+    
+    :param records: A sequence of dataclasses that will be displayed
+        within the panel. The data held by the dataclass can be of
+        any type, but it must be able to be coerced into a :class:str.
+        The dataclasses in the sequence must all be the same type.
+    :param inner_frame: (Optional.) Whether there should be a visible
+        frame around each cell in the panel.
+    :param content_align_h: (Optional.) The horizontal alignment
+        of the contents of the panel. It defaults to "left".
+    :param content_align_v: (Optional.) The vertical alignment
+        of the contents of the panel. It defaults to "top".
+    :return: None.
+    :rtype: NoneType
+    
+    .. property:: field_names
+    
+        The names of each field of data contained within the records
+        being displayed.
+        
+        :return: A :class:`list` object containing each name as
+            a :class:`str` object.
+        :rtype: list
+        
+    .. property:: field_widths
+    
+        The width in characters of each field in the table, as
+        determined by the longest value for this field found in
+        the dataclasses.
+        
+        :return: A :class:`list` object containing each width as an
+            :class:`int`.
+        :rtype: list
+        
+    .. property:: lines
+    
+        The lines of text available to be displayed in the panel
+        after they have been wrapped to fit the width of the
+        interior of the panel.
+        
+        :return: A :class:`list` object containing each line of
+            text as a :class:`str`.
+        :rtype: list
+
+.. class:: thurible.Text(content='', content_align_h='left', \
+    content_align_v='top', *args, **kwargs)
+
+    Create a new :class:`thurible.Text` object. This class displays
+    text to the document and allows the user to scroll through that
+    text if it is too long to fit in the terminal window. As a subclass
+    of :class:`thurible.panel.Scroll` and :class:`thurible.panel.Title`,
+    it can also take those parameters and has those public methods,
+    properties, and active keys.
+    
+    :param content: (Optional.) The text to display in the interior
+        of the panel.
+    :param content_align_h: (Optional.) The horizontal alignment
+        of the contents of the panel. It defaults to "left".
+    :param content_align_v: (Optional.) The vertical alignment
+        of the contents of the panel. It defaults to "top".
+    :return: None.
+    :rtype: NoneType
+    
+    .. property:: lines
+    
+        The lines of text available to be displayed in the panel
+        after they have been wrapped to fit the width of the
+        interior of the panel.
+        
+        :return: A :class:`list` object containing each line of
+            text as a :class:`str`.
+        :rtype: list
+
+.. class:: thurible.TextDialog(message_text, *args, **kwargs)
+
+    Create a new :class:`thurible.TextDialog` object. This class
+    displays a message to the user and allows them to input a string,
+    which is send to the application. As a subclass of
+    :class:`thurible.panel.Content` and :class:`thurible.panel.Title`,
+    it can also take those parameters and has those public methods,
+    properties, and active keys.
+    
+    This class defines the following active keys:
+    
+    *   KEY_BACKSPACE: Delete the previous character.
+    *   KEY_DELETE: Delete the next character.
+    *   KEY_END: Move the cursor to after the last character.
+    *   KEY_HOME: Move the cursor to the first character.
+    *   KEY_ENTER: Finish text entry and send input to the application.
+    *   KEY_LEFT: Move the cursor to the next character.
+    *   KEY_RIGHT: Move the cursor to the previous character.
+
+    While not registered as active keys, all other key presses that
+    do not result in key sequences as defined by :mod:`blessed` or
+    control characters as defined by the Unicode specification are
+    intercepted by the panel. The :class:`str` value of that key
+    press is inserted into the text field at the position of the
+    cursor.
+    
+    For more information on active keys, see :ref:`active`.
+
+    :param message_text: The text of the prompt to be displayed to
+        the user.
+    :return: None.
+    :rtype: NoneType
+    
+    .. property:: message
+
+        The message as a string that could be used to update the terminal.
+    
+        :return: A :class:`str` object.
+        :rtype: str
 
 .. _sizing:
 

@@ -34,6 +34,24 @@ class Table(Scroll, Title):
         content_align_v: str = 'top',
         *args, **kwargs
     ) -> None:
+        """Create a new :class:`thurible.Table` object. This class displays
+        a table of data to the user. As a subclass of
+        :class:`thurible.panel.Scroll` and :class:`thurible.panel.Title`,
+        it can also take those parameters and has those public methods,
+        properties, and active keys.
+
+        :param records: A sequence of dataclasses that will be displayed
+            within the panel. The data held by the dataclass can be of
+            any type, but it must be able to be coerced into a :class:str.
+        :param inner_frame: (Optional.) Whether there should be a visible
+            frame around each cell in the panel.
+        :param content_align_h: (Optional.) The horizontal alignment
+            of the contents of the panel. It defaults to "left".
+        :param content_align_v: (Optional.) The vertical alignment
+            of the contents of the panel. It defaults to "top".
+        :return: None.
+        :rtype: NoneType
+        """
         self.records = records
         self.inner_frame = inner_frame
         kwargs['content_align_h'] = content_align_h
@@ -79,12 +97,27 @@ class Table(Scroll, Title):
     # Properties.
     @property
     def field_names(self) -> list[str]:
+        """The names of each field of data contained within the records
+        being displayed.
+
+        :return: A :class:`list` object containing each name as
+            a :class:`str` object.
+        :rtype: list
+        """
         if '_field_names' not in self.__dict__:
             self._field_names = [f.name for f in fields(self.records[0])]
         return self._field_names
 
     @property
     def field_widths(self) -> list[int]:
+        """The width in characters of each field in the table, as
+        determined by the longest value for this field found in
+        the dataclasses.
+
+        :return: A :class:`list` object containing each width as an
+        :class:`int`.
+        :rtype: list
+        """
         if '_field_widths' not in self.__dict__:
             fnames = self.field_names
             fwidths = self._calc_field_widths(self.records, fnames)
@@ -95,6 +128,14 @@ class Table(Scroll, Title):
 
     @property
     def lines(self) -> list[str]:
+        """The lines of text available to be displayed in the panel
+        after they have been wrapped to fit the width of the
+        interior of the panel.
+
+        :return: A :class:`list` object containing each line of
+            text as a :class:`str`.
+        :rtype: list
+        """
         lines = []
 
         align = '<'

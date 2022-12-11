@@ -17,6 +17,17 @@ class Splash(Content, Title):
         content: str = '',
         *args, **kwargs
     ) -> None:
+        """Create a new :class:`thurible.Splash` object. This class
+        creates a splash screen that can be displayed in the terminal.
+        As a subclass of :class:`thurible.panel.Content` and
+        :class:`thurible.panel.Title`, it can also take those parameters
+        and has those public methods and properties.
+
+        :param content: (Optional.) The text to display within the
+            interior of the panel.
+        :return: None.
+        :rtype: NoneType
+        """
         self.content = content
         super().__init__(*args, **kwargs)
 
@@ -42,7 +53,12 @@ class Splash(Content, Title):
     # Properties.
     @property
     def lines(self) -> list[str]:
-        """Returns the content of the panel as a list of strings, where
-        each string represents a row in the panel.
+        """The lines of text available to be displayed in the panel
+        after they have been wrapped to fit the width of the
+        interior of the panel.
+
+        :return: A :class:`list` object containing each line of
+            text as a :class:`str`.
+        :rtype: list
         """
         return self.content.split('\n')
