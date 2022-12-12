@@ -11,7 +11,8 @@ Welcome to the :mod:`thurible` documentation!
    :caption: Contents:
 
    /panels.rst
-   /requirements.rst
+   /managers.rst
+   /messages.rst
 
 
 Introduction to :mod:`thurible`
@@ -23,7 +24,7 @@ but no interaction with the :mod:`blessed` package is required. The
 intention is for all interactions with terminal to be abstracted into
 "panels" that are displayed to the user.
 
-A "thurible" is a metal vessel hanging from chains used to burn incense
+A :dfn:`thurible` is a metal vessel hanging from chains used to burn incense
 during religious ceremonies. It seemed a reasonable name for a package
 build on top of :mod:`blessed`. Plus, it's just a fun word.
 
@@ -59,7 +60,7 @@ scrolling through its text or selecting a menu option. While it's
 possible to create your own code for handling that, the easiest way to
 do it is to use a manager.
 
-.. _managers:
+.. _advanced:
 
 Managers and Messages
 =====================

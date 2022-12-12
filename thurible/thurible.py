@@ -27,6 +27,10 @@ def queued_manager(
     """Manager for running the terminal display in a separate thread
     or process.
 
+    Manage a terminal display by sending and receiving
+    :class:`thurible.messages.Message` objects through
+    :class:`queue.Queue` objects.
+
     :param q_to: A queue for messages the program sends to the manager.
     :param q_from: A queue for messages the manager sends to the program.
     :param term: An instance of `blessed.Terminal` used to interact with

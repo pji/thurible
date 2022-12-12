@@ -41,7 +41,8 @@
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="panels.html">Panels</a></li>
-<li class="toctree-l1"><a class="reference internal" href="requirements.html">thurible Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="managers.html">Managers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="messages.html">Messages</a></li>
 </ul>
 
         </div>
@@ -80,11 +81,15 @@
 <li class="toctree-l2"><a class="reference internal" href="panels.html#active-keys">Active Keys</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="requirements.html">thurible Requirements</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="requirements.html#purpose">Purpose</a></li>
-<li class="toctree-l2"><a class="reference internal" href="requirements.html#functional-requirements">Functional Requirements</a></li>
-<li class="toctree-l2"><a class="reference internal" href="requirements.html#technical-requirements">Technical Requirements</a></li>
-<li class="toctree-l2"><a class="reference internal" href="requirements.html#design-discussion">Design Discussion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="managers.html">Managers</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="managers.html#thurible.queued_manager"><code class="docutils literal notranslate"><span class="pre">thurible.queued_manager()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="managers.html#the-manager-loop">The Manager Loop</a></li>
+<li class="toctree-l2"><a class="reference internal" href="managers.html#storing-panels">Storing Panels</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="messages.html">Messages</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="messages.html#command-messages">Command Messages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="messages.html#response-messages">Response Messages</a></li>
 </ul>
 </li>
 </ul>
@@ -97,7 +102,7 @@ in terminal applications. It’s built on top of the <code class="xref py py-mod
 but no interaction with the <code class="xref py py-mod docutils literal notranslate"><span class="pre">blessed</span></code> package is required. The
 intention is for all interactions with terminal to be abstracted into
 “panels” that are displayed to the user.</p>
-<p>A “thurible” is a metal vessel hanging from chains used to burn incense
+<p>A <em class="dfn">thurible</em> is a metal vessel hanging from chains used to burn incense
 during religious ceremonies. It seemed a reasonable name for a package
 build on top of <code class="xref py py-mod docutils literal notranslate"><span class="pre">blessed</span></code>. Plus, it’s just a fun word.</p>
 </section>
@@ -129,7 +134,7 @@ possible to create your own code for handling that, the easiest way to
 do it is to use a manager.</p>
 </section>
 <section id="managers-and-messages">
-<span id="managers"></span><h1>Managers and Messages<a class="headerlink" href="#managers-and-messages" title="Permalink to this heading"></a></h1>
+<span id="advanced"></span><h1>Managers and Messages<a class="headerlink" href="#managers-and-messages" title="Permalink to this heading"></a></h1>
 <p><em class="dfn">Managers</em> manage displaying panels and retrieving user input, so
 you don’t have to worry about it. Your code just needs to tell the
 manager what you want to display and watch for messages back from the

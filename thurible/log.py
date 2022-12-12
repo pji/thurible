@@ -15,7 +15,15 @@ from thurible.panel import Content, Message, Title
 # Available update message.
 @dataclass
 class Update(Message):
-    """Add a new line to the log."""
+    """Create a new :class:`thurible.log.Update` object. This
+    object is a command message used to instruct the currently
+    displayed :class:`thurible.Log` to add the text given in the
+    message.
+
+    :param text: The message to add to the panel.
+    :return: None.
+    :rtype: NoneType
+    """
     text: str
 
 

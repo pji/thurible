@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Managers &mdash; Thurible 0.0.1 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Messages" href="messages.html" />
+    <link rel="prev" title="Panels" href="panels.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> Thurible
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="panels.html">Panels</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Managers</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#thurible.queued_manager"><code class="docutils literal notranslate"><span class="pre">thurible.queued_manager()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#the-manager-loop">The Manager Loop</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#storing-panels">Storing Panels</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="messages.html">Messages</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Thurible</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a></li>
+      <li class="breadcrumb-item active">Managers</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/managers.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="managers">
+<span id="id1"></span><h1>Managers<a class="headerlink" href="#managers" title="Permalink to this heading"></a></h1>
+<p><em class="dfn">Managers</em> manage displaying panels and retrieving user input, so
+you don’t have to worry about it. Your code just needs to tell the
+manager what you want to display and watch for messages back from the
+manager containing input from the user.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="thurible.queued_manager">
+<span class="sig-prename descclassname"><span class="pre">thurible.</span></span><span class="sig-name descname"><span class="pre">queued_manager</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q_to</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q_from</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">term</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displays</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#thurible.queued_manager" title="Permalink to this definition"></a></dt>
+<dd><p>Manage a terminal display by sending and receiving
+<code class="xref py py-class docutils literal notranslate"><span class="pre">thurible.messages.Message</span></code> objects through
+<code class="xref py py-class docutils literal notranslate"><span class="pre">queue.Queue</span></code> objects.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p><a class="reference internal" href="#thurible.queued_manager" title="thurible.queued_manager"><code class="xref py py-func docutils literal notranslate"><span class="pre">thurible.queued_manager()</span></code></a> is intended to be run in
+its own thread or process. If you try to run it synchronously
+with the rest of your application, the loop will prevent your
+application from completing execution. This is why it is a
+“queued” manager.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>q_to</strong> – A queue for messages the program sends to the manager.</p></li>
+<li><p><strong>q_from</strong> – A queue for messages the manager sends to the program.</p></li>
+<li><p><strong>term</strong> – An instance of <cite>blessed.Terminal</cite> used to interact with
+the terminal.</p></li>
+<li><p><strong>displays</strong> – (Optional.) Storage for the panels the program may
+want the manager to display.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>None.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>NoneType</p>
+</dd>
+</dl>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">queue</span> <span class="kn">import</span> <span class="n">Queue</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">threading</span> <span class="kn">import</span> <span class="n">Thread</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">thurible</span> <span class="kn">import</span> <span class="n">get_terminal</span><span class="p">,</span> <span class="n">queued_manager</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">thurible.messages</span> <span class="kn">import</span> <span class="n">End</span>
+<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Create a queue to send messages to the manager.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">q_in</span> <span class="o">=</span> <span class="n">Queue</span><span class="p">()</span>
+<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Create a queue to receive messages from the manager.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">q_out</span> <span class="o">=</span> <span class="n">Queue</span><span class="p">()</span>
+<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Get a terminal instance for the manager to use.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">term</span> <span class="o">=</span> <span class="n">get_terminal</span><span class="p">()</span>
+<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Run the manager in a separate thread.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">T</span> <span class="o">=</span> <span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">queued_manager</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">q_in</span><span class="p">,</span> <span class="n">q_out</span><span class="p">,</span> <span class="n">term</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">T</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># End the thread running the queued_manager.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">msg</span> <span class="o">=</span> <span class="n">End</span><span class="p">(</span><span class="s1">&#39;Ending.&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">q_in</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<section id="the-manager-loop">
+<span id="manager-loop"></span><h2>The Manager Loop<a class="headerlink" href="#the-manager-loop" title="Permalink to this heading"></a></h2>
+<p>Once started, a manager loops through a standard set of actions until
+it is told to close or crashes. Those actions are:</p>
+<ol class="arabic simple">
+<li><p>Check for a message from the application.</p>
+<ol class="arabic simple">
+<li><p>If there was a comand message, perform the commanded action.</p></li>
+<li><p>If the commanded action should return a response to the
+application, send that response.</p></li>
+<li><p>If there is no action for the command message received, send
+that message to the <code class="xref py py-meth docutils literal notranslate"><span class="pre">Panel.update()</span></code> of the currently
+displayed panel.</p></li>
+</ol>
+</li>
+<li><p>Check for a key press from the user.</p>
+<ol class="arabic simple">
+<li><p>If there was a key press, send the
+<code class="xref py py-class docutils literal notranslate"><span class="pre">blessed.keyboard.Keystroke</span></code> object to the
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">Panel.action()</span></code> of the currently displayed panel.</p></li>
+<li><p>If the <code class="xref py py-meth docutils literal notranslate"><span class="pre">Panel.action()</span></code> returns data, send that data
+to the application in a <a class="reference internal" href="messages.html#thurible.messages.Data" title="thurible.messages.Data"><code class="xref py py-class docutils literal notranslate"><span class="pre">thurible.messages.Data</span></code></a>
+message.</p></li>
+<li><p>If the <code class="xref py py-meth docutils literal notranslate"><span class="pre">Panel.action()</span></code> returns an update, print
+that update to the terminal.</p></li>
+</ol>
+</li>
+</ol>
+<p>The loop will end under the following conditions:</p>
+<ul class="simple">
+<li><p>The application sends a <a class="reference internal" href="messages.html#thurible.messages.End" title="thurible.messages.End"><code class="xref py py-class docutils literal notranslate"><span class="pre">thurible.messages.End</span></code></a> message,</p></li>
+<li><p>The manager encounters a known exception it cannot recover from.</p></li>
+<li><p>The manager encounters an unknown exception.</p></li>
+</ul>
+<p>When possible, the manager will send a <a class="reference internal" href="messages.html#thurible.messages.Ending" title="thurible.messages.Ending"><code class="xref py py-class docutils literal notranslate"><span class="pre">thurible.messages.Ending</span></code></a>
+message to announce the end of the loop. If the loop is ending due to
+and exception, that exception is passed to the application within
+the <a class="reference internal" href="messages.html#thurible.messages.Ending" title="thurible.messages.Ending"><code class="xref py py-class docutils literal notranslate"><span class="pre">thurible.messages.Ending</span></code></a> message.</p>
+</section>
+<section id="storing-panels">
+<span id="id2"></span><h2>Storing Panels<a class="headerlink" href="#storing-panels" title="Permalink to this heading"></a></h2>
+<p>To allow your application to pre-load panels and easily switch back
+and forth between panels without having to recreate them, the
+manager stores all panels sent to it with the
+<a class="reference internal" href="messages.html#thurible.messages.Store" title="thurible.messages.Store"><code class="xref py py-class docutils literal notranslate"><span class="pre">thurible.messages.Store</span></code></a> message or created with the
+<a class="reference internal" href="messages.html#thurible.messages.Alert" title="thurible.messages.Alert"><code class="xref py py-class docutils literal notranslate"><span class="pre">thurible.messages.Alert</span></code></a> message. Those messages allow you
+to assign a name to the panel, which is then used by other messages,
+like <a class="reference internal" href="messages.html#thurible.messages.Show" title="thurible.messages.Show"><code class="xref py py-class docutils literal notranslate"><span class="pre">thurible.messages.Show</span></code></a>, to interact with the stored
+panels.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Managers store panels in a <code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code> object, using the
+name given to the panel as the key. This means that if you
+provide the same name for two panels, one panel will overwrite
+the other panel. For this reason, it is recommended all panels
+be given unique names.</p>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="panels.html" class="btn btn-neutral float-left" title="Panels" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="messages.html" class="btn btn-neutral float-right" title="Messages" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Paul J. Iutzi.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
