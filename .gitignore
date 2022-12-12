@@ -4,3 +4,7 @@
 
 # Ignore virtual environment.
 .venv
+
+# Build directories.
+dist
+thurible.egg-info

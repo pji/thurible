@@ -19,122 +19,84 @@ that do this better, but I prefer to keep my dependencies to a minimum.
 Plus, I like playing with terminal user interfaces. They're neat.
 
 
-How Do I Use It?
-================
-There are three key parts of `thurible` to understand:
+Using :mod:`thurible`
+=====================
+:dfn:`Panels` format and display data in a terminal. If you are used
+to working with graphical user interfaces, you can think of them like
+windows. They are how the application puts data on the screen.
 
-*   Panels: these create the UI seen in the terminal.
-*   Managers: these run the UI in a separate thread and return data to
-    your code.
-*   Messages: these are used to pass messages from your code to a
-    manager.
+While :mod:`thurible` has tools for handling displaying panels for you,
+you can display a panel yourself just by using :func:`print`. Let's
+say you just want to put the word "SPAM" in the middle of the terminal::
 
-
-Panels
-------
-:class:Panel objects do the following:
-
-*   Store data to be displayed in the terminal,
-*   Generate the text to display in the terminal,
-*   Respond to navigation input from the user.
-
-While you can create your own custom :class:Panel objects, there are several
-subclasses in `thurible` that may cover basic needs:
-
-Dialog
-    A prompt to choose between pre-defined options.
-Log
-    A rolling log.
-Menu
-    A menu of options a user can select from.
-Splash
-    A splash screen.
-Table
-    A simple table for viewing dataclasses.
-Text
-    A simple text display.
-TextDialog
-    A prompt to input text.
-
-If you use a manager with a pre-built :class:Panel, it will handle passing
-input to and getting output from the :class:Panel for you. If you aren't
-using a manager or are creating a custom :class:Panel, there are two core
-features of :class:Panel object to be aware of:
-
-*   Getting a string representation of a :class:Panel object, such as by
-    using the `str()` function, will return all of the content of the
-    :class:Panel complete with the terminal escape codes needed to redraw
-    the entire :class:Panel with a simple `print()` function.
-*   Passing keyboard input, as a :class:blessed.Keystroke object, into the
-    `action()` method of the :class:Panel will return a `tuple` of two
-    values:
+    from thurible import Splash
     
-    *   data: If the :class:Panel doesn't know what to do with the 
-        :class:Keystroke, the string value of the `Keystroke` will be
-        returned here.
-    *   update: If the :class:Panel needs to make changes to the terminal
-        due to the :class:Keystroke, these changes will be returned here as
-        a string that can be passed to a simple `print()` function.
+    splash = Splash('spam')
+    print(splash, end='', flush=True)
 
-.. note::
-    Despite the name, :class:Panel objects do not create curses-style panels
-    in the terminal. As far as I'm aware, the `blessed` package doesn't
-    offer the capability of creating those kinds of panels. However, the
-    idea is, eventually, for `thurible` to provide that type of
-    functionality on top of `blessed`.
+Do you have to add the :attr:`end` and :attr:`flush` attributes to the
+:func:`print`? Yes. Or, at least, it works better if you do. Without
+:attr:`end`, :func:`print` will add a new line after it prints the panel,
+which will cause the top of the panel to scroll up off the top of the
+terminal window. Without :attr:`flush`, :func:`print` may delay printing
+the panel until there is more text to display in the terminal, causing
+your panel to be displayed after it is relevant to the user.
 
-
-Managers
---------
-Manager functions do the following:
-
-*   Receive output from the program to display in the terminal.
-*   Make any needed updates to the terminal.
-*   Send input from the user to the program.
-
-There is currently only one pre-built manager function: `queued_manager`.
+Using :func:`print` to display the panel only shows the panel in the
+terminal. It won't all users to interact with the panel by, for example
+scrolling through its text or selecting a menu option. While it's
+possible to create your own code for handling that, the easiest way to
+do it is to use a manager.
 
 
-Messages
---------
-Communication to and from a manager is done with defined "messages."
-These messages are the dataclasses found in `thurible.thurible`.
+Managers and Messages
+=====================
+:dfn:`Managers` manage displaying panels and retrieving user input, so
+you don't have to worry about it. Your code just needs to tell the
+manager what you want to display and watch for messages back from the
+manager containing input from the user.
 
-Programs can send the following messages to a manager:
+:dfn:`Messages` are the objects you use to send instructions to the
+manager, and they are the objects the manager uses to send data back
+to you.
 
-`Alert(name, title, text, options)`
-    Tell the manager to display an alert dialog.
-`Dismiss`
-    Tell the manager to dismiss the alert dialog.
-`End(text)`
-    Tell the manager to terminate.
-`Ping(name)`
-    Tell the manager to respond with a `Pong` message.
-`Show(name)`
-    Tell the manager to switch to displaying the named :class:Panel.
-`Showing()`
-    Ask the manager for the name of the currently displayed :class:Panel.
-`Store(name, panel)`
-    Tell the manager to store the given :class:Panel as the given name for
-    future display.
+Let's expand on the previous example. You still want to put the word
+"SPAM" in the middle of the screen. But, now, you want to end the
+program after the user presses any key on their keyboard::
 
-Some panels can be updated while they are being shown to the user. Those
-panels have specific messages the program can send to the manager:
+    from threading import Thread
+    from thurible import get_queues, queued_manager, Splash
+    import thurible.messages as tm
 
-`log.Update(text)`
-    Tell the manager to add a new line to the `Log` panel.
+    # Set up and run the thread for the manager.
+    q_to, q_from = get_queues()
+    T = Thread(target=queued_manager, args=(q_to, q_from))
+    T.start()
 
-The manager can send the following message to the program:
+    # Create the panel.
+    footer = 'Press any key to continue.'
+    splash = Splash('spam', frame_type='heavy', footer=footer)
 
-`Data(value)`
-    Contains input received from the user.
-`Ending(reason, exception)`
-    Announces the manager is terminating.
-`Pong(name)`
-    Is the response to a :class:Ping message from the program.
-`Shown(name)`
-    Is the response to a :class:Showing message from the program, containing
-    the name of the currently displayed :class:Panel.
+    # Tell the manager to display the panel.
+    store = tm.Store('splash', splash)
+    show = tm.Show('splash')
+    q_to.put(store)
+    q_to.put(show)
+
+    # Watch for input indicating the user has pressed a key or if the
+    # manager is ending for some other reason, meaning you'll never get
+    # the key pressed by the user.
+    data = None
+    while not isinstance(data, [tm.Data, tm.Ending]):
+        if not q_from.empty():
+            data = q_from.get()
+    
+    # Once the user pressed a key, tell the manager to end gracefully.
+    # If the manager sent an Ending message, then you don't need to
+    # tell it to end. It's crashed on its own.
+    if isinstance(data, tm.Data):
+        end = tm.End('Goodbye!')
+        q_to.put(end)
 
 
 Usage Example
@@ -142,13 +104,13 @@ Usage Example
 Usage examples are found in the `examples/` directory.
 
 examples/favword.py
-    A terminal application that uses `thurible` to ask the user for
+    A terminal application that uses :mod:`thurible` to ask the user for
     their favorite word.
 examples/filereader.py
-    A terminal application that uses `thurible` to navigate the
+    A terminal application that uses :mod:`thurible` to navigate the
     filesystem and read files.
 examples/showsplash.py
-    A terminal application that uses `thurible` to display a simple
+    A terminal application that uses :mod:`thurible` to display a simple
     splash screen.
 
 If you want to run them to see what they do, you need to run them like
@@ -157,11 +119,11 @@ run the following::
 
     python3 -m examples.filereader
 
+
 To-Do List
 ==========
 The following items are still needed before initial release:
 
-*   Add documentation.
 *   Manager updates:
 
     *   Allow managers to catch sigkill and pass it on to the program.
