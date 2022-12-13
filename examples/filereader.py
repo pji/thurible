@@ -10,7 +10,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from queue import Queue
 from threading import Thread
-from typing import Optional, Sequence
+from typing import Optional, Sequence, Union
 
 import thurible as thb
 from thurible import messages as tm
@@ -82,7 +82,7 @@ def build_names_list(
     return [f'{prefix} {name}' for name in names]
 
 
-def create_binary_table(path: str | Path) -> thb.Table:
+def create_binary_table(path: Union[str, Path]) -> thb.Table:
     """Return a table with the hexdump of the given file.
 
     :param path: The path to the file to open.
@@ -118,7 +118,7 @@ def create_binary_table(path: str | Path) -> thb.Table:
 
 
 def create_dir_menu(
-    path: str | Path = '',
+    path: Union[str, Path] = '',
     show_hidden: bool = False
 ) -> FileReaderMenu:
     """Return a menu containing the contents of the given directory."""
@@ -152,7 +152,7 @@ def create_dir_menu(
 
 
 def create_options_from_paths(
-    paths: Sequence[str | Path],
+    paths: Sequence[Union[str, Path]],
     show_hidden: bool = False
 ) -> list[thb.Option]:
     """Return the file paths as a list of options.
@@ -185,7 +185,7 @@ def create_options_from_paths(
     return [thb.Option(name, '') for name in names]
 
 
-def create_text(path: str | Path) -> thb.Text:
+def create_text(path: Union[str, Path]) -> thb.Text:
     """Return a text reader with the contents of the given file.
 
     :param path: The file to read.
@@ -220,7 +220,7 @@ def create_text(path: str | Path) -> thb.Text:
     )
 
 
-def get_dir_list(path: str | Path) -> list[Path]:
+def get_dir_list(path: Union[str, Path]) -> list[Path]:
     """Return the contents of the directory at the given path."""
     # Ensure we are working with a pathlib.Path object since some tests
     # may still be sending strings.
@@ -355,14 +355,14 @@ def parse_invocation() -> None:
     main(args.path, show_hidden=args.show_hidden)
 
 
-def read_file_as_binary(path: str | Path) -> str:
+def read_file_as_binary(path: Union[str, Path]) -> str:
     """Return the contents of the given file as bytes."""
     with open(path, 'rb') as fh:
         text = fh.read()
     return text
 
 
-def read_file_as_text(path: str | Path, encoding: str = 'utf_8') -> str:
+def read_file_as_text(path: Union[str, Path], encoding: str = 'utf_8') -> str:
     """Return the contents of the given file as text."""
     with open(path, encoding=encoding) as fh:
         text = fh.read()

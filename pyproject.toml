@@ -14,7 +14,7 @@ authors = [
 ]
 description = "Tools for creating fullscreen terminal UIs on top of blessed."
 readme = "README.rst"
-requires-python = ">=3.10"
+requires-python = ">=3.9"
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",

@@ -4,6 +4,13 @@ __init__
 
 Initialization for the `thurible` package.
 """
+import sys as _sys
+
+# Subscripting of type is not supported before Python 3.9.
+if _sys.version_info[:2] < (3, 9):
+    msg = 'Thurible requires Python 3.9 or higher.'
+    raise ImportError(msg)
+
 from blessed import Terminal
 from blessed.keyboard import Keystroke
 
