@@ -25,3 +25,6 @@ classifiers = [
 "Homepage" = "https://thurible.readthedocs.io/en/latest/index.html#"
 "Documentation" = "https://thurible.readthedocs.io/en/latest/index.html#"
 "Source" = "https://github.com/pji/thurible"
+
+[project.scripts]
+filereader = "examples.filereader:parse_invocation"
