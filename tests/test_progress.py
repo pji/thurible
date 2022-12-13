@@ -25,6 +25,8 @@ class ProgressTestCase(tp.TerminalTestCase):
         exp = {
             'steps': 6,
             'progress': 2,
+            'bar_bg': 'red',
+            'bar_fg': 'blue',
             **tp.kwargs_content_opt_set,
             **tp.kwargs_title_opt_set,
             **tp.kwargs_frame_opt_set,
@@ -53,6 +55,8 @@ class ProgressTestCase(tp.TerminalTestCase):
         }
         exp_opt = {
             'progress': 0,
+            'bar_bg': '',
+            'bar_fg': '',
             **tp.kwargs_content_opt_default,
             **tp.kwargs_title_opt_default,
             **tp.kwargs_frame_opt_default,
@@ -87,6 +91,145 @@ class ProgressTestCase(tp.TerminalTestCase):
         # Test data and state.
         kwargs = {
             'steps': 6,
+            'height': 5,
+            'width': 6,
+        }
+        panel = progress.Progress(**kwargs)
+
+        # Run test.
+        act = str(panel)
+
+        # Determine test result.
+        self.assertEqual(exp, act)
+
+    def test___str__with_bar_bg(self):
+        """When converted to a string, a :class:`progress.Progress`
+        panel returns a string that will draw the entire progress bar.
+        If a background color is assigned to the bar, the unfilled
+        portion of that bar should be that color.
+        """
+        # Expected values.
+        exp = (
+            f'{term.move(0, 0)}      '
+            f'{term.move(1, 0)}      '
+            f'{term.move(2, 0)}      '
+            f'{term.move(3, 0)}      '
+            f'{term.move(4, 0)}      '
+            f'{term.move(2, 0)}'
+            f'{term.on_red}'
+            '      '
+            f'{term.normal}'
+        )
+
+        # Test data and state.
+        kwargs = {
+            'steps': 6,
+            'bar_bg': 'red',
+            'height': 5,
+            'width': 6,
+        }
+        panel = progress.Progress(**kwargs)
+
+        # Run test.
+        act = str(panel)
+
+        # Determine test result.
+        self.assertEqual(exp, act)
+
+    def test___str__with_bar_bg_and_bar_fg(self):
+        """When converted to a string, a :class:`progress.Progress`
+        panel returns a string that will draw the entire progress bar.
+        If a background color is assigned to the bar, the unfilled
+        portion of that bar should be that color.
+        """
+        # Expected values.
+        exp = (
+            f'{term.move(0, 0)}      '
+            f'{term.move(1, 0)}      '
+            f'{term.move(2, 0)}      '
+            f'{term.move(3, 0)}      '
+            f'{term.move(4, 0)}      '
+            f'{term.move(2, 0)}'
+            f'{term.blue_on_red}'
+            '      '
+            f'{term.normal}'
+        )
+
+        # Test data and state.
+        kwargs = {
+            'steps': 6,
+            'bar_bg': 'red',
+            'bar_fg': 'blue',
+            'height': 5,
+            'width': 6,
+        }
+        panel = progress.Progress(**kwargs)
+
+        # Run test.
+        act = str(panel)
+
+        # Determine test result.
+        self.assertEqual(exp, act)
+
+    def test___str__with_bar_fg(self):
+        """When converted to a string, a :class:`progress.Progress`
+        panel returns a string that will draw the entire progress bar.
+        If a foreground color is assigned to the bar, the filled
+        portion of that bar should be that color.
+        """
+        # Expected values.
+        exp = (
+            f'{term.move(0, 0)}      '
+            f'{term.move(1, 0)}      '
+            f'{term.move(2, 0)}      '
+            f'{term.move(3, 0)}      '
+            f'{term.move(4, 0)}      '
+            f'{term.move(2, 0)}'
+            f'{term.red}'
+            '      '
+            f'{term.normal}'
+        )
+
+        # Test data and state.
+        kwargs = {
+            'steps': 6,
+            'bar_fg': 'red',
+            'height': 5,
+            'width': 6,
+        }
+        panel = progress.Progress(**kwargs)
+
+        # Run test.
+        act = str(panel)
+
+        # Determine test result.
+        self.assertEqual(exp, act)
+
+    def test___str__with_bar_bg_and_progress(self):
+        """When converted to a string, a :class:`progress.Progress`
+        panel returns a string that will draw the entire progress bar.
+        If a background color is assigned to the bar, the unfilled
+        portion of that bar should be that color. If any progress has
+        been made, the progress bar is advanced that many steps.
+        """
+        # Expected values.
+        exp = (
+            f'{term.move(0, 0)}      '
+            f'{term.move(1, 0)}      '
+            f'{term.move(2, 0)}      '
+            f'{term.move(3, 0)}      '
+            f'{term.move(4, 0)}      '
+            f'{term.move(2, 0)}'
+            f'{term.on_red}'
+            '████  '
+            f'{term.normal}'
+        )
+
+        # Test data and state.
+        kwargs = {
+            'steps': 6,
+            'progress': 4,
+            'bar_bg': 'red',
             'height': 5,
             'width': 6,
         }
@@ -158,6 +301,94 @@ class ProgressTestCase(tp.TerminalTestCase):
 
         # Run test.
         act = str(panel)
+
+        # Determine test result.
+        self.assertEqual(exp, act)
+
+    def test___str__with_steps_greater_than_width_and_progress_full(self):
+        """When converted to a string, a :class:`progress.Progress`
+        panel returns a string that will draw the entire progress bar.
+        If any progress has been made, the progress bar is advanced
+        that many steps. If all the steps are complete, the bar should
+        be full.
+        """
+        # Expected values.
+        exp = (
+            f'{term.move(0, 0)}      '
+            f'{term.move(1, 0)}      '
+            f'{term.move(2, 0)}      '
+            f'{term.move(3, 0)}      '
+            f'{term.move(4, 0)}      '
+            f'{term.move(2, 0)}██████'
+        )
+
+        # Test data and state.
+        kwargs = {
+            'steps': 6 * 8,
+            'progress': 6 * 8,
+            'height': 5,
+            'width': 6,
+        }
+        panel = progress.Progress(**kwargs)
+
+        # Run test.
+        act = str(panel)
+
+        # Determine test result.
+        self.assertEqual(exp, act)
+
+    def test___str__with_steps_not_mult_of_eight_and_progress_full(self):
+        """When converted to a string, a :class:`progress.Progress`
+        panel returns a string that will draw the entire progress bar.
+        If any progress has been made, the progress bar is advanced
+        that many steps. If all the steps are complete, the bar should
+        be full. This should even be true when the number of steps is
+        not divisible by eight.
+        """
+        # Expected values.
+        exp = (
+            f'{term.move(0, 0)}      '
+            f'{term.move(1, 0)}      '
+            f'{term.move(2, 0)}      '
+            f'{term.move(3, 0)}      '
+            f'{term.move(4, 0)}      '
+            f'{term.move(2, 0)}██████'
+        )
+
+        # Test data and state.
+        kwargs = {
+            'steps': 6 * 8 - 3,
+            'progress': 6 * 8 - 3,
+            'height': 5,
+            'width': 6,
+        }
+        panel = progress.Progress(**kwargs)
+
+        # Run test.
+        act = str(panel)
+
+        # Determine test result.
+        self.assertEqual(exp, act)
+
+    def test_update(self):
+        """When passed a Tick message, Progress.update() should
+        return a string that will advance the progress bar.
+        """
+        # Expected value.
+        exp = term.move(2, 0) + '████  '
+
+        # Test data and state.
+        kwargs = {
+            'steps': 6,
+            'progress': 3,
+            'height': 5,
+            'width': 6,
+        }
+        panel = progress.Progress(**kwargs)
+        msg = progress.Tick()
+
+        # Run test.
+        act = panel.update(msg)
 
         # Determine test result.
         self.assertEqual(exp, act)

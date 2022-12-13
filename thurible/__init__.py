@@ -10,6 +10,7 @@ from blessed.keyboard import Keystroke
 from thurible.dialog import Dialog
 from thurible.log import Log
 from thurible.menu import Menu, Option
+from thurible.progress import Progress
 from thurible.splash import Splash
 from thurible.table import Table
 from thurible.text import Text

@@ -24,12 +24,16 @@ def queued_manager(
     term: Optional[Terminal] = None,
     displays: Optional[dict] = None
 ) -> None:
-    """Manager for running the terminal display in a separate thread
-    or process.
-
-    Manage a terminal display by sending and receiving
+    """Manage a terminal display by sending and receiving
     :class:`thurible.messages.Message` objects through
     :class:`queue.Queue` objects.
+
+    .. warning::
+        :func:`thurible.queued_manager` is intended to be run in
+        its own thread or process. If you try to run it synchronously
+        with the rest of your application, the loop will prevent your
+        application from completing execution. This is why it is a
+        "queued" manager.
 
     :param q_to: A queue for messages the program sends to the manager.
     :param q_from: A queue for messages the manager sends to the program.
@@ -63,7 +67,6 @@ def queued_manager(
         >>> # End the thread running the queued_manager.
         >>> msg = End('Ending.')
         >>> q_in.put(msg)
-
     """
     # Set up.
     if term is None:

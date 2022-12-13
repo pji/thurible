@@ -4,6 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [tool.rstcheck]
 report_level = "WARNING"
+ignore_directives = ["autoclass", "autofunction"]
 
 [project]
 name = "thurible"

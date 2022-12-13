@@ -29,7 +29,43 @@ class Option:
 
 # General classes.
 class Menu(Scroll, Title):
-    """A menu of options."""
+    """Create a new :class:`thurible.Menu` object. This class provides
+    a list of options the user can select. As a subclass of
+    :class:`thurible.panel.Scroll` and :class:`thurible.panel.Title`,
+    it can also take those parameters and has those public methods,
+    properties, and active keys.
+
+    :class:`thurible.Menu` adds the additional active key:
+
+    *   KEY_ENTER: Select the highlighted option.
+    *   Optional hot keys to highlight the options, as defined in the
+        :class:`thurible.Option` object for the option.
+
+    :class:`thurible.Menu` modifies the behavior of the following
+    active keys:
+
+    *   KEY_END: Highlight the last option, scrolling if needed.
+    *   KEY_DOWN: Highlight the next option, scrolling if needed.
+    *   KEY_HOME: Highlight the first option, scrolling if needed.
+    *   KEY_PGDOWN: Scroll to and highlight the option one screen down.
+    *   KEY_PGUP: Scroll to and highlight the option one screen up.
+    *   KEY_UP: Highlight the previous option, scrolling if needed.
+
+    For more information on active keys, see :ref:`active`.
+
+    :param options: A sequence of :class:`thurible.Option` objects
+        defining the options available to the user.
+    :param select_bg: (Optional.) The background color used to
+        highlight an option.
+    :param select_fg: (Optional.) The foreground color used to
+        highlight an option.
+    :param content_align_h: (Optional.) The horizontal alignment
+        of the contents of the panel. It defaults to "left".
+    :param content_align_v: (Optional.) The vertical alignment
+        of the contents of the panel. It defaults to "top".
+    :return: None.
+    :rtype: NoneType
+    """
     # Magic methods.
     def __init__(
         self,
@@ -40,43 +76,6 @@ class Menu(Scroll, Title):
         content_align_v: str = 'top',
         *args, **kwargs
     ) -> None:
-        """Create a new :class:`thurible.Menu` object. This class provides
-        a list of options the user can select. As a subclass of
-        :class:`thurible.panel.Scroll` and :class:`thurible.panel.Title`,
-        it can also take those parameters and has those public methods,
-        properties, and active keys.
-
-        :class:`thurible.Menu` adds the additional active key:
-
-        *   KEY_ENTER: Select the highlighted option.
-        *   Optional hot keys to highlight the options, as defined in the
-            :class:`thurible.Option` object for the option.
-
-        :class:`thurible.Menu` modifies the behavior of the following
-        active keys:
-
-        *   KEY_END: Highlight the last option, scrolling if needed.
-        *   KEY_DOWN: Highlight the next option, scrolling if needed.
-        *   KEY_HOME: Highlight the first option, scrolling if needed.
-        *   KEY_PGDOWN: Scroll to and highlight the option one screen down.
-        *   KEY_PGUP: Scroll to and highlight the option one screen up.
-        *   KEY_UP: Highlight the previous option, scrolling if needed.
-
-        For more information on active keys, see :ref:`active`.
-
-        :param options: A sequence of :class:`thurible.Option` objects
-            defining the options available to the user.
-        :param select_bg: (Optional.) The background color used to
-            highlight an option.
-        :param select_fg: (Optional.) The foreground color used to
-            highlight an option.
-        :param content_align_h: (Optional.) The horizontal alignment
-            of the contents of the panel. It defaults to "left".
-        :param content_align_v: (Optional.) The vertical alignment
-            of the contents of the panel. It defaults to "top".
-        :return: None.
-        :rtype: NoneType
-        """
         self.options = options
         self.select_bg = select_bg
         self.select_fg = select_fg

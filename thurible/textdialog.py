@@ -15,43 +15,42 @@ from thurible.panel import Content, Title
 
 # Class.
 class TextDialog(Content, Title):
-    """A text-entry dialog for terminal applications."""
+    """Create a new :class:`thurible.TextDialog` object. This class
+    displays a message to the user and allows them to input a string,
+    which is send to the application. As a subclass of
+    :class:`thurible.panel.Content` and :class:`thurible.panel.Title`,
+    it can also take those parameters and has those public methods,
+    properties, and active keys.
+
+    This class defines the following active keys:
+
+    *   KEY_BACKSPACE: Delete the previous character.
+    *   KEY_DELETE: Delete the next character.
+    *   KEY_END: Move the cursor to after the last character.
+    *   KEY_HOME: Move the cursor to the first character.
+    *   KEY_ENTER: Finish text entry and send input to the application.
+    *   KEY_LEFT: Move the cursor to the next character.
+    *   KEY_RIGHT: Move the cursor to the previous character.
+
+    While not registered as active keys, all other key presses that
+    do not result in key sequences as defined by :mod:`blessed` or
+    control characters as defined by the Unicode specification are
+    intercepted by the panel. The :class:`str` value of that key
+    press is inserted into the text field at the position of the
+    cursor.
+
+    For more information on active keys, see :ref:`active`.
+
+    :param message_text: The text of the prompt to be displayed to
+        the user.
+    :return: None.
+    :rtype: NoneType
+    """
     def __init__(
         self,
         message_text: str,
         *args, **kwargs
     ) -> None:
-        """Create a new :class:`thurible.TextDialog` object. This class
-        displays a message to the user and allows them to input a string,
-        which is send to the application. As a subclass of
-        :class:`thurible.panel.Content` and :class:`thurible.panel.Title`,
-        it can also take those parameters and has those public methods,
-        properties, and active keys.
-
-        This class defines the following active keys:
-
-        *   KEY_BACKSPACE: Delete the previous character.
-        *   KEY_DELETE: Delete the next character.
-        *   KEY_END: Move the cursor to after the last character.
-        *   KEY_HOME: Move the cursor to the first character.
-        *   KEY_ENTER: Finish text entry and send input to the application.
-        *   KEY_LEFT: Move the cursor to the next character.
-        *   KEY_RIGHT: Move the cursor to the previous character.
-
-        While not registered as active keys, all other key presses that
-        do not result in key sequences as defined by :mod:`blessed` or
-        control characters as defined by the Unicode specification are
-        intercepted by the panel. The :class:`str` value of that key
-        press is inserted into the text field at the position of the
-        cursor.
-
-        For more information on active keys, see :ref:`active`.
-
-        :param message_text: The text of the prompt to be displayed to
-            the user.
-        :return: None.
-        :rtype: NoneType
-        """
         super().__init__(*args, **kwargs)
         self.message_text = message_text
 

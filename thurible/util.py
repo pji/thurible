@@ -18,11 +18,10 @@ _term: Optional[Terminal] = None
 
 # Common classes.
 class Box:
-    """A class to track the characters used to draw a frame in a
-    terminal.
-
-    It has fifteen properties that return the character used for
-    that part of the box:
+    """Create a new :class:`thurible.util.Box` object. These objects
+    track the characters used to draw a frame in a terminal. It has
+    fifteen properties that return the character used for that part
+    of the box:
 
     * top: The top
     * bot: The bottom
@@ -38,6 +37,17 @@ class Box:
     * lbot: Bottom-left corner
     * mbot: Bottom mid-join
     * rbot: Bottom-right corner
+
+    :param kind: (Optional). Sets the set of characters used by the
+        :class:`thurible.util.Box` object. It defaults to light.
+        Available options include double, heavy, heavy_double_dash,
+        heavy_out_light_in, heavy_quadruple_dash, light,
+        light_double_dash, light_quadruple_dash, light_out_heavy_in,
+        light_triple_dash.
+    :param custom: (Optional). Provides a custom set of characters
+        for the :class:`thurible.util.Box` object to use.
+    :return: None.
+    :rtype: NoneType
     """
     def __init__(
         self,
@@ -103,26 +113,36 @@ class Box:
 
 # Common functions.
 def get_queues() -> tuple[Queue, Queue]:
+    """Create two :class:`queue.Queue` objects for use in communicating
+    with a :func:`thurible.queued_manager` manager. This is just here
+    for convenience, allowing you to use :func:`thurible.queued_manager`
+    without having to import :mod:`queue`. It doesn't store the queues.
+
+    :return: A :class:`tuple` objects, containing two
+        :class:`queue.Queue` objects.
+    :rtype: tuple
+    """
     q_to: Queue = Queue()
     q_from: Queue = Queue()
     return q_to, q_from
 
 
 def get_terminal() -> Terminal:
-    """Retrieve an instance of `blessed.Terminal` for use by `thurible`
-    objects. Every time this is called, it will return the same
-    instance, avoiding time wasting due to unnecessary `Terminal`
-    object initiation.
+    """Retrieve an instance of :class:`blessed.Terminal` for use by
+    :mod:`thurible` objects. Every time this is called, it will
+    return the same instance, avoiding time wasting due to unnecessary
+    :class:`Terminal` object initiation.
 
     .. note:
         Since we are using a mutable global value here, there may be
-        theoretical thread safety concerns. However `thurible` doesn't
-        ever change the `Terminal` object. The only mutability is
-        whether or not the `_term` is `None` or is a `Terminal` object.
-        So, I don't think thread safety will ever be a real issue for
-        this. However, it may be worth looking into whether there are
-        better ways to do this in the future. For all I know `Terminal`
-        may be a singleton, and this is entirely unnecessary.
+        theoretical thread safety concerns. However :mod:`thurible`
+        doesn't ever change the :class:`Terminal` object. The only
+        mutability is whether or not the :obj:`_term` is :obj:`None`
+        or is a :class:`Terminal` object. So, I don't think thread
+        safety will ever be a real issue for this. However, it may be
+        worth looking into whether there are better ways to do this in
+        the future. For all I know :class:`Terminal` may be a singleton,
+        and this is entirely unnecessary.
     """
     global _term
     if not isinstance(_term, Terminal):

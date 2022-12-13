@@ -10,24 +10,23 @@ from thurible.panel import Content, Title
 
 
 class Splash(Content, Title):
-    """A splash screen for terminal applications."""
+    """Create a new :class:`thurible.Splash` object. This class
+    creates a splash screen that can be displayed in the terminal.
+    As a subclass of :class:`thurible.panel.Content` and
+    :class:`thurible.panel.Title`, it can also take those parameters
+    and has those public methods and properties.
+
+    :param content: (Optional.) The text to display within the
+        interior of the panel.
+    :return: None.
+    :rtype: NoneType
+    """
     # Magic methods.
     def __init__(
         self,
         content: str = '',
         *args, **kwargs
     ) -> None:
-        """Create a new :class:`thurible.Splash` object. This class
-        creates a splash screen that can be displayed in the terminal.
-        As a subclass of :class:`thurible.panel.Content` and
-        :class:`thurible.panel.Title`, it can also take those parameters
-        and has those public methods and properties.
-
-        :param content: (Optional.) The text to display within the
-            interior of the panel.
-        :return: None.
-        :rtype: NoneType
-        """
         self.content = content
         super().__init__(*args, **kwargs)
 

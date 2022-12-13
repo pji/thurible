@@ -13,6 +13,7 @@ Welcome to the :mod:`thurible` documentation!
    /panels.rst
    /managers.rst
    /messages.rst
+   /utility.rst
 
 
 Introduction to :mod:`thurible`

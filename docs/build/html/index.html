@@ -43,6 +43,7 @@
 <li class="toctree-l1"><a class="reference internal" href="panels.html">Panels</a></li>
 <li class="toctree-l1"><a class="reference internal" href="managers.html">Managers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="messages.html">Messages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="utility.html">Utility</a></li>
 </ul>
 
         </div>
@@ -82,7 +83,7 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="managers.html">Managers</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="managers.html#thurible.queued_manager"><code class="docutils literal notranslate"><span class="pre">thurible.queued_manager()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="managers.html#thurible.queued_manager"><code class="docutils literal notranslate"><span class="pre">queued_manager()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="managers.html#the-manager-loop">The Manager Loop</a></li>
 <li class="toctree-l2"><a class="reference internal" href="managers.html#storing-panels">Storing Panels</a></li>
 </ul>
@@ -90,6 +91,12 @@
 <li class="toctree-l1"><a class="reference internal" href="messages.html">Messages</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="messages.html#command-messages">Command Messages</a></li>
 <li class="toctree-l2"><a class="reference internal" href="messages.html#response-messages">Response Messages</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="utility.html">Utility</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="utility.html#thurible.util.Box"><code class="docutils literal notranslate"><span class="pre">Box</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="utility.html#thurible.get_queues"><code class="docutils literal notranslate"><span class="pre">get_queues()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="utility.html#thurible.get_terminal"><code class="docutils literal notranslate"><span class="pre">get_terminal()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -112,7 +119,7 @@ build on top of <code class="xref py py-mod docutils literal notranslate"><span 
 to working with graphical user interfaces, you can think of them like
 windows. They are how the application puts data on the screen.</p>
 <p>While <code class="xref py py-mod docutils literal notranslate"><span class="pre">thurible</span></code> has tools for handling displaying panels for you,
-you can display a panel yourself just by using <code class="xref py py-func docutils literal notranslate"><span class="pre">print()</span></code>. Let’s
+you can display a panel yourself just by using <a class="reference external" href="https://docs.python.org/3/library/functions.html#print" title="(in Python v3.11)"><code class="xref py py-func docutils literal notranslate"><span class="pre">print()</span></code></a>. Let’s
 say you just want to put the word “SPAM” in the middle of the terminal:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">thurible</span> <span class="kn">import</span> <span class="n">Splash</span>
 
@@ -121,13 +128,13 @@ say you just want to put the word “SPAM” in the middle of the terminal:</p>
 </pre></div>
 </div>
 <p>Do you have to add the <code class="xref py py-attr docutils literal notranslate"><span class="pre">end</span></code> and <code class="xref py py-attr docutils literal notranslate"><span class="pre">flush</span></code> attributes to the
-<code class="xref py py-func docutils literal notranslate"><span class="pre">print()</span></code>? Yes. Or, at least, it works better if you do. Without
-<code class="xref py py-attr docutils literal notranslate"><span class="pre">end</span></code>, <code class="xref py py-func docutils literal notranslate"><span class="pre">print()</span></code> will add a new line after it prints the panel,
+<a class="reference external" href="https://docs.python.org/3/library/functions.html#print" title="(in Python v3.11)"><code class="xref py py-func docutils literal notranslate"><span class="pre">print()</span></code></a>? Yes. Or, at least, it works better if you do. Without
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">end</span></code>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#print" title="(in Python v3.11)"><code class="xref py py-func docutils literal notranslate"><span class="pre">print()</span></code></a> will add a new line after it prints the panel,
 which will cause the top of the panel to scroll up off the top of the
-terminal window. Without <code class="xref py py-attr docutils literal notranslate"><span class="pre">flush</span></code>, <code class="xref py py-func docutils literal notranslate"><span class="pre">print()</span></code> may delay printing
+terminal window. Without <code class="xref py py-attr docutils literal notranslate"><span class="pre">flush</span></code>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#print" title="(in Python v3.11)"><code class="xref py py-func docutils literal notranslate"><span class="pre">print()</span></code></a> may delay printing
 the panel until there is more text to display in the terminal, causing
 your panel to be displayed after it is relevant to the user.</p>
-<p>Using <code class="xref py py-func docutils literal notranslate"><span class="pre">print()</span></code> to display the panel only shows the panel in the
+<p>Using <a class="reference external" href="https://docs.python.org/3/library/functions.html#print" title="(in Python v3.11)"><code class="xref py py-func docutils literal notranslate"><span class="pre">print()</span></code></a> to display the panel only shows the panel in the
 terminal. It won’t all users to interact with the panel by, for example
 scrolling through its text or selecting a menu option. While it’s
 possible to create your own code for handling that, the easiest way to

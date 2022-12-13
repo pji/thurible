@@ -22,26 +22,25 @@ yes_no = (
 
 # Classes.
 class Dialog(Content, Title):
-    """A simple dialog for terminal applications."""
+    """Create a new :class:`thurible.Dialog` object. This class displays
+    a message to the user and offers pre-defined options for the
+    user to chose from. As a subclass of :class:`thurible.panel.Content`
+    and :class:`thurible.panel.Title`, it can also take those parameters
+    and has those public methods and properties.
+
+    :param message_text: The text of the prompt to be displayed to
+        the user.
+    :param options: The options the user can chose from. This is a
+        sequence of :class:`thurible.Option` objects.
+    :return: None.
+    :rtype: NoneType.
+    """
     def __init__(
         self,
         message_text: str,
         options: Sequence[Option] = yes_no,
         *args, **kwargs
     ) -> None:
-        """Create a new :class:thurible.Dialog object. This class displays
-        a message to the user and offers pre-defined options for the
-        user to chose from. As a subclass of :class:thurible.panel.Content
-        and :class:thurible.panel.Title, it can also take those parameters
-        and has those public methods and properties.
-
-        :param message_text: The text of the prompt to be displayed to
-            the user.
-        :param options: The options the user can chose from. This is a
-            sequence of :class:thurible.Option objects.
-        :return: None.
-        :rtype: NoneType.
-        """
         super().__init__(*args, **kwargs)
         self.message_text = message_text
         self.options = options
@@ -84,7 +83,7 @@ class Dialog(Content, Title):
         """
         The message as a string that could be used to update the terminal.
 
-        :return: A :class:str object.
+        :return: A :class:`str` object.
         :rtype: str
         """
         wrapped = self.term.wrap(self.message_text, width=self.inner_width)
@@ -100,9 +99,9 @@ class Dialog(Content, Title):
     def action(self, key: Keystroke) -> tuple[str, str]:
         """Act on a keystroke typed by the user.
 
-        :param key: A :class:blessed.keyboard.Keystroke object representing
+        :param key: A :class:`blessed.keyboard.Keystroke` object representing
             the key pressed by the user.
-        :return: A :class:tuple object containing two :class:str objects.
+        :return: A :class:`tuple` object containing two :class:`str` objects.
             The first string is any data that needs to be sent to the
             application. The second string contains any updates needed
             to be made to the terminal display.

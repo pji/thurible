@@ -109,6 +109,9 @@ examples/favword.py
 examples/filereader.py
     A terminal application that uses :mod:`thurible` to navigate the
     filesystem and read files.
+examples/tensecs.py
+    A terminal application that uses :mod:`thurible` to track a ten
+    second wait using a progress bar.
 examples/showsplash.py
     A terminal application that uses :mod:`thurible` to display a simple
     splash screen.

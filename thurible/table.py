@@ -25,7 +25,24 @@ class Dataclass(Protocol):
 
 # Classes.
 class Table(Scroll, Title):
-    """Display a table of data."""
+    """Create a new :class:`thurible.Table` object. This class displays
+    a table of data to the user. As a subclass of
+    :class:`thurible.panel.Scroll` and :class:`thurible.panel.Title`,
+    it can also take those parameters and has those public methods,
+    properties, and active keys.
+
+    :param records: A sequence of dataclasses that will be displayed
+        within the panel. The data held by the dataclass can be of
+        any type, but it must be able to be coerced into a :class:str.
+    :param inner_frame: (Optional.) Whether there should be a visible
+        frame around each cell in the panel.
+    :param content_align_h: (Optional.) The horizontal alignment
+        of the contents of the panel. It defaults to "left".
+    :param content_align_v: (Optional.) The vertical alignment
+        of the contents of the panel. It defaults to "top".
+    :return: None.
+    :rtype: NoneType
+    """
     def __init__(
         self,
         records: Sequence[Dataclass],
@@ -34,24 +51,6 @@ class Table(Scroll, Title):
         content_align_v: str = 'top',
         *args, **kwargs
     ) -> None:
-        """Create a new :class:`thurible.Table` object. This class displays
-        a table of data to the user. As a subclass of
-        :class:`thurible.panel.Scroll` and :class:`thurible.panel.Title`,
-        it can also take those parameters and has those public methods,
-        properties, and active keys.
-
-        :param records: A sequence of dataclasses that will be displayed
-            within the panel. The data held by the dataclass can be of
-            any type, but it must be able to be coerced into a :class:str.
-        :param inner_frame: (Optional.) Whether there should be a visible
-            frame around each cell in the panel.
-        :param content_align_h: (Optional.) The horizontal alignment
-            of the contents of the panel. It defaults to "left".
-        :param content_align_v: (Optional.) The vertical alignment
-            of the contents of the panel. It defaults to "top".
-        :return: None.
-        :rtype: NoneType
-        """
         self.records = records
         self.inner_frame = inner_frame
         kwargs['content_align_h'] = content_align_h

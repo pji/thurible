@@ -9,51 +9,7 @@ you don't have to worry about it. Your code just needs to tell the
 manager what you want to display and watch for messages back from the
 manager containing input from the user.
 
-.. function:: thurible.queued_manager(q_to, q_from, term=None, displays=None)
-
-    Manage a terminal display by sending and receiving
-    :class:`thurible.messages.Message` objects through
-    :class:`queue.Queue` objects.
-    
-    .. warning::
-        :func:`thurible.queued_manager` is intended to be run in
-        its own thread or process. If you try to run it synchronously
-        with the rest of your application, the loop will prevent your
-        application from completing execution. This is why it is a
-        "queued" manager.
-    
-    :param q_to: A queue for messages the program sends to the manager.
-    :param q_from: A queue for messages the manager sends to the program.
-    :param term: An instance of `blessed.Terminal` used to interact with
-        the terminal.
-    :param displays: (Optional.) Storage for the panels the program may
-        want the manager to display.
-    :return: None.
-    :rtype: NoneType
-
-    Usage::
-
-        >>> from queue import Queue
-        >>> from threading import Thread
-        >>> from thurible import get_terminal, queued_manager
-        >>> from thurible.messages import End
-        >>>
-        >>> # Create a queue to send messages to the manager.
-        >>> q_in = Queue()
-        >>>
-        >>> # Create a queue to receive messages from the manager.
-        >>> q_out = Queue()
-        >>>
-        >>> # Get a terminal instance for the manager to use.
-        >>> term = get_terminal()
-        >>>
-        >>> # Run the manager in a separate thread.
-        >>> T = Thread(target=queued_manager, args=(q_in, q_out, term))
-        >>> T.start()
-        >>>
-        >>> # End the thread running the queued_manager.
-        >>> msg = End('Ending.')
-        >>> q_in.put(msg)
+.. autofunction:: thurible.queued_manager
 
 .. _manager-loop:
 
