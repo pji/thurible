@@ -93,8 +93,8 @@ class Log(Content, Title):
         interior of the panel. A message from the application may
         be split into multiple lines.
 
-        :return: A :class:list object containing each line of
-            text as a :class:str.
+        :return: A :class:`list` object containing each line of
+            text as a :class:`str`.
         :rtype: list
         """
         width = self.inner_width
