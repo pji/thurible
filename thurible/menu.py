@@ -55,12 +55,18 @@ class Menu(Scroll, Title):
 
     :param options: A sequence of :class:`thurible.Option` objects
         defining the options available to the user.
+    :param option_align_h: (Optional.) The horizontal alignment
+        of the options within the area that would be highlighted when
+        the option is highlighted. If you think of each option as a
+        button, it's how the text is aligned on the face of the button.
+        It defaults to "left".
     :param select_bg: (Optional.) The background color used to
         highlight an option.
     :param select_fg: (Optional.) The foreground color used to
         highlight an option.
     :param content_align_h: (Optional.) The horizontal alignment
-        of the contents of the panel. It defaults to "left".
+        of the contents of the panel. It defaults to "left". See
+        :class:`thurible.panel.Content` for more information.
     :param content_align_v: (Optional.) The vertical alignment
         of the contents of the panel. It defaults to "top".
     :return: None.
@@ -70,16 +76,22 @@ class Menu(Scroll, Title):
     def __init__(
         self,
         options: tuple[Option],
+        option_align_h: str = 'left',
         select_bg: str = '',
         select_fg: str = '',
-        content_align_h: str = 'left',
         content_align_v: str = 'top',
         *args, **kwargs
     ) -> None:
         self.options = options
+        self.option_align_h = option_align_h
         self.select_bg = select_bg
         self.select_fg = select_fg
-        kwargs['content_align_h'] = content_align_h
+        if (
+            'content_pad_left' not in kwargs
+            and 'conent_pad_right' not in kwargs
+            and 'content_align_h' not in kwargs
+        ):
+            kwargs['content_align_h'] = 'left'
         kwargs['content_align_v'] = content_align_v
         super().__init__(*args, **kwargs)
 
@@ -141,9 +153,9 @@ class Menu(Scroll, Title):
         lines = []
         fwidth = self.field_width
         align = '<'
-        if self.content_align_h == 'center':
+        if self.option_align_h == 'center':
             align = '^'
-        if self.content_align_h == 'right':
+        if self.option_align_h == 'right':
             align = '>'
 
         for option in self.options:
@@ -154,14 +166,6 @@ class Menu(Scroll, Title):
 
     # Public methods.
     def action(self, key: Keystroke) -> tuple[str, str]:
-        """React to input from the user.
-
-        :param key: A keystroke from the user.
-        :return: A :class:tuple that contains a :class:str containing
-            any data that needs to go back to the application and a
-            :class:str containing any updates to the terminal.
-        :rtype: tuple
-        """
         # These are the results that are returned.
         data = ''
         update = ''

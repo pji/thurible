@@ -126,12 +126,18 @@
 
 <span class="sd">    :param options: A sequence of :class:`thurible.Option` objects</span>
 <span class="sd">        defining the options available to the user.</span>
+<span class="sd">    :param option_align_h: (Optional.) The horizontal alignment</span>
+<span class="sd">        of the options within the area that would be highlighted when</span>
+<span class="sd">        the option is highlighted. If you think of each option as a</span>
+<span class="sd">        button, it&#39;s how the text is aligned on the face of the button.</span>
+<span class="sd">        It defaults to &quot;left&quot;.</span>
 <span class="sd">    :param select_bg: (Optional.) The background color used to</span>
 <span class="sd">        highlight an option.</span>
 <span class="sd">    :param select_fg: (Optional.) The foreground color used to</span>
 <span class="sd">        highlight an option.</span>
 <span class="sd">    :param content_align_h: (Optional.) The horizontal alignment</span>
-<span class="sd">        of the contents of the panel. It defaults to &quot;left&quot;.</span>
+<span class="sd">        of the contents of the panel. It defaults to &quot;left&quot;. See</span>
+<span class="sd">        :class:`thurible.panel.Content` for more information.</span>
 <span class="sd">    :param content_align_v: (Optional.) The vertical alignment</span>
 <span class="sd">        of the contents of the panel. It defaults to &quot;top&quot;.</span>
 <span class="sd">    :return: None.</span>
@@ -141,16 +147,22 @@
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">options</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Option</span><span class="p">],</span>
+        <span class="n">option_align_h</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;left&#39;</span><span class="p">,</span>
         <span class="n">select_bg</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
         <span class="n">select_fg</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
-        <span class="n">content_align_h</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;left&#39;</span><span class="p">,</span>
         <span class="n">content_align_v</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;top&#39;</span><span class="p">,</span>
         <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">options</span> <span class="o">=</span> <span class="n">options</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">option_align_h</span> <span class="o">=</span> <span class="n">option_align_h</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">select_bg</span> <span class="o">=</span> <span class="n">select_bg</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">select_fg</span> <span class="o">=</span> <span class="n">select_fg</span>
-        <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;content_align_h&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">content_align_h</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="s1">&#39;content_pad_left&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span>
+            <span class="ow">and</span> <span class="s1">&#39;conent_pad_right&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span>
+            <span class="ow">and</span> <span class="s1">&#39;content_align_h&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span>
+        <span class="p">):</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;content_align_h&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;left&#39;</span>
         <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;content_align_v&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">content_align_v</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
@@ -212,9 +224,9 @@
         <span class="n">lines</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">fwidth</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">field_width</span>
         <span class="n">align</span> <span class="o">=</span> <span class="s1">&#39;&lt;&#39;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">content_align_h</span> <span class="o">==</span> <span class="s1">&#39;center&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">option_align_h</span> <span class="o">==</span> <span class="s1">&#39;center&#39;</span><span class="p">:</span>
             <span class="n">align</span> <span class="o">=</span> <span class="s1">&#39;^&#39;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">content_align_h</span> <span class="o">==</span> <span class="s1">&#39;right&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">option_align_h</span> <span class="o">==</span> <span class="s1">&#39;right&#39;</span><span class="p">:</span>
             <span class="n">align</span> <span class="o">=</span> <span class="s1">&#39;&gt;&#39;</span>
 
         <span class="k">for</span> <span class="n">option</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="p">:</span>
@@ -225,14 +237,6 @@
 
     <span class="c1"># Public methods.</span>
 <div class="viewcode-block" id="Menu.action"><a class="viewcode-back" href="../../panels.html#thurible.Menu.action">[docs]</a>    <span class="k">def</span> <span class="nf">action</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="n">Keystroke</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;React to input from the user.</span>
-
-<span class="sd">        :param key: A keystroke from the user.</span>
-<span class="sd">        :return: A :class:tuple that contains a :class:str containing</span>
-<span class="sd">            any data that needs to go back to the application and a</span>
-<span class="sd">            :class:str containing any updates to the terminal.</span>
-<span class="sd">        :rtype: tuple</span>
-<span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># These are the results that are returned.</span>
         <span class="n">data</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
         <span class="n">update</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>

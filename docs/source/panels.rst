@@ -83,18 +83,32 @@ going to be 24×80, but if you run into a terminal that is
 
 Panel tries to solve that by allowing you to set the size of
 a panel relative to the terminal window, no matter what size
-that terminal window is. Now, there are some limitation to that.
+that terminal window is. Now, there are some limitations to that.
 If the terminal window is 1×1, there isn't much that can be
 shown in that terminal. However, it still should be useful for
 most terminal sizes you are going to run into.
 
-.. _absolute:
+.. _position_onion:
 
-The Absolute Sizing Model
--------------------------
-To position the panel in the terminal, :mod:`thurible` managers start
-with the absolute position. The absolute position is determined
-by the following attributes:
+The Positioning Onion
+---------------------
+
+While it varies a little depending upon what classes a panel
+inherits, there are generally four layers of positioning that
+can happen within a panel:
+
+*   Absolute
+*   Frame (requires inheriting from :class:`thurible.panel.Frame`)
+*   Inner
+*   Content (requires inheriting from :class:`thurible.panel.Content`)
+
+.. _absolute-layer:
+
+The Absolute Layer
+^^^^^^^^^^^^^^^^^^
+
+The absolute layer is the first layer, and it is tracked in the
+following attributes:
 
 height
     The number of rows from the top of the panel to the bottom.
@@ -114,118 +128,178 @@ origin_y
     origin_y, it will default to the top-most row of the
     terminal window.
 
-For the most part, it's best not to set these manually, and just
-let it default to fill the entire terminal window. However, if
-you have some case where you need to manually set them, such as
-simplifying unit tests, you can do so.
+.. note::
+    While you can set these manually, doing so will prevent the
+    panel from being resized when the terminal is resized. The
+    only intended use case for setting these is to simplify
+    the writing of unit tests. In all other cases, it's recommended
+    to allow these to default to the full size of the terminal
+    window and use other parameters to position the panel.
 
-.. _relative:
+.. _frame-layer:
 
-The Relative Sizing Model
--------------------------
-After determining the absolute position of the panel, :mod:`thurible`
-then uses the following attributes to determine where the
-interior space of the panel is located relative to the absolute
-position of the panel in the terminal window.
+The Frame Layer
+^^^^^^^^^^^^^^^
 
-The horizontal positioning attributes are:
+For subclasses of :class:`thurible.panel.Frame`, the next layer in
+positions the panel's frame. It's tracked by the following properties:
 
-*	panel_pad_left
-*   panel_relative_width
-*   panel_pad_right
+frame_height
+    The number of rows from the top of the panel's frame to the bottom.
+frame_width
+    The number of columns from the left side of the panel's frame to
+    the right side.
+frame_x
+    The left-most column of the panel's frame.
+frame_y
+    The top-most row of the panel's frame.
 
-The vertical positioning attributes are:
+These are properties, so they cannot be set directly. You have to use
+relative positioning attributes to affect these. That is done with
+the attributes described in the :ref:`inner-layer` below.
 
-*   panel_pad_top
-*   panel_relative_height
-*   panel_pad_bottom
+.. _inner-layer:
 
-Each of those takes a value from 0.0 to 1.0, inclusive, that
-sets what percentage of the absolute size of the panel is
-taken up by that part of the relative size. For example, let's
-say you create the following panel::
+The Inner Layer
+^^^^^^^^^^^^^^^
+
+The next positioning layer is the :dfn:`inner layer`. It's tracked
+by the following properties:
+
+inner_height
+    The number of rows from the top of the panel's interior to the
+    bottom.
+inner_width
+    The number of columns from the left side of the panel's
+    interior to the right side.
+inner_x
+    The left-most column of the panel's interior.
+inner_y
+    The top-most row of the panel's interior.
+
+These are properties, so they cannot be set directly. You have to
+use the following attributes to set their value:
+
+panel_relative_height
+    The proportional height of the interior of the panel as
+    compared to the absoute height of the panel. The proportion
+    is given a :class:`float` with a value between 0.0 and 1.0,
+    inclusive.
+panel_relative_width
+    The proportional width of the interior of the panel as
+    compared to the absoute width of the panel. The proportion
+    is given a :class:`float` with a value between 0.0 and 1.0,
+    inclusive.
+panel_align_h
+    The horizontal alignment of the interior of the panel within
+    the absolute width of the panel. The alignment is given as
+    one of the following strings: "left", "center", or "right".
+panel_align_v
+    The vertical alignment of the interior of the panel within
+    the absolute height of the panel. The alignment is given
+    as one of the following strings: "top", "middle", "bottom".
+
+.. note::
+    There are two additional attributes that are involved:
+    `panel_pad_left` and `panel_pad_right`. While it is
+    currently possible to set these yourself, that
+    ability will likely be removed in future versions. It
+    is recommended to avoid using these two attributes.
+
+So how does this actually work? Let's say we have the following
+panel::
 
     panel = Panel(
         origin_x=0,
         width=80,
-        panel_pad_left=0.2
+        panel_relative_width=0.8,
+        panel_align_h='right'
     )
 
-The absolute left side of the panel is the left-most column of
-the terminal window (in Python that's referred to as column 0,
-those curses programming will often call it column 1). The
-absolute width of the terminal is 80 columns. However, the
-interior of the frame starts 20% of the total width of the panel
-from the absolute left-most column, which is column::
+The width of the interior of the panel, as given by
+:attr:`panel.inner_width` is::
 
-    80 * 0.2 = 16
+    int(panel.width * panel.panel_relative_width)
+    int(80 * 0.8)
+    int(64.0)
+    64
 
-The interior then takes of the remaining 80% of the absolute
-width of the panel, or::
+Since the interior is aligned "right", the starting point of the
+interior, as given by :attr:`panel.inner_x` is::
 
-    80 * 0.8 = 64
+    panel.origin_x + (panel.width - panel.inner_width)
+    0 + (80 - 64)
+    0 + 16
+    16
 
-As shown in the example, you do not need to set all three of
-the relative positioning attribute for each dimension. In most
-cases, it's only necessary to set one per dimension.
+Had the alignment been "center", it would have been::
 
-.. note::
-    If you do set all three of the relative positioning
-    attributes for a dimension, you must ensure that the sum
-    of all three attributes equals 1.0. Because floating-point
-    math is involved, it's theoretically possible that some
-    values that look like they should add to 1.0 won't add to
-    1.0. The best way to avoid that is never set all three
-    of the attributes for a dimension. Set one, or at most
-    two, and let the panel object calculate the rest for you.
+    panel.origin_x + (panel.width - panel.inner_width) // 2
+    0 + (80 - 64) // 2
+    0 + 16 // 2
+    0 + 8
+    8
 
-While you can set any of the three relative positional
-attributes, it is recommended that you use ones that set the
-relative interior sizes:
+Had the alignment been "left", it would have been::
 
-*   panel_relative_height
-*   panel_relative_width
+    panel.origin_x
+    0
 
-Then, instead of setting any of the "panel_pad" attributes, set
-the alignment attribute for the dimension:
-
-*   panel_align_h
-*   panel_align_v
-
-Setting those attributes will align the relative interior area
-of the panel with the absolute area of the panel.
-
-The valid values when setting panel_align_h are:
-
-*   left
-*   center
-*   right
-
-The valid values when setting panel_align_v are:
-
-*   top
-*   middle
-*   bottom
-
-For example, if you create the following panel::
-
-    panel = Panel(
-        panel_relative_height=0.25,
-        panel_relative_width=0.25,
-        panel_align_h='right',
-        panel_align_v='bottom'
-    )
-
-You will get a panel that will fill the bottom-right quarter of
-the terminal window.
+.. warning::
+    The above is not completely accurate for the current version
+    of :mod:`thurible`. Instead, the panel uses
+    :attr:`panel.panel_relative_width` to calculate the values of
+    :attr:`panel.panel_pad_left` and :attr:`panel.panel_pad_right`.
+    It then uses those values to determine the values for the
+    `inner_*` attributes. However, the explanation above should
+    be close to the results provided by the actual method, and
+    future versions of :mod:`thurible` should move to the model
+    described above.
 
 .. note::
-    You cannot set panel alignment attributes (panel_align_h
-    and panel_align_v) and the panel padding attributes (any of
-    the panel_pad_* attributes) at the same time. The alignment
-    attributes use the panel padding attributes to position the
-    interior of the panel, so setting both of them would create
-    a conflict that could lead to unexpected behavior.
+    In subclasses of :class:`thurible.panel.Frame`, adding a
+    frame will affect the values of the `inner_*` attributes.
+    The frame shrinks the interior by one character on each side
+    of the interior. Therefore, if there had been a frame in the
+    example above, :attr:`panel.inner_width` would have been 62
+    and the :attr:`panel.inner_x` would've been 17.
+
+.. _content-layer:
+
+The Content Layer
+^^^^^^^^^^^^^^^^^
+
+For subclasses of :class:`thurible.panel.Content`, the next layer in
+positions the panel's content. It's tracked by the following properties:
+
+content_width
+    The number of columns from the left side of the panel's content
+    to the right side.
+content_x
+    The left-most column of the panel's content.
+
+These are properties, so they cannot be set directly. You have to
+use the following attributes to set their value:
+
+content_relative_width
+    The proportional width of the content of the panel as
+    compared to the inner width of the panel. The proportion
+    is given a :class:`float` with a value between 0.0 and 1.0,
+    inclusive.
+content_align_h
+    The horizontal alignment of the content of the panel within
+    the inner width of the panel. The alignment is given as
+    one of the following strings: "left", "center", or "right".
+
+.. note::
+    There are two additional attributes that are involved:
+    `content_pad_left` and `content_pad_right`. While it is
+    currently possible to set these yourself, that
+    ability will likely be removed in future versions. It
+    is recommended to avoid using these two attributes.
+
+These attributes work similar to the relative width and alignment
+attributes in :ref:`inner-layer` above.
 
 .. _active:
 

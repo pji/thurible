@@ -126,8 +126,13 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#sizing-panels">Sizing Panels</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#the-absolute-sizing-model">The Absolute Sizing Model</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#the-relative-sizing-model">The Relative Sizing Model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#the-positioning-onion">The Positioning Onion</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#the-absolute-layer">The Absolute Layer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#the-frame-layer">The Frame Layer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#the-inner-layer">The Inner Layer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#the-content-layer">The Content Layer</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#active-keys">Active Keys</a></li>
@@ -573,7 +578,7 @@ panel.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="thurible.panel.Content">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">thurible.panel.</span></span><span class="sig-name descname"><span class="pre">Content</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">content_align_h</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'center'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">content_align_v</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'middle'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">content_pad_left</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">content_pad_right</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/thurible/panel.html#Content"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#thurible.panel.Content" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">thurible.panel.</span></span><span class="sig-name descname"><span class="pre">Content</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">content_align_h</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">content_align_v</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'middle'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">content_pad_left</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">content_pad_right</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">content_relative_width</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/thurible/panel.html#Content"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#thurible.panel.Content" title="Permalink to this definition"></a></dt>
 <dd><p>Create a new <a class="reference internal" href="#thurible.panel.Content" title="thurible.panel.Content"><code class="xref py py-class docutils literal notranslate"><span class="pre">thurible.panel.Content</span></code></a> object. This class
 serves as a parent class for all panels that allow padding between
 the frame surrounding the interior of the panel and the content
@@ -597,6 +602,10 @@ between the right inner margin of the panel and the content.
 It is measured as a float between 0.0 and 1.0, where 0.0
 is no padding and 1.0 is the entire width of the panel is
 padding. The default is 0.0.</p></li>
+<li><p><strong>panel_relative_width</strong> – (Optional.) The width of the
+content of the panel in comparison of the full width of
+the panel. It is a percentage expressed as a <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>
+between 0.0 and 1.0, inclusive. The default is 1.0.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -981,7 +990,7 @@ be made to the terminal display.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="thurible.Menu">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">thurible.</span></span><span class="sig-name descname"><span class="pre">Menu</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.11)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><span class="pre">thurible.menu.Option</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">select_bg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">select_fg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">content_align_h</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'left'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">content_align_v</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'top'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/thurible/menu.html#Menu"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#thurible.Menu" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">thurible.</span></span><span class="sig-name descname"><span class="pre">Menu</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.11)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><span class="pre">thurible.menu.Option</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">option_align_h</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'left'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">select_bg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">select_fg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">content_align_v</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'top'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/thurible/menu.html#Menu"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#thurible.Menu" title="Permalink to this definition"></a></dt>
 <dd><p>Create a new <a class="reference internal" href="#thurible.Menu" title="thurible.Menu"><code class="xref py py-class docutils literal notranslate"><span class="pre">thurible.Menu</span></code></a> object. This class provides
 a list of options the user can select. As a subclass of
 <a class="reference internal" href="#thurible.panel.Scroll" title="thurible.panel.Scroll"><code class="xref py py-class docutils literal notranslate"><span class="pre">thurible.panel.Scroll</span></code></a> and <a class="reference internal" href="#thurible.panel.Title" title="thurible.panel.Title"><code class="xref py py-class docutils literal notranslate"><span class="pre">thurible.panel.Title</span></code></a>,
@@ -1009,12 +1018,18 @@ active keys:</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>options</strong> – A sequence of <code class="xref py py-class docutils literal notranslate"><span class="pre">thurible.Option</span></code> objects
 defining the options available to the user.</p></li>
+<li><p><strong>option_align_h</strong> – (Optional.) The horizontal alignment
+of the options within the area that would be highlighted when
+the option is highlighted. If you think of each option as a
+button, it’s how the text is aligned on the face of the button.
+It defaults to “left”.</p></li>
 <li><p><strong>select_bg</strong> – (Optional.) The background color used to
 highlight an option.</p></li>
 <li><p><strong>select_fg</strong> – (Optional.) The foreground color used to
 highlight an option.</p></li>
 <li><p><strong>content_align_h</strong> – (Optional.) The horizontal alignment
-of the contents of the panel. It defaults to “left”.</p></li>
+of the contents of the panel. It defaults to “left”. See
+<a class="reference internal" href="#thurible.panel.Content" title="thurible.panel.Content"><code class="xref py py-class docutils literal notranslate"><span class="pre">thurible.panel.Content</span></code></a> for more information.</p></li>
 <li><p><strong>content_align_v</strong> – (Optional.) The vertical alignment
 of the contents of the panel. It defaults to “top”.</p></li>
 </ul>
@@ -1029,15 +1044,17 @@ of the contents of the panel. It defaults to “top”.</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="thurible.Menu.action">
 <span class="sig-name descname"><span class="pre">action</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://blessed.readthedocs.io/en/latest/api/keyboard.html#blessed.keyboard.Keystroke" title="(in Blessed v1.19.1)"><span class="pre">Keystroke</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.11)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/thurible/menu.html#Menu.action"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#thurible.Menu.action" title="Permalink to this definition"></a></dt>
-<dd><p>React to input from the user.</p>
+<dd><p>Act on a keystroke typed by the user.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>key</strong> – A keystroke from the user.</p>
+<dd class="field-odd"><p><strong>key</strong> – A <a class="reference external" href="https://blessed.readthedocs.io/en/latest/api/keyboard.html#blessed.keyboard.Keystroke" title="(in Blessed v1.19.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">blessed.keyboard.Keystroke</span></code></a> object
+representing the key pressed by the user.</p>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>A :class:tuple that contains a :class:str containing
-any data that needs to go back to the application and a
-:class:str containing any updates to the terminal.</p>
+<dd class="field-even"><p>A <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a> object containing two <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>
+objects. The first string is any data that needs to be sent
+to the application. The second string contains any updates
+needed to be made to the terminal display.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.11)">tuple</a></p>
@@ -1309,15 +1326,25 @@ going to be 24×80, but if you run into a terminal that is
 48×132, things might get weird.</p>
 <p>Panel tries to solve that by allowing you to set the size of
 a panel relative to the terminal window, no matter what size
-that terminal window is. Now, there are some limitation to that.
+that terminal window is. Now, there are some limitations to that.
 If the terminal window is 1×1, there isn’t much that can be
 shown in that terminal. However, it still should be useful for
 most terminal sizes you are going to run into.</p>
-<section id="the-absolute-sizing-model">
-<span id="absolute"></span><h3>The Absolute Sizing Model<a class="headerlink" href="#the-absolute-sizing-model" title="Permalink to this heading"></a></h3>
-<p>To position the panel in the terminal, <code class="xref py py-mod docutils literal notranslate"><span class="pre">thurible</span></code> managers start
-with the absolute position. The absolute position is determined
-by the following attributes:</p>
+<section id="the-positioning-onion">
+<span id="position-onion"></span><h3>The Positioning Onion<a class="headerlink" href="#the-positioning-onion" title="Permalink to this heading"></a></h3>
+<p>While it varies a little depending upon what classes a panel
+inherits, there are generally four layers of positioning that
+can happen within a panel:</p>
+<ul class="simple">
+<li><p>Absolute</p></li>
+<li><p>Frame (requires inheriting from <a class="reference internal" href="#thurible.panel.Frame" title="thurible.panel.Frame"><code class="xref py py-class docutils literal notranslate"><span class="pre">thurible.panel.Frame</span></code></a>)</p></li>
+<li><p>Inner</p></li>
+<li><p>Content (requires inheriting from <a class="reference internal" href="#thurible.panel.Content" title="thurible.panel.Content"><code class="xref py py-class docutils literal notranslate"><span class="pre">thurible.panel.Content</span></code></a>)</p></li>
+</ul>
+<section id="the-absolute-layer">
+<span id="absolute-layer"></span><h4>The Absolute Layer<a class="headerlink" href="#the-absolute-layer" title="Permalink to this heading"></a></h4>
+<p>The absolute layer is the first layer, and it is tracked in the
+following attributes:</p>
 <dl class="simple">
 <dt>height</dt><dd><p>The number of rows from the top of the panel to the bottom.
 If you don’t specify a height, it will default to the
@@ -1337,115 +1364,177 @@ origin_y, it will default to the top-most row of the
 terminal window.</p>
 </dd>
 </dl>
-<p>For the most part, it’s best not to set these manually, and just
-let it default to fill the entire terminal window. However, if
-you have some case where you need to manually set them, such as
-simplifying unit tests, you can do so.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>While you can set these manually, doing so will prevent the
+panel from being resized when the terminal is resized. The
+only intended use case for setting these is to simplify
+the writing of unit tests. In all other cases, it’s recommended
+to allow these to default to the full size of the terminal
+window and use other parameters to position the panel.</p>
+</div>
 </section>
-<section id="the-relative-sizing-model">
-<span id="relative"></span><h3>The Relative Sizing Model<a class="headerlink" href="#the-relative-sizing-model" title="Permalink to this heading"></a></h3>
-<p>After determining the absolute position of the panel, <code class="xref py py-mod docutils literal notranslate"><span class="pre">thurible</span></code>
-then uses the following attributes to determine where the
-interior space of the panel is located relative to the absolute
-position of the panel in the terminal window.</p>
-<p>The horizontal positioning attributes are:</p>
-<ul class="simple">
-<li><p>panel_pad_left</p></li>
-<li><p>panel_relative_width</p></li>
-<li><p>panel_pad_right</p></li>
-</ul>
-<p>The vertical positioning attributes are:</p>
-<ul class="simple">
-<li><p>panel_pad_top</p></li>
-<li><p>panel_relative_height</p></li>
-<li><p>panel_pad_bottom</p></li>
-</ul>
-<p>Each of those takes a value from 0.0 to 1.0, inclusive, that
-sets what percentage of the absolute size of the panel is
-taken up by that part of the relative size. For example, let’s
-say you create the following panel:</p>
+<section id="the-frame-layer">
+<span id="frame-layer"></span><h4>The Frame Layer<a class="headerlink" href="#the-frame-layer" title="Permalink to this heading"></a></h4>
+<p>For subclasses of <a class="reference internal" href="#thurible.panel.Frame" title="thurible.panel.Frame"><code class="xref py py-class docutils literal notranslate"><span class="pre">thurible.panel.Frame</span></code></a>, the next layer in
+positions the panel’s frame. It’s tracked by the following properties:</p>
+<dl class="simple">
+<dt>frame_height</dt><dd><p>The number of rows from the top of the panel’s frame to the bottom.</p>
+</dd>
+<dt>frame_width</dt><dd><p>The number of columns from the left side of the panel’s frame to
+the right side.</p>
+</dd>
+<dt>frame_x</dt><dd><p>The left-most column of the panel’s frame.</p>
+</dd>
+<dt>frame_y</dt><dd><p>The top-most row of the panel’s frame.</p>
+</dd>
+</dl>
+<p>These are properties, so they cannot be set directly. You have to use
+relative positioning attributes to affect these. That is done with
+the attributes described in the <a class="reference internal" href="#inner-layer"><span class="std std-ref">The Inner Layer</span></a> below.</p>
+</section>
+<section id="the-inner-layer">
+<span id="inner-layer"></span><h4>The Inner Layer<a class="headerlink" href="#the-inner-layer" title="Permalink to this heading"></a></h4>
+<p>The next positioning layer is the <em class="dfn">inner layer</em>. It’s tracked
+by the following properties:</p>
+<dl class="simple">
+<dt>inner_height</dt><dd><p>The number of rows from the top of the panel’s interior to the
+bottom.</p>
+</dd>
+<dt>inner_width</dt><dd><p>The number of columns from the left side of the panel’s
+interior to the right side.</p>
+</dd>
+<dt>inner_x</dt><dd><p>The left-most column of the panel’s interior.</p>
+</dd>
+<dt>inner_y</dt><dd><p>The top-most row of the panel’s interior.</p>
+</dd>
+</dl>
+<p>These are properties, so they cannot be set directly. You have to
+use the following attributes to set their value:</p>
+<dl class="simple">
+<dt>panel_relative_height</dt><dd><p>The proportional height of the interior of the panel as
+compared to the absoute height of the panel. The proportion
+is given a <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a> with a value between 0.0 and 1.0,
+inclusive.</p>
+</dd>
+<dt>panel_relative_width</dt><dd><p>The proportional width of the interior of the panel as
+compared to the absoute width of the panel. The proportion
+is given a <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a> with a value between 0.0 and 1.0,
+inclusive.</p>
+</dd>
+<dt>panel_align_h</dt><dd><p>The horizontal alignment of the interior of the panel within
+the absolute width of the panel. The alignment is given as
+one of the following strings: “left”, “center”, or “right”.</p>
+</dd>
+<dt>panel_align_v</dt><dd><p>The vertical alignment of the interior of the panel within
+the absolute height of the panel. The alignment is given
+as one of the following strings: “top”, “middle”, “bottom”.</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>There are two additional attributes that are involved:
+<cite>panel_pad_left</cite> and <cite>panel_pad_right</cite>. While it is
+currently possible to set these yourself, that
+ability will likely be removed in future versions. It
+is recommended to avoid using these two attributes.</p>
+</div>
+<p>So how does this actually work? Let’s say we have the following
+panel:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">panel</span> <span class="o">=</span> <span class="n">Panel</span><span class="p">(</span>
     <span class="n">origin_x</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
     <span class="n">width</span><span class="o">=</span><span class="mi">80</span><span class="p">,</span>
-    <span class="n">panel_pad_left</span><span class="o">=</span><span class="mf">0.2</span>
+    <span class="n">panel_relative_width</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span>
+    <span class="n">panel_align_h</span><span class="o">=</span><span class="s1">&#39;right&#39;</span>
 <span class="p">)</span>
 </pre></div>
 </div>
-<p>The absolute left side of the panel is the left-most column of
-the terminal window (in Python that’s referred to as column 0,
-those curses programming will often call it column 1). The
-absolute width of the terminal is 80 columns. However, the
-interior of the frame starts 20% of the total width of the panel
-from the absolute left-most column, which is column:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">80</span> <span class="o">*</span> <span class="mf">0.2</span> <span class="o">=</span> <span class="mi">16</span>
+<p>The width of the interior of the panel, as given by
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">panel.inner_width</span></code> is:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">int</span><span class="p">(</span><span class="n">panel</span><span class="o">.</span><span class="n">width</span> <span class="o">*</span> <span class="n">panel</span><span class="o">.</span><span class="n">panel_relative_width</span><span class="p">)</span>
+<span class="nb">int</span><span class="p">(</span><span class="mi">80</span> <span class="o">*</span> <span class="mf">0.8</span><span class="p">)</span>
+<span class="nb">int</span><span class="p">(</span><span class="mf">64.0</span><span class="p">)</span>
+<span class="mi">64</span>
 </pre></div>
 </div>
-<p>The interior then takes of the remaining 80% of the absolute
-width of the panel, or:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">80</span> <span class="o">*</span> <span class="mf">0.8</span> <span class="o">=</span> <span class="mi">64</span>
+<p>Since the interior is aligned “right”, the starting point of the
+interior, as given by <code class="xref py py-attr docutils literal notranslate"><span class="pre">panel.inner_x</span></code> is:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">panel</span><span class="o">.</span><span class="n">origin_x</span> <span class="o">+</span> <span class="p">(</span><span class="n">panel</span><span class="o">.</span><span class="n">width</span> <span class="o">-</span> <span class="n">panel</span><span class="o">.</span><span class="n">inner_width</span><span class="p">)</span>
+<span class="mi">0</span> <span class="o">+</span> <span class="p">(</span><span class="mi">80</span> <span class="o">-</span> <span class="mi">64</span><span class="p">)</span>
+<span class="mi">0</span> <span class="o">+</span> <span class="mi">16</span>
+<span class="mi">16</span>
 </pre></div>
 </div>
-<p>As shown in the example, you do not need to set all three of
-the relative positioning attribute for each dimension. In most
-cases, it’s only necessary to set one per dimension.</p>
+<p>Had the alignment been “center”, it would have been:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">panel</span><span class="o">.</span><span class="n">origin_x</span> <span class="o">+</span> <span class="p">(</span><span class="n">panel</span><span class="o">.</span><span class="n">width</span> <span class="o">-</span> <span class="n">panel</span><span class="o">.</span><span class="n">inner_width</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span>
+<span class="mi">0</span> <span class="o">+</span> <span class="p">(</span><span class="mi">80</span> <span class="o">-</span> <span class="mi">64</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span>
+<span class="mi">0</span> <span class="o">+</span> <span class="mi">16</span> <span class="o">//</span> <span class="mi">2</span>
+<span class="mi">0</span> <span class="o">+</span> <span class="mi">8</span>
+<span class="mi">8</span>
+</pre></div>
+</div>
+<p>Had the alignment been “left”, it would have been:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">panel</span><span class="o">.</span><span class="n">origin_x</span>
+<span class="mi">0</span>
+</pre></div>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The above is not completely accurate for the current version
+of <code class="xref py py-mod docutils literal notranslate"><span class="pre">thurible</span></code>. Instead, the panel uses
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">panel.panel_relative_width</span></code> to calculate the values of
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">panel.panel_pad_left</span></code> and <code class="xref py py-attr docutils literal notranslate"><span class="pre">panel.panel_pad_right</span></code>.
+It then uses those values to determine the values for the
+<cite>inner_*</cite> attributes. However, the explanation above should
+be close to the results provided by the actual method, and
+future versions of <code class="xref py py-mod docutils literal notranslate"><span class="pre">thurible</span></code> should move to the model
+described above.</p>
+</div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>If you do set all three of the relative positioning
-attributes for a dimension, you must ensure that the sum
-of all three attributes equals 1.0. Because floating-point
-math is involved, it’s theoretically possible that some
-values that look like they should add to 1.0 won’t add to
-1.0. The best way to avoid that is never set all three
-of the attributes for a dimension. Set one, or at most
-two, and let the panel object calculate the rest for you.</p>
+<p>In subclasses of <a class="reference internal" href="#thurible.panel.Frame" title="thurible.panel.Frame"><code class="xref py py-class docutils literal notranslate"><span class="pre">thurible.panel.Frame</span></code></a>, adding a
+frame will affect the values of the <cite>inner_*</cite> attributes.
+The frame shrinks the interior by one character on each side
+of the interior. Therefore, if there had been a frame in the
+example above, <code class="xref py py-attr docutils literal notranslate"><span class="pre">panel.inner_width</span></code> would have been 62
+and the <code class="xref py py-attr docutils literal notranslate"><span class="pre">panel.inner_x</span></code> would’ve been 17.</p>
 </div>
-<p>While you can set any of the three relative positional
-attributes, it is recommended that you use ones that set the
-relative interior sizes:</p>
-<ul class="simple">
-<li><p>panel_relative_height</p></li>
-<li><p>panel_relative_width</p></li>
-</ul>
-<p>Then, instead of setting any of the “panel_pad” attributes, set
-the alignment attribute for the dimension:</p>
-<ul class="simple">
-<li><p>panel_align_h</p></li>
-<li><p>panel_align_v</p></li>
-</ul>
-<p>Setting those attributes will align the relative interior area
-of the panel with the absolute area of the panel.</p>
-<p>The valid values when setting panel_align_h are:</p>
-<ul class="simple">
-<li><p>left</p></li>
-<li><p>center</p></li>
-<li><p>right</p></li>
-</ul>
-<p>The valid values when setting panel_align_v are:</p>
-<ul class="simple">
-<li><p>top</p></li>
-<li><p>middle</p></li>
-<li><p>bottom</p></li>
-</ul>
-<p>For example, if you create the following panel:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">panel</span> <span class="o">=</span> <span class="n">Panel</span><span class="p">(</span>
-    <span class="n">panel_relative_height</span><span class="o">=</span><span class="mf">0.25</span><span class="p">,</span>
-    <span class="n">panel_relative_width</span><span class="o">=</span><span class="mf">0.25</span><span class="p">,</span>
-    <span class="n">panel_align_h</span><span class="o">=</span><span class="s1">&#39;right&#39;</span><span class="p">,</span>
-    <span class="n">panel_align_v</span><span class="o">=</span><span class="s1">&#39;bottom&#39;</span>
-<span class="p">)</span>
-</pre></div>
-</div>
-<p>You will get a panel that will fill the bottom-right quarter of
-the terminal window.</p>
+</section>
+<section id="the-content-layer">
+<span id="content-layer"></span><h4>The Content Layer<a class="headerlink" href="#the-content-layer" title="Permalink to this heading"></a></h4>
+<p>For subclasses of <a class="reference internal" href="#thurible.panel.Content" title="thurible.panel.Content"><code class="xref py py-class docutils literal notranslate"><span class="pre">thurible.panel.Content</span></code></a>, the next layer in
+positions the panel’s content. It’s tracked by the following properties:</p>
+<dl class="simple">
+<dt>content_width</dt><dd><p>The number of columns from the left side of the panel’s content
+to the right side.</p>
+</dd>
+<dt>content_x</dt><dd><p>The left-most column of the panel’s content.</p>
+</dd>
+</dl>
+<p>These are properties, so they cannot be set directly. You have to
+use the following attributes to set their value:</p>
+<dl class="simple">
+<dt>content_relative_width</dt><dd><p>The proportional width of the content of the panel as
+compared to the inner width of the panel. The proportion
+is given a <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a> with a value between 0.0 and 1.0,
+inclusive.</p>
+</dd>
+<dt>content_align_h</dt><dd><p>The horizontal alignment of the content of the panel within
+the inner width of the panel. The alignment is given as
+one of the following strings: “left”, “center”, or “right”.</p>
+</dd>
+</dl>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>You cannot set panel alignment attributes (panel_align_h
-and panel_align_v) and the panel padding attributes (any of
-the panel_pad_* attributes) at the same time. The alignment
-attributes use the panel padding attributes to position the
-interior of the panel, so setting both of them would create
-a conflict that could lead to unexpected behavior.</p>
+<p>There are two additional attributes that are involved:
+<cite>content_pad_left</cite> and <cite>content_pad_right</cite>. While it is
+currently possible to set these yourself, that
+ability will likely be removed in future versions. It
+is recommended to avoid using these two attributes.</p>
 </div>
+<p>These attributes work similar to the relative width and alignment
+attributes in <a class="reference internal" href="#inner-layer"><span class="std std-ref">The Inner Layer</span></a> above.</p>
+</section>
 </section>
 </section>
 <section id="active-keys">

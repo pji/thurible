@@ -22,8 +22,7 @@ term = get_terminal()
 kwargs_content_opt_default = {
     'content_align_h': 'center',
     'content_align_v': 'middle',
-    'content_pad_left': 0.0,
-    'content_pad_right': 0.0,
+    'content_relative_width': 1.0,
 }
 kwargs_content_opt_default_alt = kwargs_content_opt_default.copy()
 kwargs_content_opt_default_alt['content_align_h'] = 'left'
@@ -31,8 +30,7 @@ kwargs_content_opt_default_alt['content_align_v'] = 'top'
 kwargs_content_opt_set = {
     'content_align_h': 'right',
     'content_align_v': 'bottom',
-    'content_pad_left': 0.2,
-    'content_pad_right': 0.2,
+    'content_relative_width': 0.6,
 }
 kwargs_frame_opt_default = {
     'frame_type': None,

@@ -29,8 +29,7 @@ progress = Progress(
     title_frame=True,
     panel_relative_height=0.2,
     panel_relative_width=0.9,
-    content_pad_left=0.05,
-    content_pad_right=0.05
+    content_relative_width=0.9
 )
 
 # Display the dialog.

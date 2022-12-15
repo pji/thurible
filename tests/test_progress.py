@@ -272,6 +272,72 @@ class ProgressTestCase(tp.TerminalTestCase):
         # Determine test result.
         self.assertEqual(exp, act)
 
+    def test___str__with_progress_and_content_pad(self):
+        """When converted to a string, a :class:`progress.Progress`
+        panel returns a string that will draw the entire progress bar.
+        If any progress has been made, the progress bar is advanced
+        that many steps.
+        """
+        # Expected values.
+        exp = (
+            f'{term.move(0, 0)}          '
+            f'{term.move(1, 0)}          '
+            f'{term.move(2, 0)}          '
+            f'{term.move(3, 0)}          '
+            f'{term.move(4, 0)}          '
+            f'{term.move(2, 2)}████  '
+        )
+
+        # Test data and state.
+        kwargs = {
+            'steps': 6,
+            'progress': 4,
+            'height': 5,
+            'width': 10,
+            'content_pad_left': 0.2,
+            'content_pad_right': 0.2,
+        }
+        panel = progress.Progress(**kwargs)
+
+        # Run test.
+        act = str(panel)
+
+        # Determine test result.
+        self.assertEqual(exp, act)
+
+    def test___str__with_progress_and_content_relative_width(self):
+        """When converted to a string, a :class:`progress.Progress`
+        panel returns a string that will draw the entire progress bar.
+        If any progress has been made, the progress bar is advanced
+        that many steps. If a relative width is given, the bar's width
+        is that percentage of the panel's width.
+        """
+        # Expected values.
+        exp = (
+            f'{term.move(0, 0)}          '
+            f'{term.move(1, 0)}          '
+            f'{term.move(2, 0)}          '
+            f'{term.move(3, 0)}          '
+            f'{term.move(4, 0)}          '
+            f'{term.move(2, 2)}████  '
+        )
+
+        # Test data and state.
+        kwargs = {
+            'steps': 6,
+            'progress': 4,
+            'height': 5,
+            'width': 10,
+            'content_relative_width': 0.6,
+        }
+        panel = progress.Progress(**kwargs)
+
+        # Run test.
+        act = str(panel)
+
+        # Determine test result.
+        self.assertEqual(exp, act)
+
     def test___str__with_steps_greater_than_width_and_progress(self):
         """When converted to a string, a :class:`progress.Progress`
         panel returns a string that will draw the entire progress bar.

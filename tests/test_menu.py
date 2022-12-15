@@ -12,6 +12,7 @@ from blessed.keyboard import Keystroke
 
 from thurible import menu
 from tests.test_panel import term, TerminalTestCase
+import tests.test_panel as tp
 
 
 # Common data.
@@ -40,34 +41,14 @@ class MenuTestCase(TerminalTestCase):
                 menu.Option('eggs', 'e'),
                 menu.Option('bacon', 'b'),
             ],
+            'option_align_h': 'right',
             'select_bg': 'red',
             'select_fg': 'blue',
-
-            # Content protocol.
-            'content_align_h': 'right',
-            'content_align_v': 'bottom',
-
-            # Title protocol.
-            'footer_text': 'eggs',
-            'footer_align': 'center',
-            'title_text': 'spam',
-            'title_align': 'center',
-            'title_bg': 'blue',
-            'title_fg': 'red',
-
-            # Frame protocol.
-            'frame_type': 'light',
-            'frame_bg': 'red',
-            'frame_fg': 'blue',
-
-            # Panel protocol
-            'height': 5,
-            'width': 7,
-            'term': term,
-            'origin_y': 2,
-            'origin_x': 3,
-            'fg': 'red',
-            'bg': 'blue',
+            **tp.kwargs_content_opt_default_alt,
+            **tp.kwargs_title_opt_set,
+            **tp.kwargs_frame_opt_set,
+            **tp.kwargs_panel_req,
+            **tp.kwargs_panel_opt_set,
         }
 
         # Run test.
@@ -90,38 +71,15 @@ class MenuTestCase(TerminalTestCase):
                 menu.Option('eggs', 'e'),
                 menu.Option('bacon', 'b'),
             ],
-
-            # Panel protocol.
-            'height': 5,
-            'width': 7,
-            'term': term,
         }
         exp_opt = {
             'select_bg': '',
             'select_fg': '',
-
-            # Content protocol.
-            'content_align_h': 'left',
-            'content_align_v': 'top',
-
-            # Title protocol.
-            'footer_text': '',
-            'footer_align': 'left',
-            'title_text': '',
-            'title_align': 'left',
-            'title_bg': '',
-            'title_fg': '',
-
-            # Frame protocol.
-            'frame_type': None,
-            'frame_bg': '',
-            'frame_fg': '',
-
-            # Panel protocol.
-            'origin_y': 0,
-            'origin_x': 0,
-            'fg': '',
-            'bg': '',
+            'option_align_h': 'left',
+            **tp.kwargs_content_opt_default_alt,
+            **tp.kwargs_title_opt_default,
+            **tp.kwargs_frame_opt_default,
+            **tp.kwargs_panel_opt_default,
         }
 
         # Run test.
@@ -218,7 +176,7 @@ class MenuTestCase(TerminalTestCase):
         # Determine test result.
         self.assertEqual(exp, act)
 
-    def test___str__with_content_align_h_center(self):
+    def test___str__with_content_and_option_align_h_center(self):
         """When converted to a string, a Menu object returns a string
         that will draw the entire menu. If the horizontal content
         alignment is centered, the options should be centered within
@@ -247,6 +205,7 @@ class MenuTestCase(TerminalTestCase):
                 menu.Option('bacon', 'b'),
                 menu.Option('ham', 'h'),
             ],
+            'option_align_h': 'center',
             'content_align_h': 'center',
             'height': 5,
             'width': 9,
@@ -260,7 +219,7 @@ class MenuTestCase(TerminalTestCase):
         # Determine test result.
         self.assertEqual(exp, act)
 
-    def test___str__with_content_align_h_right(self):
+    def test___str__with_content_and_option_align_h_right(self):
         """When converted to a string, a Menu object returns a string
         that will draw the entire menu. If the horizontal content
         alignment is right, the options should be right aligned within
@@ -289,6 +248,7 @@ class MenuTestCase(TerminalTestCase):
                 menu.Option('bacon', 'b'),
                 menu.Option('ham', 'h'),
             ],
+            'option_align_h': 'right',
             'content_align_h': 'right',
             'height': 5,
             'width': 9,
@@ -315,10 +275,10 @@ class MenuTestCase(TerminalTestCase):
             f'{term.move(3, 0)}          '
             f'{term.move(4, 0)}          '
             f'{term.reverse}'
-            f'{term.move(0, 2)}spam '
+            f'{term.move(0, 3)}spam '
             f'{term.normal}'
-            f'{term.move(1, 2)}eggs '
-            f'{term.move(2, 2)}bacon'
+            f'{term.move(1, 3)}eggs '
+            f'{term.move(2, 3)}bacon'
         )
 
         # Test data and state.
@@ -341,7 +301,7 @@ class MenuTestCase(TerminalTestCase):
         # Determine test result.
         self.assertEqual(exp, act)
 
-    def test___str__with_content_pad_right(self):
+    def test___str__with_content_relative_width_and_align_h_center(self):
         """When converted to a string, a Menu object returns a string
         that will draw the entire menu. If left content padding is set,
         the options will be inset by the amount of padding.
@@ -354,10 +314,10 @@ class MenuTestCase(TerminalTestCase):
             f'{term.move(3, 0)}          '
             f'{term.move(4, 0)}          '
             f'{term.reverse}'
-            f'{term.move(0, 4)} spam'
+            f'{term.move(0, 2)} spam'
             f'{term.normal}'
-            f'{term.move(1, 4)} eggs'
-            f'{term.move(2, 4)}bacon'
+            f'{term.move(1, 2)} eggs'
+            f'{term.move(2, 2)}bacon'
         )
 
         # Test data and state.
@@ -367,8 +327,9 @@ class MenuTestCase(TerminalTestCase):
                 menu.Option('eggs', 'e'),
                 menu.Option('bacon', 'b'),
             ],
-            'content_align_h': 'right',
-            'content_pad_right': 0.1,
+            'option_align_h': 'right',
+            'content_align_h': 'center',
+            'content_relative_width': 0.8,
             'height': 5,
             'width': 10,
             'term': term,
@@ -649,12 +610,12 @@ class MenuTestCase(TerminalTestCase):
         """
         # Expected values.
         exp = ('', (
-            f'{term.move(0, 2)}spam  '
+            f'{term.move(0, 3)}spam  '
             f'{term.reverse}'
-            f'{term.move(1, 2)}eggs  '
+            f'{term.move(1, 3)}eggs  '
             f'{term.normal}'
-            f'{term.move(2, 2)}bacon '
-            f'{term.move(3, 2)}ham   '
+            f'{term.move(2, 3)}bacon '
+            f'{term.move(3, 3)}ham   '
         ))
 
         # Test data and state.

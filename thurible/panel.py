@@ -660,22 +660,30 @@ class Content(Frame):
         It is measured as a float between 0.0 and 1.0, where 0.0
         is no padding and 1.0 is the entire width of the panel is
         padding. The default is 0.0.
+    :param panel_relative_width: (Optional.) The width of the
+        content of the panel in comparison of the full width of
+        the panel. It is a percentage expressed as a :class:`float`
+        between 0.0 and 1.0, inclusive. The default is 1.0.
     :return: None.
     :rtype: NoneType
     """
     # Magic methods.
     def __init__(
         self,
-        content_align_h: str = 'center',
+        content_align_h: Optional[str] = None,
         content_align_v: str = 'middle',
-        content_pad_left: float = 0.0,
-        content_pad_right: float = 0.0,
+        content_pad_left: Optional[float] = None,
+        content_pad_right: Optional[float] = None,
+        content_relative_width: Optional[float] = None,
         *args, **kwargs
     ) -> None:
-        self.content_align_h = content_align_h
         self.content_align_v = content_align_v
-        self.content_pad_left = content_pad_left
-        self.content_pad_right = content_pad_right
+        self._set_content_relative_horizontal_dimensions(
+            content_pad_left,
+            content_relative_width,
+            content_pad_right,
+            content_align_h
+        )
         super().__init__(*args, **kwargs)
 
     def __eq__(self, other) -> bool:
@@ -766,6 +774,33 @@ class Content(Frame):
             v_space = height - length
             y_mod = v_space
         return y_mod
+
+    def _set_content_relative_horizontal_dimensions(
+        self,
+        left: Optional[float] = None,
+        width: Optional[float] = None,
+        right: Optional[float] = None,
+        align: Optional[str] = None,
+    ) -> None:
+        """Ensure the horizontal relative dimensions are set correctly."""
+        # Calculate the correct values.
+        left, width, right, align = self._set_relative_dimenstion(
+            left,
+            width,
+            right,
+            align,
+            attr_names=(
+                'content_pad_top',
+                'content_relative_height',
+                'content_pad_bottom',
+            )
+        )
+
+        # Set the attributes.
+        self.content_pad_left = left
+        self.content_relative_width = width
+        self.content_pad_right = right
+        self.content_align_h = align
 
 
 class Scroll(Content):
