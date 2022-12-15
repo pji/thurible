@@ -4,16 +4,23 @@ progress
 
 An object for announcing the progress towards a goal.
 """
+from collections import deque
+from dataclasses import dataclass
+from typing import Optional, Sequence
+
 from thurible.panel import Content, Message, Title
 
 
 # Message class.
+@dataclass
 class Tick(Message):
     """Create a new :class:`thurible.progress.Tick` object.
 
+    :param message: A message to display.
     :return: None.
     :rtype: NoneType
     """
+    message: str = ''
 
 
 # Panel class.
@@ -35,6 +42,12 @@ class Progress(Content, Title):
     :param bar_fg: (Optional.) A string describing the foreground
         color of the bar. See the documentation for :mod:`blessed`
         for more detail on the available options.
+    :param max_messages: (Optional.) How many status messages should
+        be stored to be displayed.
+    :param messages: (Optional.) Any status messages to start in the
+        display. Since new messages are added to the display at the
+        top, the messages passed in this sequence should be stored
+        in reverse chronological order.
     :return: None.
     :rtype: NoneType
     """
@@ -44,28 +57,63 @@ class Progress(Content, Title):
         progress: int = 0,
         bar_bg: str = '',
         bar_fg: str = '',
+        max_messages: int = 0,
+        messages: Optional[Sequence[str]] = None,
         *args, **kwargs
     ) -> None:
         self.steps = steps
         self.progress = progress
         self.bar_bg = bar_bg
         self.bar_fg = bar_fg
+        self.max_messages = max_messages
+        self.messages = deque(maxlen=self.max_messages)
+        if messages:
+            for msg in messages:
+                self.messages.append(msg)
         super().__init__(*args, **kwargs)
+
+        self._wrapped_width = -1
 
     def __str__(self) -> str:
         """Return a string that will draw the entire panel."""
         # Set up.
         result = super().__str__()
-        y = self._align_v('middle', 1, self.inner_height) + self.inner_y
+        height = 1 + self.max_messages
+        y = self._align_v('middle', height, self.inner_height) + self.inner_y
         x = self.content_x
 
         # Add the progress bar.
         result += self.term.move(y, x) + self.progress_bar
+        y += 1
+
+        # Add messages.
+        if self.max_messages:
+            result += self._visible_messages(x, y)
 
         # Return the resulting string.
         return result
 
     # Properties.
+    @property
+    def lines(self) -> list[str]:
+        """The lines of text available to be displayed in the panel
+        after they have been wrapped to fit the width of the
+        interior of the panel. A message from the application may
+        be split into multiple lines.
+
+        :return: A :class:list object containing each line of
+            text as a :class:str.
+        :rtype: list
+        """
+        width = self.content_width
+        if width != self._wrapped_width:
+            wrapped = []
+            for line in self.messages:
+                wrapped.extend(self.term.wrap(line, width=width))
+            self._lines = wrapped
+            self._wrapped_width = width
+        return self._lines
+
     @property
     def progress_bar(self) -> str:
         """The progress bar as a string.
@@ -117,7 +165,26 @@ class Progress(Content, Title):
         result = ''
         if isinstance(msg, Tick):
             self.progress += 1
-            y = self._align_v('middle', 1, self.inner_height) + self.inner_y
+            if self.max_messages:
+                self.messages.appendleft(msg.message)
+                self._wrapped_width = -1
+
+            height = 1 + self.max_messages
+            y = self.inner_y
+            y += self._align_v('middle', height, self.inner_height)
             x = self.content_x
             result += self.term.move(y, x) + self.progress_bar
+            y += 1
+
+            if self.max_messages:
+                result += self._visible_messages(x, y)
+
+        return result
+
+    # Private helper methods.
+    def _visible_messages(self, x: int, y: int) -> str:
+        result = ''
+        width = self.content_width
+        for i, line in zip(range(self.max_messages), self.lines):
+            result += f'{self.term.move(y + i, x)}{line:<{width}}'
         return result

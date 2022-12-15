@@ -161,31 +161,47 @@ def check_messages(
     farewell = ''
     if not q_to.empty():
         msg = q_to.get()
+
+        # End the manager.
         if isinstance(msg, tm.End):
             farewell = msg.text
             reason = 'Received End message.'
             end = True
+
+        # Prove the manager is still responding.
         elif isinstance(msg, tm.Ping):
             pong = tm.Pong(msg.name)
             q_from.put(pong)
+
+        # Display a stored panel.
         elif isinstance(msg, tm.Show):
             if showing:
                 history.appendleft(showing)
             showing = msg.name
             print(str(displays[showing]), end='', flush=True)
+
+        # Check what panel is currently displayed.
         elif isinstance(msg, tm.Showing):
             shown = tm.Shown(msg.name, showing)
             q_from.put(shown)
+
+        # Store a panel for display.
         elif isinstance(msg, tm.Store):
             displays[msg.name] = msg.display
+
+        # Remove a panel from storage.
         elif isinstance(msg, tm.Delete):
             del displays[msg.name]
+
+        # Check what panels are currently stored.
         elif isinstance(msg, tm.Storing):
             stored = tm.Stored(
                 msg.name,
                 tuple(key for key in displays)
             )
             q_from.put(stored)
+
+        # Show an alert.
         elif isinstance(msg, tm.Alert):
             height = len(get_terminal().wrap(
                 msg.text,
@@ -207,12 +223,17 @@ def check_messages(
             history.appendleft(showing)
             showing = msg.name
             print(str(displays[showing]), end='', flush=True)
+
+        # Dismiss the alert.
         elif isinstance(msg, tm.Dismiss) and msg.name == showing:
             history.appendleft(showing)
             showing = history[1]
             print(str(displays[showing]), end='', flush=True)
+
+        # Send unrecognized messages to the showing panel.
         else:
             update = displays[showing].update(msg)
             if update:
                 print(update, end='', flush=True)
+
     return displays, showing, end, farewell, reason, history

@@ -4,6 +4,7 @@ test_progress
 
 Unit tests for the :mod:`thurible.progress` module.
 """
+from collections import deque
 import unittest as ut
 
 from tests import test_panel as tp
@@ -27,6 +28,8 @@ class ProgressTestCase(tp.TerminalTestCase):
             'progress': 2,
             'bar_bg': 'red',
             'bar_fg': 'blue',
+            'max_messages': 5,
+            'messages': deque(['spam', 'eggs', 'bacon',], maxlen=5),
             **tp.kwargs_content_opt_set,
             **tp.kwargs_title_opt_set,
             **tp.kwargs_frame_opt_set,
@@ -57,6 +60,8 @@ class ProgressTestCase(tp.TerminalTestCase):
             'progress': 0,
             'bar_bg': '',
             'bar_fg': '',
+            'max_messages': 0,
+            'messages': deque(maxlen=0),
             **tp.kwargs_content_opt_default,
             **tp.kwargs_title_opt_default,
             **tp.kwargs_frame_opt_default,
@@ -230,6 +235,72 @@ class ProgressTestCase(tp.TerminalTestCase):
             'steps': 6,
             'progress': 4,
             'bar_bg': 'red',
+            'height': 5,
+            'width': 6,
+        }
+        panel = progress.Progress(**kwargs)
+
+        # Run test.
+        act = str(panel)
+
+        # Determine test result.
+        self.assertEqual(exp, act)
+
+    def test___str__with_max_messages(self):
+        """When converted to a string, a :class:`progress.Progress`
+        panel returns a string that will draw the entire progress bar.
+        If :attr:`Progress.max_messages` is set, space is created for
+        that number of messages.
+        """
+        # Expected values.
+        exp = (
+            f'{term.move(0, 0)}      '
+            f'{term.move(1, 0)}      '
+            f'{term.move(2, 0)}      '
+            f'{term.move(3, 0)}      '
+            f'{term.move(4, 0)}      '
+            f'{term.move(1, 0)}      '
+        )
+
+        # Test data and state.
+        kwargs = {
+            'steps': 6,
+            'max_messages': 2,
+            'height': 5,
+            'width': 6,
+        }
+        panel = progress.Progress(**kwargs)
+
+        # Run test.
+        act = str(panel)
+
+        # Determine test result.
+        self.assertEqual(exp, act)
+
+    def test___str__with_max_messages_and_messages(self):
+        """When converted to a string, a :class:`progress.Progress`
+        panel returns a string that will draw the entire progress bar.
+        If :attr:`Progress.max_messages` is set, space is created for
+        that number of messages. If :attr:`Progress.messages` is set,
+        those messages appear in the display.
+        """
+        # Expected values.
+        exp = (
+            f'{term.move(0, 0)}      '
+            f'{term.move(1, 0)}      '
+            f'{term.move(2, 0)}      '
+            f'{term.move(3, 0)}      '
+            f'{term.move(4, 0)}      '
+            f'{term.move(1, 0)}      '
+            f'{term.move(2, 0)}spam  '
+            f'{term.move(3, 0)}eggs  '
+        )
+
+        # Test data and state.
+        kwargs = {
+            'steps': 6,
+            'max_messages': 2,
+            'messages': ['spam', 'eggs',],
             'height': 5,
             'width': 6,
         }
@@ -452,6 +523,35 @@ class ProgressTestCase(tp.TerminalTestCase):
         }
         panel = progress.Progress(**kwargs)
         msg = progress.Tick()
+
+        # Run test.
+        act = panel.update(msg)
+
+        # Determine test result.
+        self.assertEqual(exp, act)
+
+    def test_update_with_message(self):
+        """When passed a Tick message, Progress.update() should
+        return a string that will advance the progress bar.
+        """
+        # Expected value.
+        exp = (
+            f'{term.move(1, 0)}████  '
+            f'{term.move(2, 0)}bacon '
+            f'{term.move(3, 0)}spam  '
+        )
+
+        # Test data and state.
+        kwargs = {
+            'steps': 6,
+            'progress': 3,
+            'max_messages': 2,
+            'messages': ['spam', 'eggs',],
+            'height': 5,
+            'width': 6,
+        }
+        panel = progress.Progress(**kwargs)
+        msg = progress.Tick('bacon')
 
         # Run test.
         act = panel.update(msg)

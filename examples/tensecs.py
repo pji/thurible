@@ -23,11 +23,13 @@ interval = 0.125
 ticks = int(seconds / interval)
 progress = Progress(
     steps=ticks,
+    max_messages=4,
+    messages=['Waiting…',],
     bar_bg='bright_black',
     frame_type='double',
     title_text='tensecs',
     title_frame=True,
-    panel_relative_height=0.2,
+    panel_relative_height=0.3,
     panel_relative_width=0.9,
     content_relative_width=0.9
 )
@@ -38,9 +40,10 @@ q_to.put(tm.Show('prog'))
 
 # Send an update to the progress bar every eighth of a second for
 # ten seconds.
-for _ in range(ticks):
+for tick in range(ticks):
     sleep(interval)
-    q_to.put(Tick())
+    msg = f'Waited for {tick * interval:0<2.2f}s.'
+    q_to.put(Tick(msg))
 
 
 # End the program by displaying the favorite word.
