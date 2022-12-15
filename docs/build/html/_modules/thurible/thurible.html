@@ -232,31 +232,47 @@
     <span class="n">farewell</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">q_to</span><span class="o">.</span><span class="n">empty</span><span class="p">():</span>
         <span class="n">msg</span> <span class="o">=</span> <span class="n">q_to</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+
+        <span class="c1"># End the manager.</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">tm</span><span class="o">.</span><span class="n">End</span><span class="p">):</span>
             <span class="n">farewell</span> <span class="o">=</span> <span class="n">msg</span><span class="o">.</span><span class="n">text</span>
             <span class="n">reason</span> <span class="o">=</span> <span class="s1">&#39;Received End message.&#39;</span>
             <span class="n">end</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="c1"># Prove the manager is still responding.</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">tm</span><span class="o">.</span><span class="n">Ping</span><span class="p">):</span>
             <span class="n">pong</span> <span class="o">=</span> <span class="n">tm</span><span class="o">.</span><span class="n">Pong</span><span class="p">(</span><span class="n">msg</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
             <span class="n">q_from</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">pong</span><span class="p">)</span>
+
+        <span class="c1"># Display a stored panel.</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">tm</span><span class="o">.</span><span class="n">Show</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">showing</span><span class="p">:</span>
                 <span class="n">history</span><span class="o">.</span><span class="n">appendleft</span><span class="p">(</span><span class="n">showing</span><span class="p">)</span>
             <span class="n">showing</span> <span class="o">=</span> <span class="n">msg</span><span class="o">.</span><span class="n">name</span>
             <span class="nb">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">displays</span><span class="p">[</span><span class="n">showing</span><span class="p">]),</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="c1"># Check what panel is currently displayed.</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">tm</span><span class="o">.</span><span class="n">Showing</span><span class="p">):</span>
             <span class="n">shown</span> <span class="o">=</span> <span class="n">tm</span><span class="o">.</span><span class="n">Shown</span><span class="p">(</span><span class="n">msg</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">showing</span><span class="p">)</span>
             <span class="n">q_from</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">shown</span><span class="p">)</span>
+
+        <span class="c1"># Store a panel for display.</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">tm</span><span class="o">.</span><span class="n">Store</span><span class="p">):</span>
             <span class="n">displays</span><span class="p">[</span><span class="n">msg</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">msg</span><span class="o">.</span><span class="n">display</span>
+
+        <span class="c1"># Remove a panel from storage.</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">tm</span><span class="o">.</span><span class="n">Delete</span><span class="p">):</span>
             <span class="k">del</span> <span class="n">displays</span><span class="p">[</span><span class="n">msg</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
+
+        <span class="c1"># Check what panels are currently stored.</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">tm</span><span class="o">.</span><span class="n">Storing</span><span class="p">):</span>
             <span class="n">stored</span> <span class="o">=</span> <span class="n">tm</span><span class="o">.</span><span class="n">Stored</span><span class="p">(</span>
                 <span class="n">msg</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
                 <span class="nb">tuple</span><span class="p">(</span><span class="n">key</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">displays</span><span class="p">)</span>
             <span class="p">)</span>
             <span class="n">q_from</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">stored</span><span class="p">)</span>
+
+        <span class="c1"># Show an alert.</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">tm</span><span class="o">.</span><span class="n">Alert</span><span class="p">):</span>
             <span class="n">height</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">get_terminal</span><span class="p">()</span><span class="o">.</span><span class="n">wrap</span><span class="p">(</span>
                 <span class="n">msg</span><span class="o">.</span><span class="n">text</span><span class="p">,</span>
@@ -278,14 +294,19 @@
             <span class="n">history</span><span class="o">.</span><span class="n">appendleft</span><span class="p">(</span><span class="n">showing</span><span class="p">)</span>
             <span class="n">showing</span> <span class="o">=</span> <span class="n">msg</span><span class="o">.</span><span class="n">name</span>
             <span class="nb">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">displays</span><span class="p">[</span><span class="n">showing</span><span class="p">]),</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="c1"># Dismiss the alert.</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">tm</span><span class="o">.</span><span class="n">Dismiss</span><span class="p">)</span> <span class="ow">and</span> <span class="n">msg</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">showing</span><span class="p">:</span>
             <span class="n">history</span><span class="o">.</span><span class="n">appendleft</span><span class="p">(</span><span class="n">showing</span><span class="p">)</span>
             <span class="n">showing</span> <span class="o">=</span> <span class="n">history</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
             <span class="nb">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">displays</span><span class="p">[</span><span class="n">showing</span><span class="p">]),</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="c1"># Send unrecognized messages to the showing panel.</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">update</span> <span class="o">=</span> <span class="n">displays</span><span class="p">[</span><span class="n">showing</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">update</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="n">update</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
     <span class="k">return</span> <span class="n">displays</span><span class="p">,</span> <span class="n">showing</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">farewell</span><span class="p">,</span> <span class="n">reason</span><span class="p">,</span> <span class="n">history</span>
 </pre></div>
 
