@@ -5,7 +5,9 @@ test_progress
 Unit tests for the :mod:`thurible.progress` module.
 """
 from collections import deque
+from datetime import timedelta
 import unittest as ut
+from unittest.mock import patch
 
 from tests import test_panel as tp
 from thurible import progress
@@ -29,7 +31,8 @@ class ProgressTestCase(tp.TerminalTestCase):
             'bar_bg': 'red',
             'bar_fg': 'blue',
             'max_messages': 5,
-            'messages': deque(['spam', 'eggs', 'bacon',], maxlen=5),
+            'messages': deque([], maxlen=5),
+            'timestamp': True,
             **tp.kwargs_content_opt_set,
             **tp.kwargs_title_opt_set,
             **tp.kwargs_frame_opt_set,
@@ -62,6 +65,7 @@ class ProgressTestCase(tp.TerminalTestCase):
             'bar_fg': '',
             'max_messages': 0,
             'messages': deque(maxlen=0),
+            'timestamp': False,
             **tp.kwargs_content_opt_default,
             **tp.kwargs_title_opt_default,
             **tp.kwargs_frame_opt_default,
@@ -292,8 +296,8 @@ class ProgressTestCase(tp.TerminalTestCase):
             f'{term.move(3, 0)}      '
             f'{term.move(4, 0)}      '
             f'{term.move(1, 0)}      '
-            f'{term.move(2, 0)}spam  '
-            f'{term.move(3, 0)}eggs  '
+            f'{term.move(2, 0)}eggs  '
+            f'{term.move(3, 0)}spam  '
         )
 
         # Test data and state.
@@ -538,7 +542,7 @@ class ProgressTestCase(tp.TerminalTestCase):
         exp = (
             f'{term.move(1, 0)}████  '
             f'{term.move(2, 0)}bacon '
-            f'{term.move(3, 0)}spam  '
+            f'{term.move(3, 0)}eggs  '
         )
 
         # Test data and state.
@@ -552,6 +556,41 @@ class ProgressTestCase(tp.TerminalTestCase):
         }
         panel = progress.Progress(**kwargs)
         msg = progress.Tick('bacon')
+
+        # Run test.
+        act = panel.update(msg)
+
+        # Determine test result.
+        self.assertEqual(exp, act)
+
+    @patch('thurible.progress.datetime')
+    def test_update_with_message_and_timestamp(self, mock_dt):
+        """When passed a Tick message, Progress.update() should
+        return a string that will advance the progress bar. If
+        :attr:`Progress.timestamp` is `True`, add a timestamp to
+        the beginning of the messages.
+        """
+        # Expected value.
+        exp = (
+            f'{term.move(1, 0)}████████████      '
+            f'{term.move(2, 0)}00:02 bacon       '
+            f'{term.move(3, 0)}00:00 eggs        '
+        )
+
+        # Test data and state.
+        kwargs = {
+            'steps': 6,
+            'progress': 3,
+            'max_messages': 2,
+            'timestamp': True,
+            'messages': ['spam', 'eggs',],
+            'height': 5,
+            'width': 18,
+        }
+        mock_dt.now.return_value = timedelta(seconds=3)
+        panel = progress.Progress(**kwargs)
+        msg = progress.Tick('bacon')
+        mock_dt.now.return_value = timedelta(seconds=5)
 
         # Run test.
         act = panel.update(msg)

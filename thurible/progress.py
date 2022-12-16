@@ -6,6 +6,7 @@ An object for announcing the progress towards a goal.
 """
 from collections import deque
 from dataclasses import dataclass
+from datetime import datetime
 from typing import Optional, Sequence
 
 from thurible.panel import Content, Message, Title
@@ -48,6 +49,8 @@ class Progress(Content, Title):
         display. Since new messages are added to the display at the
         top, the messages passed in this sequence should be stored
         in reverse chronological order.
+    :param timestamp: (Optional.) Add a timestamp to the messages
+        when they are displayed.
     :return: None.
     :rtype: NoneType
     """
@@ -59,20 +62,23 @@ class Progress(Content, Title):
         bar_fg: str = '',
         max_messages: int = 0,
         messages: Optional[Sequence[str]] = None,
+        timestamp: bool = False,
         *args, **kwargs
     ) -> None:
+        self._t0 = datetime.now()
+        self._wrapped_width = -1
+
         self.steps = steps
         self.progress = progress
         self.bar_bg = bar_bg
         self.bar_fg = bar_fg
         self.max_messages = max_messages
-        self.messages = deque(maxlen=self.max_messages)
+        self.timestamp = timestamp
+        self.messages: deque = deque(maxlen=self.max_messages)
         if messages:
             for msg in messages:
-                self.messages.append(msg)
+                self._add_message(msg)
         super().__init__(*args, **kwargs)
-
-        self._wrapped_width = -1
 
     def __str__(self) -> str:
         """Return a string that will draw the entire panel."""
@@ -166,7 +172,7 @@ class Progress(Content, Title):
         if isinstance(msg, Tick):
             self.progress += 1
             if self.max_messages:
-                self.messages.appendleft(msg.message)
+                self._add_message(msg.message)
                 self._wrapped_width = -1
 
             height = 1 + self.max_messages
@@ -182,6 +188,14 @@ class Progress(Content, Title):
         return result
 
     # Private helper methods.
+    def _add_message(self, msg) -> None:
+        if self.timestamp:
+            stamp = datetime.now() - self._t0
+            mins = stamp.seconds // 60
+            secs = int(stamp.seconds % 60)
+            msg = f'{mins:0>2}:{secs:0>2} {msg}'
+        self.messages.appendleft(msg)
+
     def _visible_messages(self, x: int, y: int) -> str:
         result = ''
         width = self.content_width

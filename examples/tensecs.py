@@ -1,6 +1,6 @@
 """
-tensec
-~~~~~~
+tensecs
+~~~~~~~
 
 Show a progress bar indicating the passage of ten seconds.
 """
@@ -25,6 +25,7 @@ progress = Progress(
     steps=ticks,
     max_messages=4,
     messages=['Waiting…',],
+    timestamp=True,
     bar_bg='bright_black',
     frame_type='double',
     title_text='tensecs',
