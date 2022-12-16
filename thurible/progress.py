@@ -12,10 +12,25 @@ from typing import Optional, Sequence
 from thurible.panel import Content, Message, Title
 
 
-# Message class.
+# Message classes.
+@dataclass
+class NoTick(Message):
+    """Create a new :class:`thurible.progress.NoTick` object. When
+    sent to :meth:`thurible.Progress.update`, this will not cause
+    the progress bar to advance.
+
+    :param message: A message to display.
+    :return: None.
+    :rtype: NoneType
+    """
+    message: str = ''
+
+
 @dataclass
 class Tick(Message):
-    """Create a new :class:`thurible.progress.Tick` object.
+    """Create a new :class:`thurible.progress.Tick` object. When
+    sent to :meth:`thurible.Progress.update`, this will cause the
+    progress bar to advance.
 
     :param message: A message to display.
     :return: None.
@@ -65,6 +80,7 @@ class Progress(Content, Title):
         timestamp: bool = False,
         *args, **kwargs
     ) -> None:
+        self._notick = False
         self._t0 = datetime.now()
         self._wrapped_width = -1
 
@@ -163,27 +179,43 @@ class Progress(Content, Title):
     def update(self, msg: Message) -> str:
         """Act on a message sent by the application.
 
+        :class:`thurible.Progress` responds to the following
+        update messages:
+
+        *   :class:`thurible.progress.Tick`: Advance the progress bar
+            and display any message passed.
+        *   :class:`thurible.progress.NoTick`: Do not advance the
+            progress bar but display the message passed as a
+            temporary message. The temporary message will be replaced
+            by the next message received.
+
         :param msg: A message sent by the application.
         :return: A :class:`str` object containing any updates needed to
             be made to the terminal display.
         :rtype: str
         """
         result = ''
+
+        # If a tick is received, advance the progress bar.
         if isinstance(msg, Tick):
+            if self._notick and self.max_messages:
+                self.messages.popleft()
+            self._notick = False
             self.progress += 1
             if self.max_messages:
                 self._add_message(msg.message)
                 self._wrapped_width = -1
+            result += self._make_display()
 
-            height = 1 + self.max_messages
-            y = self.inner_y
-            y += self._align_v('middle', height, self.inner_height)
-            x = self.content_x
-            result += self.term.move(y, x) + self.progress_bar
-            y += 1
-
-            if self.max_messages:
-                result += self._visible_messages(x, y)
+        # If a notick is received, update the status messages but
+        # don't advance the progress bar.
+        elif isinstance(msg, NoTick) and self.max_messages:
+            if self._notick:
+                self.messages.popleft()
+            self._notick = True
+            self._add_message(msg.message)
+            self._wrapped_width = -1
+            result += self._make_display()
 
         return result
 
@@ -195,6 +227,20 @@ class Progress(Content, Title):
             secs = int(stamp.seconds % 60)
             msg = f'{mins:0>2}:{secs:0>2} {msg}'
         self.messages.appendleft(msg)
+
+    def _make_display(self) -> str:
+        result = ''
+        height = 1 + self.max_messages
+        y = self.inner_y
+        y += self._align_v('middle', height, self.inner_height)
+        x = self.content_x
+        result += self.term.move(y, x) + self.progress_bar
+        y += 1
+
+        if self.max_messages:
+            result += self._visible_messages(x, y)
+
+        return result
 
     def _visible_messages(self, x: int, y: int) -> str:
         result = ''

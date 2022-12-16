@@ -28,6 +28,7 @@ by the manager to the application.
 .. autoclass:: thurible.messages.Storing
 .. autoclass:: thurible.log.Update
 .. autoclass:: thurible.progress.Tick
+.. autoclass:: thurible.progress.NoTick
 
 .. _response-messages:
 

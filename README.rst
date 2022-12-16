@@ -130,11 +130,19 @@ The following items are still needed before initial release:
 *   Manager updates:
 
     *   Allow managers to catch sigkill and pass it on to the program.
+    
+*   Panel updates:
+
+    *   Add updates to :class:`thuurible.Progress` that don't tick'.
+
+The following items are likely in future releases:
+
+*   Manager updates:
+
     *   Add coroutine manager.
     
 *   Panel updates:
 
-    *   Add a progress panel.
     *   Add a textfield panel.
     *   Add a textform panel.
     *   Add a tableform panel.

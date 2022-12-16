@@ -1170,6 +1170,16 @@ text as a <a class="reference external" href="https://docs.python.org/3/library/
 <dt class="sig sig-object py" id="thurible.Progress.update">
 <span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Message</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span></span><a class="reference internal" href="_modules/thurible/progress.html#Progress.update"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#thurible.Progress.update" title="Permalink to this definition"></a></dt>
 <dd><p>Act on a message sent by the application.</p>
+<p><a class="reference internal" href="#thurible.Progress" title="thurible.Progress"><code class="xref py py-class docutils literal notranslate"><span class="pre">thurible.Progress</span></code></a> responds to the following
+update messages:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="messages.html#thurible.progress.Tick" title="thurible.progress.Tick"><code class="xref py py-class docutils literal notranslate"><span class="pre">thurible.progress.Tick</span></code></a>: Advance the progress bar
+and display any message passed.</p></li>
+<li><p><a class="reference internal" href="messages.html#thurible.progress.NoTick" title="thurible.progress.NoTick"><code class="xref py py-class docutils literal notranslate"><span class="pre">thurible.progress.NoTick</span></code></a>: Do not advance the
+progress bar but display the message passed as a
+temporary message. The temporary message will be replaced
+by the next message received.</p></li>
+</ul>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>msg</strong> – A message sent by the application.</p>

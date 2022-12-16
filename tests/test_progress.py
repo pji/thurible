@@ -511,7 +511,82 @@ class ProgressTestCase(tp.TerminalTestCase):
         # Determine test result.
         self.assertEqual(exp, act)
 
-    def test_update(self):
+    @patch('thurible.progress.datetime')
+    def test_update_notick_with_timestamp(self, mock_dt):
+        """When passed a NoTick message, Progress.update() should
+        return a string that will not advance the progress bar. If
+        not in notick mode, the message should be added to the top
+        of the status messages. If :attr:`Progress.timestamp` is
+        `True`, add a timestamp to the beginning of the messages.
+        """
+        # Expected value.
+        exp = (
+            f'{term.move(1, 0)}████████████      '
+            f'{term.move(2, 0)}00:02 bacon       '
+            f'{term.move(3, 0)}00:00 eggs        '
+        )
+
+        # Test data and state.
+        kwargs = {
+            'steps': 6,
+            'progress': 4,
+            'max_messages': 2,
+            'timestamp': True,
+            'messages': ['spam', 'eggs',],
+            'height': 5,
+            'width': 18,
+        }
+        mock_dt.now.return_value = timedelta(seconds=3)
+        panel = progress.Progress(**kwargs)
+        msg = progress.NoTick('bacon')
+        mock_dt.now.return_value = timedelta(seconds=5)
+
+        # Run test.
+        act = panel.update(msg)
+
+        # Determine test result.
+        self.assertEqual(exp, act)
+
+    @patch('thurible.progress.datetime')
+    def test_update_notick_after_notick_with_timestamp(self, mock_dt):
+        """When passed a NoTick message, Progress.update() should
+        return a string that will not advance the progress bar. If
+        not in notick mode, the message should be added to the top
+        of the status messages. If :attr:`Progress.timestamp` is
+        `True`, add a timestamp to the beginning of the messages.
+        """
+        # Expected value.
+        exp = (
+            f'{term.move(1, 0)}████████████      '
+            f'{term.move(2, 0)}00:04 ham         '
+            f'{term.move(3, 0)}00:00 eggs        '
+        )
+
+        # Test data and state.
+        kwargs = {
+            'steps': 6,
+            'progress': 4,
+            'max_messages': 2,
+            'timestamp': True,
+            'messages': ['spam', 'eggs',],
+            'height': 5,
+            'width': 18,
+        }
+        mock_dt.now.return_value = timedelta(seconds=3)
+        panel = progress.Progress(**kwargs)
+        msg = progress.NoTick('bacon')
+        mock_dt.now.return_value = timedelta(seconds=5)
+        act = panel.update(msg)
+        msg = progress.NoTick('ham')
+        mock_dt.now.return_value = timedelta(seconds=7)
+
+        # Run test.
+        act = panel.update(msg)
+
+        # Determine test result.
+        self.assertEqual(exp, act)
+
+    def test_update_tick(self):
         """When passed a Tick message, Progress.update() should
         return a string that will advance the progress bar.
         """
@@ -534,7 +609,7 @@ class ProgressTestCase(tp.TerminalTestCase):
         # Determine test result.
         self.assertEqual(exp, act)
 
-    def test_update_with_message(self):
+    def test_update_tick_with_message(self):
         """When passed a Tick message, Progress.update() should
         return a string that will advance the progress bar.
         """
@@ -564,7 +639,50 @@ class ProgressTestCase(tp.TerminalTestCase):
         self.assertEqual(exp, act)
 
     @patch('thurible.progress.datetime')
-    def test_update_with_message_and_timestamp(self, mock_dt):
+    def test_update_tick_after_notick_with_message_and_timestamp(
+        self,
+        mock_dt
+    ):
+        """When passed a Tick message, Progress.update() should
+        return a string that will advance the progress bar. If
+        :attr:`Progress.timestamp` is `True`, add a timestamp to
+        the beginning of the messages. If this is sent after a
+        :class:`thurible.progress.NoTick` message has been sent,
+        this message should replace the top message.
+        """
+        # Expected value.
+        exp = (
+            f'{term.move(1, 0)}████████████      '
+            f'{term.move(2, 0)}00:04 ham         '
+            f'{term.move(3, 0)}00:00 eggs        '
+        )
+
+        # Test data and state.
+        kwargs = {
+            'steps': 6,
+            'progress': 3,
+            'max_messages': 2,
+            'timestamp': True,
+            'messages': ['spam', 'eggs',],
+            'height': 5,
+            'width': 18,
+        }
+        mock_dt.now.return_value = timedelta(seconds=3)
+        panel = progress.Progress(**kwargs)
+        msg = progress.NoTick('bacon')
+        mock_dt.now.return_value = timedelta(seconds=5)
+        act = panel.update(msg)
+        msg = progress.Tick('ham')
+        mock_dt.now.return_value = timedelta(seconds=7)
+
+        # Run test.
+        act = panel.update(msg)
+
+        # Determine test result.
+        self.assertEqual(exp, act)
+
+    @patch('thurible.progress.datetime')
+    def test_update_tick_with_message_and_timestamp(self, mock_dt):
         """When passed a Tick message, Progress.update() should
         return a string that will advance the progress bar. If
         :attr:`Progress.timestamp` is `True`, add a timestamp to
