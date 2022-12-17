@@ -434,89 +434,99 @@ def main(
     T = Thread(target=thb.queued_manager, args=(q_to, q_from))
     T.start()
 
-    # Since the manager communicates through a queue, you need a loop
-    # to check if there are messages in the queue and act on them.
-    # There are probably many ways to do that. Here we are using a
-    # simple while loop.
-    alerting = ''
-    while True:
+    # Now that we have a thread running, we need to watch for
+    # keyboard interrupts, so that we can make sure to kill the
+    # thread when the application is interrupted.
+    try:
 
-        # If we've received a message, we may need to act.
-        if not q_from.empty():
+        # Since the manager communicates through a queue, you need a loop
+        # to check if there are messages in the queue and act on them.
+        # There are probably many ways to do that. Here we are using a
+        # simple while loop.
+        alerting = ''
+        while True:
 
-            # Get the message from the queue.
-            msg = q_from.get()
+            # If we've received a message, we may need to act.
+            if not q_from.empty():
 
-            # Input from the user is passed to the currently displayed
-            # panel first incase it's navigation input. If the panel
-            # doesn't have a defined behavior for the input, the string
-            # representation of that input is returned to you as a
-            # Data message, so that your code can act on it.
-            #
-            # If an alert is showing, enter closes the alert.
-            if (
-                alerting
-                and isinstance(msg, tm.Data)
-                and msg.value == 'Continue'
-            ):
-                msg = tm.Dismiss(alerting)
-                q_to.put(msg)
-                alerting = ''
+                # Get the message from the queue.
+                msg = q_from.get()
 
-            # If an alert is showing, other keys do nothing.
-            elif alerting and isinstance(msg, tm.Data):
-                pass
+                # Input from the user is passed to the currently displayed
+                # panel first incase it's navigation input. If the panel
+                # doesn't have a defined behavior for the input, the string
+                # representation of that input is returned to you as a
+                # Data message, so that your code can act on it.
+                #
+                # If an alert is showing, enter closes the alert.
+                if (
+                    alerting
+                    and isinstance(msg, tm.Data)
+                    and msg.value == 'Continue'
+                ):
+                    msg = tm.Dismiss(alerting)
+                    q_to.put(msg)
+                    alerting = ''
 
-            # If the user pressed the `q` key, quit the program.
-            elif isinstance(msg, tm.Data) and msg.value == 'q':
-                break
+                # If an alert is showing, other keys do nothing.
+                elif alerting and isinstance(msg, tm.Data):
+                    pass
 
-            # If the user pressed the escape key, send the directory
-            # menu for the parent of the currently viewed directory
-            # or file.
-            elif isinstance(msg, tm.Data) and msg.value == '\x1b':
-                path = path.parent
-                panel = create_dir_menu(path, show_hidden=show_hidden)
-                q_to.put(tm.Store(str(path), panel))
-                q_to.put(tm.Show(str(path)))
+                # If the user pressed the `q` key, quit the program.
+                elif isinstance(msg, tm.Data) and msg.value == 'q':
+                    break
 
-            # If the user selected a menu item, the selection should
-            # be handled.
-            elif isinstance(msg, tm.Data) and '\x1e' in msg.value:
-                path = handle_menu_selection(
-                    msg.value,
-                    path,
-                    q_to,
-                    show_hidden
-                )
+                # If the user pressed the escape key, send the directory
+                # menu for the parent of the currently viewed directory
+                # or file.
+                elif isinstance(msg, tm.Data) and msg.value == '\x1b':
+                    path = path.parent
+                    panel = create_dir_menu(path, show_hidden=show_hidden)
+                    q_to.put(tm.Store(str(path), panel))
+                    q_to.put(tm.Show(str(path)))
 
-            # If the user supplied other input, show an alert.
-            elif isinstance(msg, tm.Data):
-                alerting = f'{msg.value} alert'
-                msg = tm.Alert(
-                    name=alerting,
-                    title='Alert',
-                    text=f'Unknown input: {msg.value}',
-                    options=cont
-                )
-                q_to.put(msg)
+                # If the user selected a menu item, the selection should
+                # be handled.
+                elif isinstance(msg, tm.Data) and '\x1e' in msg.value:
+                    path = handle_menu_selection(
+                        msg.value,
+                        path,
+                        q_to,
+                        show_hidden
+                    )
 
-            # If the queued_manager ends unexpectedly, it should send an
-            # Ending message explaining why. The main cause of that
-            # would be when an exception is raised. In that case, the
-            # exception will be returned in the Ending message, so your
-            # code can react to it.
-            elif isinstance(msg, tm.Ending) and msg.ex:
-                raise msg.ex
+                # If the user supplied other input, show an alert.
+                elif isinstance(msg, tm.Data):
+                    alerting = f'{msg.value} alert'
+                    msg = tm.Alert(
+                        name=alerting,
+                        title='Alert',
+                        text=f'Unknown input: {msg.value}',
+                        options=cont
+                    )
+                    q_to.put(msg)
 
-            # This is just here as a catch all in case there is some
-            # reason other than an Exception that could cause the
-            # manager to send an unexpected Ending message. That
-            # should't happen with queued_manager, but may be possible
-            # with managers developed in the future.
-            elif isinstance(msg, tm.Ending):
-                msg = f'queue_manager ended for reason: {msg.reason}'
-                raise RuntimeError(msg)
+                # If the queued_manager ends unexpectedly, it should send an
+                # Ending message explaining why. The main cause of that
+                # would be when an exception is raised. In that case, the
+                # exception will be returned in the Ending message, so your
+                # code can react to it.
+                elif isinstance(msg, tm.Ending) and msg.ex:
+                    raise msg.ex
+
+                # This is just here as a catch all in case there is some
+                # reason other than an Exception that could cause the
+                # manager to send an unexpected Ending message. That
+                # should't happen with queued_manager, but may be possible
+                # with managers developed in the future.
+                elif isinstance(msg, tm.Ending):
+                    msg = f'queue_manager ended for reason: {msg.reason}'
+                    raise RuntimeError(msg)
+
+    # End the manager if the application has been interrupted.
+    except KeyboardInterrupt as ex:
+        q_to.put(tm.End(repr(ex)))
+        raise ex
 
     # Once filereader breaks out of the loop, it will end. Send an
     # End message to the manager to allow it to exit cleanly.

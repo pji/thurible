@@ -19,6 +19,19 @@ that do this better, but I prefer to keep my dependencies to a minimum.
 Plus, I like playing with terminal user interfaces. They're neat.
 
 
+Will It Work with My Terminal?
+==============================
+It's intended to work with anything that :mod:`blessed` works with. Is
+that everything? Probably not. Certainly some features, like color,
+will only work if your terminal supports it. Some things, like the
+frames that can go around the panels rely on Unicode characters that
+may not exist in all fonts. If you're using a variable width font in
+your terminal… I don't know. Things are probably going to be messed up.
+
+If you run into something should work but isn't, open an issue. I'm
+just doing this on my own in my spare time, but I'll try to look at it.
+
+
 Using :mod:`thurible`
 =====================
 :dfn:`Panels` format and display data in a terminal. If you are used
@@ -100,7 +113,7 @@ program after the user presses any key on their keyboard::
 
 
 Usage Example
--------------
+=============
 Usage examples are found in the `examples/` directory.
 
 examples/favword.py
@@ -125,16 +138,6 @@ run the following::
 
 To-Do List
 ==========
-The following items are still needed before initial release:
-
-*   Manager updates:
-
-    *   Allow managers to catch sigkill and pass it on to the program.
-    
-*   Panel updates:
-
-    *   Add updates to :class:`thuurible.Progress` that don't tick'.
-
 The following items are likely in future releases:
 
 *   Manager updates:
@@ -143,6 +146,11 @@ The following items are likely in future releases:
     
 *   Panel updates:
 
+    *   Fall back frames that only use ASCII characters.
+    *   Fall back overflow indicators that only use ASCII characters.
+    *   Simplify sizing.
+    *   Add a simple table for sequences.
+    *   Add a simple table for mappings.
     *   Add a textfield panel.
     *   Add a textform panel.
     *   Add a tableform panel.

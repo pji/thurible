@@ -39,14 +39,22 @@ progress = Progress(
 q_to.put(tm.Store('prog', progress))
 q_to.put(tm.Show('prog'))
 
-# Send an update to the progress bar every eighth of a second for
-# ten seconds.
-for tick in range(ticks):
-    sleep(interval)
-    msg = f'Waited for {tick * interval:0<2.2f}s.'
-    q_to.put(Tick(msg))
+# Putting the loop in a try block to ensure the threads are ended
+# if the application runs into a problem.
+try:
 
+    # Send an update to the progress bar every eighth of a second for
+    # ten seconds.
+    for tick in range(ticks):
+        sleep(interval)
+        msg = f'Waited for {tick * interval:0<2.2f}s.'
+        q_to.put(Tick(msg))
+
+except KeyboardInterrupt as ex:
+    end = tm.End('Interrupted.')
+    q_to.put(end)
+    raise ex
 
 # End the program by displaying the favorite word.
-end = tm.End(f'That was ten seconds.')
+end = tm.End('That was at least 10 seconds.')
 q_to.put(end)

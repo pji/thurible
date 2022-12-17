@@ -123,7 +123,7 @@ def queued_manager(
     q_from.put(tm.Ending(reason, exception))
 
 
-# Core functions.
+# Manager core functions.
 def check_input(
     q_from: Queue,
     displays: dict[str, Panel],
