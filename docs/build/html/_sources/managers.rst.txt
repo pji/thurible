@@ -10,6 +10,7 @@ manager what you want to display and watch for messages back from the
 manager containing input from the user.
 
 .. autofunction:: thurible.queued_manager
+.. autofunction:: thurible.event_manager
 
 .. _manager-loop:
 

@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>thurible.eventmanager &mdash; Thurible 0.0.1 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> Thurible
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../panels.html">Panels</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../managers.html">Managers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../messages.html">Messages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../utility.html">Utility</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Thurible</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">thurible.eventmanager</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for thurible.eventmanager</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">eventmanager</span>
+<span class="sd">~~~~~~~~~~~~</span>
+
+<span class="sd">A manager that uses events sent from the user interface to drive</span>
+<span class="sd">application flow.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">queue</span> <span class="kn">import</span> <span class="n">Queue</span>
+<span class="kn">from</span> <span class="nn">threading</span> <span class="kn">import</span> <span class="n">Thread</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Optional</span>
+
+<span class="kn">from</span> <span class="nn">thurible.panel</span> <span class="kn">import</span> <span class="n">Panel</span>
+<span class="kn">from</span> <span class="nn">thurible.thurible</span> <span class="kn">import</span> <span class="n">queued_manager</span>
+<span class="kn">from</span> <span class="nn">thurible.util</span> <span class="kn">import</span> <span class="n">get_queues</span>
+<span class="kn">import</span> <span class="nn">thurible.messages</span> <span class="k">as</span> <span class="nn">tm</span>
+
+
+<span class="c1"># Manager.</span>
+<div class="viewcode-block" id="event_manager"><a class="viewcode-back" href="../../managers.html#thurible.event_manager">[docs]</a><span class="k">def</span> <span class="nf">event_manager</span><span class="p">(</span>
+    <span class="n">event_map</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">type</span><span class="p">,</span> <span class="n">Callable</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">initial_panel</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Panel</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Manage a terminal display by mapping :ref:`response-messages`</span>
+<span class="sd">    to functions in your application.</span>
+
+<span class="sd">    :param event_map: (Optional.) A :class:`dict` mapping the</span>
+<span class="sd">        :class:`thurible.panel.Message` types managers can send to</span>
+<span class="sd">        applications (:ref:`response-messages`) to functions in</span>
+<span class="sd">        your application. These functions must accept a</span>
+<span class="sd">        :class:`queue.Queue` object and the response message as</span>
+<span class="sd">        parameters. It must return a :class:`bool` indicating</span>
+<span class="sd">        whether the application should continue running.</span>
+<span class="sd">    :param initial_panel: (Optional.) The first panel displayed in</span>
+<span class="sd">        the terminal. While this is technically optional, that&#39;s</span>
+<span class="sd">        just for testing purposes. You should really provide</span>
+<span class="sd">        this to the manager. The panel passed this way will be</span>
+<span class="sd">        stored as &quot;__init&quot;.</span>
+<span class="sd">    :return: None</span>
+<span class="sd">    :rtype: NoneType</span>
+
+<span class="sd">    Usage::</span>
+
+<span class="sd">        from thurible import event_manager, Splash</span>
+<span class="sd">        import thurible.messages as tm</span>
+
+<span class="sd">        # Create the event handlers.</span>
+<span class="sd">        def data_handler(msg, q_to):</span>
+<span class="sd">            msg = tm.End(&#39;Quitting.&#39;)</span>
+<span class="sd">            q_to.put(msg)</span>
+<span class="sd">            return False</span>
+
+<span class="sd">        def ending_handler(msg, q_to):</span>
+<span class="sd">            if msg.exception:</span>
+<span class="sd">                raise msg.exception</span>
+<span class="sd">            return False</span>
+
+<span class="sd">        # Map the handlers to event messages.</span>
+<span class="sd">        event_map = {</span>
+<span class="sd">            tm.Data: data_handler,</span>
+<span class="sd">            tm.Ending: ending_handler,</span>
+<span class="sd">        }</span>
+
+<span class="sd">        # Create the panel to display when the manager starts.</span>
+<span class="sd">        splash = Splash(&#39;SPAM!&#39;)</span>
+
+<span class="sd">        # Run the event_manager.</span>
+<span class="sd">        event_manager(event_map, splash)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">event_map</span><span class="p">:</span>
+        <span class="n">event_map</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="n">q_to</span><span class="p">,</span> <span class="n">q_from</span> <span class="o">=</span> <span class="n">get_queues</span><span class="p">()</span>
+    <span class="n">T</span> <span class="o">=</span> <span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">queued_manager</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">q_to</span><span class="p">,</span> <span class="n">q_from</span><span class="p">))</span>
+    <span class="n">run</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">T</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">initial_panel</span><span class="p">:</span>
+            <span class="n">q_to</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">tm</span><span class="o">.</span><span class="n">Store</span><span class="p">(</span><span class="s1">&#39;__init&#39;</span><span class="p">,</span> <span class="n">initial_panel</span><span class="p">))</span>
+            <span class="n">q_to</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">tm</span><span class="o">.</span><span class="n">Show</span><span class="p">(</span><span class="s1">&#39;__init&#39;</span><span class="p">))</span>
+
+        <span class="k">while</span> <span class="n">run</span><span class="p">:</span>
+            <span class="n">run</span> <span class="o">=</span> <span class="n">_check_for_message</span><span class="p">(</span><span class="n">q_to</span><span class="p">,</span> <span class="n">q_from</span><span class="p">,</span> <span class="n">event_map</span><span class="p">)</span>
+
+    <span class="k">except</span> <span class="ne">KeyboardInterrupt</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
+        <span class="n">reason</span> <span class="o">=</span> <span class="s1">&#39;Keyboard Interrupt&#39;</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="n">tm</span><span class="o">.</span><span class="n">End</span><span class="p">(</span><span class="n">reason</span><span class="p">)</span>
+        <span class="n">q_to</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">ex</span></div>
+
+
+<span class="c1"># Private functions.</span>
+<span class="k">def</span> <span class="nf">_check_for_message</span><span class="p">(</span>
+    <span class="n">q_to</span><span class="p">:</span> <span class="n">Queue</span><span class="p">,</span>
+    <span class="n">q_from</span><span class="p">:</span> <span class="n">Queue</span><span class="p">,</span>
+    <span class="n">event_map</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">type</span><span class="p">,</span> <span class="n">Callable</span><span class="p">]</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Check for and handle UI messages.&quot;&quot;&quot;</span>
+    <span class="n">run</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">q_from</span><span class="o">.</span><span class="n">empty</span><span class="p">():</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="n">q_from</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">msg_type</span> <span class="ow">in</span> <span class="n">event_map</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">msg_type</span><span class="p">):</span>
+                <span class="n">run</span> <span class="o">=</span> <span class="n">event_map</span><span class="p">[</span><span class="n">msg_type</span><span class="p">](</span><span class="n">msg</span><span class="p">,</span> <span class="n">q_to</span><span class="p">)</span>
+                <span class="k">break</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">tm</span><span class="o">.</span><span class="n">Ending</span><span class="p">):</span>
+                <span class="n">run</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">return</span> <span class="n">run</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Paul J. Iutzi.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

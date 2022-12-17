@@ -116,6 +116,9 @@ Usage Example
 =============
 Usage examples are found in the `examples/` directory.
 
+examples/eventsplash.py
+    A terminal application that uses a :class:`thurible.event_manager`
+    to display a simple splash screen.
 examples/favword.py
     A terminal application that uses :mod:`thurible` to ask the user for
     their favorite word.
@@ -126,8 +129,8 @@ examples/tensecs.py
     A terminal application that uses :mod:`thurible` to track a ten
     second wait using a progress bar.
 examples/showsplash.py
-    A terminal application that uses :mod:`thurible` to display a simple
-    splash screen.
+    A terminal application that uses a :class:`thurible.queued_manager`
+    to display a simple splash screen.
 
 If you want to run them to see what they do, you need to run them like
 modules. For example, to run filereader from the root of the repository,

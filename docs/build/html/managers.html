@@ -44,6 +44,7 @@
 <li class="toctree-l1"><a class="reference internal" href="panels.html">Panels</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Managers</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#thurible.queued_manager"><code class="docutils literal notranslate"><span class="pre">queued_manager()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#thurible.event_manager"><code class="docutils literal notranslate"><span class="pre">event_manager()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#the-manager-loop">The Manager Loop</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#storing-panels">Storing Panels</a></li>
 </ul>
@@ -136,6 +137,65 @@ want the manager to display.</p></li>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># End the thread running the queued_manager.</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">msg</span> <span class="o">=</span> <span class="n">End</span><span class="p">(</span><span class="s1">&#39;Ending.&#39;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">q_in</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="thurible.event_manager">
+<span class="sig-prename descclassname"><span class="pre">thurible.</span></span><span class="sig-name descname"><span class="pre">event_manager</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event_map</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#type" title="(in Python v3.11)"><span class="pre">type</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.11)"><span class="pre">Callable</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_panel</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="panels.html#thurible.panel.Panel" title="thurible.panel.Panel"><span class="pre">Panel</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/thurible/eventmanager.html#event_manager"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#thurible.event_manager" title="Permalink to this definition"></a></dt>
+<dd><p>Manage a terminal display by mapping <a class="reference internal" href="messages.html#response-messages"><span class="std std-ref">Response Messages</span></a>
+to functions in your application.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>event_map</strong> – (Optional.) A <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a> mapping the
+<code class="xref py py-class docutils literal notranslate"><span class="pre">thurible.panel.Message</span></code> types managers can send to
+applications (<a class="reference internal" href="messages.html#response-messages"><span class="std std-ref">Response Messages</span></a>) to functions in
+your application. These functions must accept a
+<a class="reference external" href="https://docs.python.org/3/library/queue.html#queue.Queue" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">queue.Queue</span></code></a> object and the response message as
+parameters. It must return a <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a> indicating
+whether the application should continue running.</p></li>
+<li><p><strong>initial_panel</strong> – (Optional.) The first panel displayed in
+the terminal. While this is technically optional, that’s
+just for testing purposes. You should really provide
+this to the manager. The panel passed this way will be
+stored as “__init”.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>NoneType</p>
+</dd>
+</dl>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">thurible</span> <span class="kn">import</span> <span class="n">event_manager</span><span class="p">,</span> <span class="n">Splash</span>
+<span class="kn">import</span> <span class="nn">thurible.messages</span> <span class="k">as</span> <span class="nn">tm</span>
+
+<span class="c1"># Create the event handlers.</span>
+<span class="k">def</span> <span class="nf">data_handler</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">q_to</span><span class="p">):</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="n">tm</span><span class="o">.</span><span class="n">End</span><span class="p">(</span><span class="s1">&#39;Quitting.&#39;</span><span class="p">)</span>
+    <span class="n">q_to</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+    <span class="k">return</span> <span class="kc">False</span>
+
+<span class="k">def</span> <span class="nf">ending_handler</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">q_to</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">msg</span><span class="o">.</span><span class="n">exception</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">msg</span><span class="o">.</span><span class="n">exception</span>
+    <span class="k">return</span> <span class="kc">False</span>
+
+<span class="c1"># Map the handlers to event messages.</span>
+<span class="n">event_map</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="n">tm</span><span class="o">.</span><span class="n">Data</span><span class="p">:</span> <span class="n">data_handler</span><span class="p">,</span>
+    <span class="n">tm</span><span class="o">.</span><span class="n">Ending</span><span class="p">:</span> <span class="n">ending_handler</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># Create the panel to display when the manager starts.</span>
+<span class="n">splash</span> <span class="o">=</span> <span class="n">Splash</span><span class="p">(</span><span class="s1">&#39;SPAM!&#39;</span><span class="p">)</span>
+
+<span class="c1"># Run the event_manager.</span>
+<span class="n">event_manager</span><span class="p">(</span><span class="n">event_map</span><span class="p">,</span> <span class="n">splash</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>
