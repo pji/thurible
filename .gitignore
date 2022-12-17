@@ -7,5 +7,6 @@
 .venv*
 
 # Build directories.
+build
 dist
 thurible.egg-info

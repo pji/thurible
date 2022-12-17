@@ -20,6 +20,9 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
 ]
+dependencies = [
+    'blessed',
+]
 
 [project.urls]
 "Homepage" = "https://thurible.readthedocs.io/en/latest/index.html#"
