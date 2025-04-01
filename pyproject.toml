@@ -6,6 +6,15 @@ build-backend = "setuptools.build_meta"
 report_level = "WARNING"
 ignore_directives = ["autoclass", "autofunction"]
 
+[tool.poetry.group.dev.dependencies]
+pycodestyle = "^2.13.0"
+mypy = "^1.15.0"
+rstcheck = "^6.2.4"
+rstcheck-core = "^1.2.1"
+sphinx = "^8.2.3"
+furo = "^2024.8.6"
+pytest = "^8.3.5"
+
 [project]
 name = "thurible"
 version = "0.0.1"
@@ -14,7 +23,7 @@ authors = [
 ]
 description = "Tools for creating fullscreen terminal UIs on top of blessed."
 readme = "README.rst"
-requires-python = ">=3.9"
+requires-python = ">=3.11"
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",

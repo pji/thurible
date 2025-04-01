@@ -4,15 +4,21 @@ text
 
 An object for displaying a data table in a terminal.
 """
+from __future__ import annotations
+
 from dataclasses import astuple, dataclass, fields
 import unicodedata as ucd
-from typing import Any, Optional, Protocol, Sequence
+from typing import Any, Optional, Protocol, Sequence, TYPE_CHECKING
 
 from blessed import Terminal
 from blessed.keyboard import Keystroke
 
 from thurible.panel import Scroll, Title
 from thurible.util import Box as Frame
+
+
+if TYPE_CHECKING:
+    from _typeshed import DataclassInstance
 
 
 # Protocols for type hinting.
@@ -45,7 +51,7 @@ class Table(Scroll, Title):
     """
     def __init__(
         self,
-        records: Sequence[Dataclass],
+        records: Sequence[DataclassInstance],
         inner_frame: bool = False,
         content_align_h: str = 'left',
         content_align_v: str = 'top',
@@ -180,7 +186,7 @@ class Table(Scroll, Title):
     # Private helper methods.
     def _calc_field_widths(
         self,
-        records: Sequence[Dataclass],
+        records: Sequence[DataclassInstance],
         names: list[str],
     ) -> list[int]:
         result = []
@@ -268,7 +274,7 @@ class Table(Scroll, Title):
 
     def _get_field_value(
         self,
-        record: Dataclass,
+        record: DataclassInstance,
         field: str,
         width: int
     ) -> str:
