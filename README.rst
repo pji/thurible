@@ -139,6 +139,28 @@ run the following::
     python3 -m examples.filereader
 
 
+Changes in 0.0.2
+================
+The following are the changes in v0.0.2:
+
+*   Moved dependency management to `poetry`.
+
+*   Moved `thurible` into a `src` folder.
+*   (Started.) Moved testing to `pytest`.
+
+    *   Added `make test`.
+    *   Refactored `test_dialog`.
+    *   Refactored `test_event_manager`.
+    *   Refactored `test_filereader`.
+    *   Refactored `test_init`.
+    *   Refactored `test_log`.
+    *   (Started.) Refactored `test_menu`.
+
+*   (Not started.) Implemented `tox` to test across supported Python versions.
+*   (Not started.) Moved doctests to `sphinx`.
+*   (Started.) Documentation formatting changes.
+
+
 To-Do List
 ==========
 The following items are likely in future releases:

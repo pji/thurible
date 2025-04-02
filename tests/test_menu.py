@@ -7,6 +7,7 @@ Unit tests for the `thurible.menu` module.
 import unittest as ut
 from unittest.mock import patch
 
+import pytest as pt
 from blessed import Terminal
 from blessed.keyboard import Keystroke
 
@@ -16,679 +17,475 @@ import tests.test_panel as tp
 
 
 # Common data.
-KEY_DOWN = Keystroke('\x1b[B', term.KEY_DOWN, 'KEY_DOWN')
-KEY_E = Keystroke('e')
-KEY_END = Keystroke('\x1b[F', term.KEY_END, 'KEY_END')
-KEY_ENTER = Keystroke('\n', term.KEY_ENTER, 'KEY_ENTER')
-KEY_HOME = Keystroke('\x1b[H', term.KEY_HOME, 'KEY_HOME')
-KEY_O = Keystroke('o')
-KEY_PGDOWN = Keystroke('\x1b[U', term.KEY_PGDOWN, 'KEY_PGDOWN')
-KEY_PGUP = Keystroke('\x1b[V', term.KEY_PGUP, 'KEY_PGUP')
-KEY_UP = Keystroke('\x1b[A', term.KEY_UP, 'KEY_UP')
-KEY_X = Keystroke('x')
+# KEY_DOWN = Keystroke('\x1b[B', term.KEY_DOWN, 'KEY_DOWN')
+# KEY_E = Keystroke('e')
+# KEY_END = Keystroke('\x1b[F', term.KEY_END, 'KEY_END')
+# KEY_ENTER = Keystroke('\n', term.KEY_ENTER, 'KEY_ENTER')
+# KEY_HOME = Keystroke('\x1b[H', term.KEY_HOME, 'KEY_HOME')
+# KEY_O = Keystroke('o')
+# KEY_PGDOWN = Keystroke('\x1b[U', term.KEY_PGDOWN, 'KEY_PGDOWN')
+# KEY_PGUP = Keystroke('\x1b[V', term.KEY_PGUP, 'KEY_PGUP')
+# KEY_UP = Keystroke('\x1b[A', term.KEY_UP, 'KEY_UP')
+# KEY_X = Keystroke('x')
+
+
+# Fixtures.
+@pt.fixture
+def menu_options():
+    """Common menu options."""
+    return [
+        menu.Option('spam', 's'),
+        menu.Option('eggs', 'e'),
+        menu.Option('bacon', 'b'),
+    ]
+
+
+@pt.fixture
+def menu_options_long(menu_options):
+    """Long list of common menu options."""
+    return [
+        *menu_options,
+        menu.Option('ham', 'h'),
+        menu.Option('beans', 'n'),
+        menu.Option('toast', 'o'),
+        menu.Option('tomato', 't'),
+    ]
 
 
 # Test case.
+def test__init_attrs_default(
+    content_attr_defaults_menu,
+    frame_attr_defaults,
+    menu_options,
+    panel_attr_defaults,
+    title_attr_defaults
+):
+    """Given only the required parameters, a Menu should
+    return an object with the expected attributes set.
+    """
+    m = menu.Menu(options=menu_options)
+    assert m.options == menu_options
+    assert m.select_bg == ''
+    assert m.select_fg == ''
+    assert m.option_align_h == 'left'
+    assert {
+        k: getattr(m, k) for k in content_attr_defaults_menu
+    } == content_attr_defaults_menu
+    assert {
+        k: getattr(m, k) for k in title_attr_defaults
+    } == title_attr_defaults
+    assert {
+        k: getattr(m, k) for k in frame_attr_defaults
+    } == frame_attr_defaults
+    assert {
+        k: getattr(m, k) for k in panel_attr_defaults
+    } == panel_attr_defaults
+
+
+def test__init_attrs_set(
+    content_attr_set,
+    frame_attr_set,
+    menu_options,
+    panel_attr_set,
+    title_attr_set
+):
+    """Given any parameters, a Menu should return an
+    object with the expected attributes set.
+    """
+    m = menu.Menu(
+        options=menu_options,
+        select_bg='red',
+        select_fg='blue',
+        option_align_h='right',
+        **content_attr_set,
+        **title_attr_set,
+        **frame_attr_set,
+        **panel_attr_set
+    )
+    assert m.options == menu_options
+    assert m.select_bg == 'red'
+    assert m.select_fg == 'blue'
+    assert m.option_align_h == 'right'
+    assert {
+        k: getattr(m, k) for k in content_attr_set
+    } == content_attr_set
+    assert {
+        k: getattr(m, k) for k in title_attr_set
+    } == title_attr_set
+    assert {
+        k: getattr(m, k) for k in frame_attr_set
+    } == frame_attr_set
+    assert {
+        k: getattr(m, k) for k in panel_attr_set
+    } == panel_attr_set
+
+
+def test_as_str(menu_options, term):
+    """When converted to a string, a Menu object returns a string
+    that will draw the entire menu.
+    """
+    m = menu.Menu(options=menu_options, height=5, width=7)
+    assert str(m) == (
+        f'{term.move(0, 0)}       '
+        f'{term.move(1, 0)}       '
+        f'{term.move(2, 0)}       '
+        f'{term.move(3, 0)}       '
+        f'{term.move(4, 0)}       '
+        f'{term.reverse}'
+        f'{term.move(0, 0)}spam '
+        f'{term.normal}'
+        f'{term.move(1, 0)}eggs '
+        f'{term.move(2, 0)}bacon'
+    )
+
+
+def test_as_str_with_bg_and_fg(menu_options, term):
+    """When converted to a string, a Menu object returns a string
+    that will draw the entire menu. If foreground or background
+    colors are given, the contents of the panel should have those
+    colors.
+    """
+    m = menu.Menu(
+        options=menu_options,
+        height=5,
+        width=7,
+        bg='blue',
+        fg='red'
+    )
+    assert str(m) == (
+        f'{term.red_on_blue}'
+        f'{term.move(0, 0)}       '
+        f'{term.move(1, 0)}       '
+        f'{term.move(2, 0)}       '
+        f'{term.move(3, 0)}       '
+        f'{term.move(4, 0)}       '
+        f'{term.normal}'
+        f'{term.red_on_blue}'
+        f'{term.reverse}'
+        f'{term.move(0, 0)}spam '
+        f'{term.normal}'
+        f'{term.red_on_blue}'
+        f'{term.move(1, 0)}eggs '
+        f'{term.move(2, 0)}bacon'
+        f'{term.normal}'
+    )
+
+
+def test_as_str_with_content_and_option_align_h_center(menu_options, term):
+    """When converted to a string, a Menu object returns a string
+    that will draw the entire menu. If the horizontal content
+    alignment is centered, the options should be centered within
+    the panel.
+    """
+    m = menu.Menu(
+        options=[*menu_options, menu.Option('ham', 'h')],
+        option_align_h='center',
+        content_align_h='center',
+        height=5,
+        width=9
+    )
+    assert str(m) == (
+        f'{term.move(0, 0)}         '
+        f'{term.move(1, 0)}         '
+        f'{term.move(2, 0)}         '
+        f'{term.move(3, 0)}         '
+        f'{term.move(4, 0)}         '
+        f'{term.reverse}'
+        f'{term.move(0, 2)}spam '
+        f'{term.normal}'
+        f'{term.move(1, 2)}eggs '
+        f'{term.move(2, 2)}bacon'
+        f'{term.move(3, 2)} ham '
+    )
+
+
+def test_as_str_with_content_and_option_align_h_right(menu_options, term):
+    """When converted to a string, a Menu object returns a string
+    that will draw the entire menu. If the horizontal content
+    alignment is right, the options should be right aligned within
+    the panel.
+    """
+    m = menu.Menu(
+        options=[*menu_options, menu.Option('ham', 'h')],
+        option_align_h='right',
+        content_align_h='right',
+        height=5,
+        width=9
+    )
+    assert str(m) == (
+        f'{term.move(0, 0)}         '
+        f'{term.move(1, 0)}         '
+        f'{term.move(2, 0)}         '
+        f'{term.move(3, 0)}         '
+        f'{term.move(4, 0)}         '
+        f'{term.reverse}'
+        f'{term.move(0, 4)} spam'
+        f'{term.normal}'
+        f'{term.move(1, 4)} eggs'
+        f'{term.move(2, 4)}bacon'
+        f'{term.move(3, 4)}  ham'
+    )
+
+
+def test_as_str_with_content_pad_left(menu_options, term):
+    """When converted to a string, a Menu object returns a string
+    that will draw the entire menu. If left content padding is set,
+    the options will be inset by the amount of padding.
+    """
+    m = menu.Menu(
+        options=menu_options,
+        content_pad_left=0.2,
+        height=5,
+        width=10
+    )
+    assert str(m) == (
+        f'{term.move(0, 0)}          '
+        f'{term.move(1, 0)}          '
+        f'{term.move(2, 0)}          '
+        f'{term.move(3, 0)}          '
+        f'{term.move(4, 0)}          '
+        f'{term.reverse}'
+        f'{term.move(0, 3)}spam '
+        f'{term.normal}'
+        f'{term.move(1, 3)}eggs '
+        f'{term.move(2, 3)}bacon'
+    )
+
+
+def test_as_str_with_content_relative_width_and_align_h_center(
+    menu_options, term
+):
+    """When converted to a string, a Menu object returns a string
+    that will draw the entire menu. If left content padding is set,
+    the options will be inset by the amount of padding.
+    """
+    m = menu.Menu(
+        options=menu_options,
+        option_align_h='right',
+        content_align_h='center',
+        content_relative_width=0.8,
+        height=5,
+        width=10
+    )
+    assert str(m) == (
+        f'{term.move(0, 0)}          '
+        f'{term.move(1, 0)}          '
+        f'{term.move(2, 0)}          '
+        f'{term.move(3, 0)}          '
+        f'{term.move(4, 0)}          '
+        f'{term.reverse}'
+        f'{term.move(0, 2)} spam'
+        f'{term.normal}'
+        f'{term.move(1, 2)} eggs'
+        f'{term.move(2, 2)}bacon'
+    )
+
+
+def test_as_str_with_overflow(menu_options_long, term):
+    """When converted to a string, a Menu object returns a string
+    that will draw the entire menu. If there are too many options
+    to fit in the panel, there should be an overflow indicator on
+    the bottom line of the panel's content.
+    """
+    m = menu.Menu(
+        options=menu_options_long,
+        height=5,
+        width=9
+    )
+    assert str(m) == (
+        f'{term.move(0, 0)}         '
+        f'{term.move(1, 0)}         '
+        f'{term.move(2, 0)}         '
+        f'{term.move(3, 0)}         '
+        f'{term.move(4, 0)}         '
+        f'{term.move(4, 0)}         '
+        f'{term.move(4, 3)}[▼]'
+        f'{term.reverse}'
+        f'{term.move(0, 0)}spam  '
+        f'{term.normal}'
+        f'{term.move(1, 0)}eggs  '
+        f'{term.move(2, 0)}bacon '
+        f'{term.move(3, 0)}ham   '
+    )
+
+
+def test_as_str_with_select_bg_and_fg(menu_options, term):
+    """When converted to a string, a Menu object returns a string
+    that will draw the entire menu. If foreground and background
+    colors are set for the selection, the selection should be those
+    colors.
+    """
+    m = menu.Menu(
+        options=menu_options,
+        select_bg='blue',
+        select_fg='red',
+        height=5,
+        width=7
+    )
+    assert str(m) == (
+        f'{term.move(0, 0)}       '
+        f'{term.move(1, 0)}       '
+        f'{term.move(2, 0)}       '
+        f'{term.move(3, 0)}       '
+        f'{term.move(4, 0)}       '
+        f'{term.red_on_blue}'
+        f'{term.move(0, 0)}spam '
+        f'{term.normal}'
+        f'{term.move(1, 0)}eggs '
+        f'{term.move(2, 0)}bacon'
+    )
+
+
+def test_action_down(KEY_DOWN, menu_options_long, term):
+    """When a down arrow is received, Menu.action() selects the
+    next option.
+    """
+    m = menu.Menu(
+        options=menu_options_long,
+        height=5,
+        width=9
+    )
+    m._overflow_bottom = True
+    m._stop = 4
+    assert m.action(KEY_DOWN) == ('', (
+        f'{term.move(0, 0)}spam  '
+        f'{term.reverse}'
+        f'{term.move(1, 0)}eggs  '
+        f'{term.normal}'
+        f'{term.move(2, 0)}bacon '
+        f'{term.move(3, 0)}ham   '
+    ))
+
+
+def test_action_down_at_bottom(KEY_DOWN, menu_options_long, term):
+    """When a down arrow is received, Menu.action() selects the
+    next option. If the selected option is the last option, the
+    selection doesn't move.
+    """
+    m = menu.Menu(
+        options=menu_options_long,
+        height=5,
+        width=9
+    )
+    m._overflow_top = True
+    m._selected = 6
+    m._start = 3
+    m._stop = 7
+    assert m.action(KEY_DOWN) == ('', (
+        f'{term.move(1, 0)}ham   '
+        f'{term.move(2, 0)}beans '
+        f'{term.move(3, 0)}toast '
+        f'{term.reverse}'
+        f'{term.move(4, 0)}tomato'
+        f'{term.normal}'
+    ))
+
+
+def test_action_down_scrolls_to_overflow(KEY_DOWN, menu_options_long, term):
+    """When a down arrow is received, Menu.action() selects the
+    next option. If the selected option is the last visible
+    options and the list of option overflows, the list of options
+    should scroll down to see the next option.
+    """
+    m = menu.Menu(
+        options=menu_options_long,
+        height=5,
+        width=9
+    )
+    m._overflow_bottom = True
+    m._selected = 3
+    m._stop = 4
+    assert m.action(KEY_DOWN) == ('', (
+        f'{term.move(0, 0)}         '
+        f'{term.move(0, 3)}[▲]'
+        f'{term.move(1, 0)}bacon '
+        f'{term.move(2, 0)}ham   '
+        f'{term.reverse}'
+        f'{term.move(3, 0)}beans '
+        f'{term.normal}'
+    ))
+
+
+def test_action_down_scrolls_near_bottom_of_overflow(
+    KEY_DOWN, menu_options_long, term
+):
+    """When a down arrow is received, Menu.action() selects the
+    next option. If the selected option is the last visible
+    options and the list of option overflows, the list of options
+    should scroll down to see the next option. If it scrolls to
+    the next to last option, the overflow down marker should be
+    replaced with the last option.
+    """
+    m = menu.Menu(
+        options=menu_options_long,
+        height=5,
+        width=9
+    )
+    m._overflow_bottom = True
+    m._overflow_top = True
+    m._selected = 4
+    m._start = 2
+    m._stop = 5
+    assert m.action(KEY_DOWN) == ('', (
+        f'{term.move(4, 0)}         '
+        f'{term.move(1, 0)}ham   '
+        f'{term.move(2, 0)}beans '
+        f'{term.reverse}'
+        f'{term.move(3, 0)}toast '
+        f'{term.normal}'
+        f'{term.move(4, 0)}tomato'
+    ))
+
+
+def test_action_down_with_content_pad_left(KEY_DOWN, menu_options_long, term):
+    """When a down arrow is received, Menu.action() selects the
+    next option.
+    """
+    m = menu.Menu(
+        options=menu_options_long,
+        content_pad_left=0.2,
+        height=5,
+        width=10
+    )
+    m._overflow_bottom = True
+    m._stop = 4
+    assert m.action(KEY_DOWN) == ('', (
+        f'{term.move(0, 3)}spam  '
+        f'{term.reverse}'
+        f'{term.move(1, 3)}eggs  '
+        f'{term.normal}'
+        f'{term.move(2, 3)}bacon '
+        f'{term.move(3, 3)}ham   '
+    ))
+
+
+def test_action_end(KEY_END, menu_options_long, term):
+    """When an end is received, Menu.action() selects the
+    last option and jumps to that section of the menu.
+    """
+    m = menu.Menu(
+        options=menu_options_long,
+        height=5,
+        width=9
+    )
+    m._overflow_bottom = True
+    m._selected = 2
+    m._stop = 4
+    assert m.action(KEY_END) == ('', (
+        f'{term.move(4, 0)}         '
+        f'{term.move(0, 0)}         '
+        f'{term.move(0, 3)}[▲]'
+        f'{term.move(1, 0)}ham   '
+        f'{term.move(2, 0)}beans '
+        f'{term.move(3, 0)}toast '
+        f'{term.reverse}'
+        f'{term.move(4, 0)}tomato'
+        f'{term.normal}'
+    ))
+
+
+@pt.mark.skip
 class MenuTestCase(TerminalTestCase):
-    def test___init__optional_parameters(self):
-        """Given any parameters, a Menu should return an
-        object with the expected attributes set.
-        """
-        # Expected values.
-        exp = {
-            'options': [
-                menu.Option('spam', 's'),
-                menu.Option('eggs', 'e'),
-                menu.Option('bacon', 'b'),
-            ],
-            'option_align_h': 'right',
-            'select_bg': 'red',
-            'select_fg': 'blue',
-            **tp.kwargs_content_opt_default_alt,
-            **tp.kwargs_title_opt_set,
-            **tp.kwargs_frame_opt_set,
-            **tp.kwargs_panel_req,
-            **tp.kwargs_panel_opt_set,
-        }
-
-        # Run test.
-        m = menu.Menu(**exp)
-
-        # Gather actuals.
-        act = {key: getattr(m, key) for key in exp}
-
-        # Determine test results.
-        self.assertDictEqual(exp, act)
-
-    def test___init__required_parameters(self):
-        """Given only the required parameters, a Menu should
-        return an object with the expected attributes set.
-        """
-        # Expected values.
-        exp_req = {
-            'options': [
-                menu.Option('spam', 's'),
-                menu.Option('eggs', 'e'),
-                menu.Option('bacon', 'b'),
-            ],
-        }
-        exp_opt = {
-            'select_bg': '',
-            'select_fg': '',
-            'option_align_h': 'left',
-            **tp.kwargs_content_opt_default_alt,
-            **tp.kwargs_title_opt_default,
-            **tp.kwargs_frame_opt_default,
-            **tp.kwargs_panel_opt_default,
-        }
-
-        # Run test.
-        m = menu.Menu(**exp_req)
-
-        # Gather actuals.
-        act_req = {key: getattr(m, key) for key in exp_req}
-        act_opt = {key: getattr(m, key) for key in exp_opt}
-
-        # Determine test results.
-        self.assertDictEqual(exp_req, act_req)
-        self.assertDictEqual(exp_opt, act_opt)
-
-    def test___str__(self):
-        """When converted to a string, a Menu object returns a string
-        that will draw the entire menu.
-        """
-        # Expected values.
-        exp = (
-            f'{term.move(0, 0)}       '
-            f'{term.move(1, 0)}       '
-            f'{term.move(2, 0)}       '
-            f'{term.move(3, 0)}       '
-            f'{term.move(4, 0)}       '
-            f'{term.reverse}'
-            f'{term.move(0, 0)}spam '
-            f'{term.normal}'
-            f'{term.move(1, 0)}eggs '
-            f'{term.move(2, 0)}bacon'
-        )
-
-        # Test data and state.
-        kwargs = {
-            'options': [
-                menu.Option('spam', 's'),
-                menu.Option('eggs', 'e'),
-                menu.Option('bacon', 'b'),
-            ],
-            'height': 5,
-            'width': 7,
-            'term': term,
-        }
-        m = menu.Menu(**kwargs)
-
-        # Run test.
-        act = str(m)
-
-        # Determine test result.
-        self.assertEqual(exp, act)
-
-    def test___str__with_bg_and_fg(self):
-        """When converted to a string, a Menu object returns a string
-        that will draw the entire menu. If foreground or background
-        colors are given, the contents of the panel should have those
-        colors.
-        """
-        # Expected values.
-        exp = (
-            f'{term.red_on_blue}'
-            f'{term.move(0, 0)}       '
-            f'{term.move(1, 0)}       '
-            f'{term.move(2, 0)}       '
-            f'{term.move(3, 0)}       '
-            f'{term.move(4, 0)}       '
-            f'{term.normal}'
-            f'{term.red_on_blue}'
-            f'{term.reverse}'
-            f'{term.move(0, 0)}spam '
-            f'{term.normal}'
-            f'{term.red_on_blue}'
-            f'{term.move(1, 0)}eggs '
-            f'{term.move(2, 0)}bacon'
-            f'{term.normal}'
-        )
-
-        # Test data and state.
-        kwargs = {
-            'options': [
-                menu.Option('spam', 's'),
-                menu.Option('eggs', 'e'),
-                menu.Option('bacon', 'b'),
-            ],
-            'height': 5,
-            'width': 7,
-            'term': term,
-            'bg': 'blue',
-            'fg': 'red',
-        }
-        m = menu.Menu(**kwargs)
-
-        # Run test.
-        act = str(m)
-
-        # Determine test result.
-        self.assertEqual(exp, act)
-
-    def test___str__with_content_and_option_align_h_center(self):
-        """When converted to a string, a Menu object returns a string
-        that will draw the entire menu. If the horizontal content
-        alignment is centered, the options should be centered within
-        the panel.
-        """
-        # Expected values.
-        exp = (
-            f'{term.move(0, 0)}         '
-            f'{term.move(1, 0)}         '
-            f'{term.move(2, 0)}         '
-            f'{term.move(3, 0)}         '
-            f'{term.move(4, 0)}         '
-            f'{term.reverse}'
-            f'{term.move(0, 2)}spam '
-            f'{term.normal}'
-            f'{term.move(1, 2)}eggs '
-            f'{term.move(2, 2)}bacon'
-            f'{term.move(3, 2)} ham '
-        )
-
-        # Test data and state.
-        kwargs = {
-            'options': [
-                menu.Option('spam', 's'),
-                menu.Option('eggs', 'e'),
-                menu.Option('bacon', 'b'),
-                menu.Option('ham', 'h'),
-            ],
-            'option_align_h': 'center',
-            'content_align_h': 'center',
-            'height': 5,
-            'width': 9,
-            'term': term,
-        }
-        m = menu.Menu(**kwargs)
-
-        # Run test.
-        act = str(m)
-
-        # Determine test result.
-        self.assertEqual(exp, act)
-
-    def test___str__with_content_and_option_align_h_right(self):
-        """When converted to a string, a Menu object returns a string
-        that will draw the entire menu. If the horizontal content
-        alignment is right, the options should be right aligned within
-        the panel.
-        """
-        # Expected values.
-        exp = (
-            f'{term.move(0, 0)}         '
-            f'{term.move(1, 0)}         '
-            f'{term.move(2, 0)}         '
-            f'{term.move(3, 0)}         '
-            f'{term.move(4, 0)}         '
-            f'{term.reverse}'
-            f'{term.move(0, 4)} spam'
-            f'{term.normal}'
-            f'{term.move(1, 4)} eggs'
-            f'{term.move(2, 4)}bacon'
-            f'{term.move(3, 4)}  ham'
-        )
-
-        # Test data and state.
-        kwargs = {
-            'options': [
-                menu.Option('spam', 's'),
-                menu.Option('eggs', 'e'),
-                menu.Option('bacon', 'b'),
-                menu.Option('ham', 'h'),
-            ],
-            'option_align_h': 'right',
-            'content_align_h': 'right',
-            'height': 5,
-            'width': 9,
-            'term': term,
-        }
-        m = menu.Menu(**kwargs)
-
-        # Run test.
-        act = str(m)
-
-        # Determine test result.
-        self.assertEqual(exp, act)
-
-    def test___str__with_content_pad_left(self):
-        """When converted to a string, a Menu object returns a string
-        that will draw the entire menu. If left content padding is set,
-        the options will be inset by the amount of padding.
-        """
-        # Expected values.
-        exp = (
-            f'{term.move(0, 0)}          '
-            f'{term.move(1, 0)}          '
-            f'{term.move(2, 0)}          '
-            f'{term.move(3, 0)}          '
-            f'{term.move(4, 0)}          '
-            f'{term.reverse}'
-            f'{term.move(0, 3)}spam '
-            f'{term.normal}'
-            f'{term.move(1, 3)}eggs '
-            f'{term.move(2, 3)}bacon'
-        )
-
-        # Test data and state.
-        kwargs = {
-            'options': [
-                menu.Option('spam', 's'),
-                menu.Option('eggs', 'e'),
-                menu.Option('bacon', 'b'),
-            ],
-            'content_pad_left': 0.2,
-            'height': 5,
-            'width': 10,
-            'term': term,
-        }
-        m = menu.Menu(**kwargs)
-
-        # Run test.
-        act = str(m)
-
-        # Determine test result.
-        self.assertEqual(exp, act)
-
-    def test___str__with_content_relative_width_and_align_h_center(self):
-        """When converted to a string, a Menu object returns a string
-        that will draw the entire menu. If left content padding is set,
-        the options will be inset by the amount of padding.
-        """
-        # Expected values.
-        exp = (
-            f'{term.move(0, 0)}          '
-            f'{term.move(1, 0)}          '
-            f'{term.move(2, 0)}          '
-            f'{term.move(3, 0)}          '
-            f'{term.move(4, 0)}          '
-            f'{term.reverse}'
-            f'{term.move(0, 2)} spam'
-            f'{term.normal}'
-            f'{term.move(1, 2)} eggs'
-            f'{term.move(2, 2)}bacon'
-        )
-
-        # Test data and state.
-        kwargs = {
-            'options': [
-                menu.Option('spam', 's'),
-                menu.Option('eggs', 'e'),
-                menu.Option('bacon', 'b'),
-            ],
-            'option_align_h': 'right',
-            'content_align_h': 'center',
-            'content_relative_width': 0.8,
-            'height': 5,
-            'width': 10,
-            'term': term,
-        }
-        m = menu.Menu(**kwargs)
-
-        # Run test.
-        act = str(m)
-
-        # Determine test result.
-        self.assertEqual(exp, act)
-
-    def test___str__with_overflow(self):
-        """When converted to a string, a Menu object returns a string
-        that will draw the entire menu. If there are too many options
-        to fit in the panel, there should be an overflow indicator on
-        the bottom line of the panel's content.
-        """
-        # Expected values.
-        exp = (
-            f'{term.move(0, 0)}         '
-            f'{term.move(1, 0)}         '
-            f'{term.move(2, 0)}         '
-            f'{term.move(3, 0)}         '
-            f'{term.move(4, 0)}         '
-            f'{term.move(4, 0)}         '
-            f'{term.move(4, 3)}[▼]'
-            f'{term.reverse}'
-            f'{term.move(0, 0)}spam  '
-            f'{term.normal}'
-            f'{term.move(1, 0)}eggs  '
-            f'{term.move(2, 0)}bacon '
-            f'{term.move(3, 0)}ham   '
-        )
-
-        # Test data and state.
-        kwargs = {
-            'options': [
-                menu.Option('spam', 's'),
-                menu.Option('eggs', 'e'),
-                menu.Option('bacon', 'b'),
-                menu.Option('ham', 'h'),
-                menu.Option('beans', 'n'),
-                menu.Option('toast', 'o'),
-                menu.Option('tomato', 't'),
-            ],
-            'height': 5,
-            'width': 9,
-            'term': term,
-        }
-        m = menu.Menu(**kwargs)
-
-        # Run test.
-        act = str(m)
-
-        # Determine test result.
-        self.assertEqual(exp, act)
-
-    def test___str__with_select_bg_and_fg(self):
-        """When converted to a string, a Menu object returns a string
-        that will draw the entire menu. If foreground and background
-        colors are set for the selection, the selection should be those
-        colors.
-        """
-        # Expected values.
-        exp = (
-            f'{term.move(0, 0)}       '
-            f'{term.move(1, 0)}       '
-            f'{term.move(2, 0)}       '
-            f'{term.move(3, 0)}       '
-            f'{term.move(4, 0)}       '
-            f'{term.red_on_blue}'
-            f'{term.move(0, 0)}spam '
-            f'{term.normal}'
-            f'{term.move(1, 0)}eggs '
-            f'{term.move(2, 0)}bacon'
-        )
-
-        # Test data and state.
-        kwargs = {
-            'options': [
-                menu.Option('spam', 's'),
-                menu.Option('eggs', 'e'),
-                menu.Option('bacon', 'b'),
-            ],
-            'select_bg': 'blue',
-            'select_fg': 'red',
-            'height': 5,
-            'width': 7,
-            'term': term,
-        }
-        m = menu.Menu(**kwargs)
-
-        # Run test.
-        act = str(m)
-
-        # Determine test result.
-        self.assertEqual(exp, act)
-
-    def test_action_down_arrow(self):
-        """When a down arrow is received, Menu.action() selects the
-        next option.
-        """
-        # Expected values.
-        exp = ('', (
-            f'{term.move(0, 0)}spam  '
-            f'{term.reverse}'
-            f'{term.move(1, 0)}eggs  '
-            f'{term.normal}'
-            f'{term.move(2, 0)}bacon '
-            f'{term.move(3, 0)}ham   '
-        ))
-
-        # Test data and state.
-        kwargs = {
-            'options': [
-                menu.Option('spam', 's'),
-                menu.Option('eggs', 'e'),
-                menu.Option('bacon', 'b'),
-                menu.Option('ham', 'h'),
-                menu.Option('beans', 'n'),
-                menu.Option('toast', 'o'),
-                menu.Option('tomato', 't'),
-            ],
-            'height': 5,
-            'width': 9,
-            'term': term,
-        }
-        m = menu.Menu(**kwargs)
-        m._overflow_bottom = True
-        m._stop = 4
-        key = KEY_DOWN
-
-        # Run test.
-        act = m.action(key)
-
-        # Determine test result.
-        self.assertEqual(exp, act)
-
-    def test_action_down_arrow_at_bottom(self):
-        """When a down arrow is received, Menu.action() selects the
-        next option. If the selected option is the last option, the
-        selection doesn't move.
-        """
-        # Expected values.
-        exp = ('', (
-            f'{term.move(1, 0)}ham   '
-            f'{term.move(2, 0)}beans '
-            f'{term.move(3, 0)}toast '
-            f'{term.reverse}'
-            f'{term.move(4, 0)}tomato'
-            f'{term.normal}'
-        ))
-
-        # Test data and state.
-        kwargs = {
-            'options': [
-                menu.Option('spam', 's'),
-                menu.Option('eggs', 'e'),
-                menu.Option('bacon', 'b'),
-                menu.Option('ham', 'h'),
-                menu.Option('beans', 'n'),
-                menu.Option('toast', 'o'),
-                menu.Option('tomato', 't'),
-            ],
-            'height': 5,
-            'width': 9,
-            'term': term,
-        }
-        m = menu.Menu(**kwargs)
-        m._overflow_top = True
-        m._selected = 6
-        m._start = 3
-        m._stop = 7
-        key = KEY_DOWN
-
-        # Run test.
-        act = m.action(key)
-
-        # Determine test result.
-        self.assertEqual(exp, act)
-
-    def test_action_down_arrow_scrolls_to_overflow(self):
-        """When a down arrow is received, Menu.action() selects the
-        next option. If the selected option is the last visible
-        options and the list of option overflows, the list of options
-        should scroll down to see the next option.
-        """
-        # Expected values.
-        exp = ('', (
-            f'{term.move(0, 0)}         '
-            f'{term.move(0, 3)}[▲]'
-            f'{term.move(1, 0)}bacon '
-            f'{term.move(2, 0)}ham   '
-            f'{term.reverse}'
-            f'{term.move(3, 0)}beans '
-            f'{term.normal}'
-        ))
-
-        # Test data and state.
-        kwargs = {
-            'options': [
-                menu.Option('spam', 's'),
-                menu.Option('eggs', 'e'),
-                menu.Option('bacon', 'b'),
-                menu.Option('ham', 'h'),
-                menu.Option('beans', 'n'),
-                menu.Option('toast', 'o'),
-                menu.Option('tomato', 't'),
-            ],
-            'height': 5,
-            'width': 9,
-            'term': term,
-        }
-        m = menu.Menu(**kwargs)
-        m._overflow_bottom = True
-        m._selected = 3
-        m._stop = 4
-        key = KEY_DOWN
-
-        # Run test.
-        act = m.action(key)
-
-        # Determine test result.
-        self.assertEqual(exp, act)
-
-    def test_action_down_arrow_scrolls_near_bottom_of_overflow(self):
-        """When a down arrow is received, Menu.action() selects the
-        next option. If the selected option is the last visible
-        options and the list of option overflows, the list of options
-        should scroll down to see the next option. If it scrolls to
-        the next to last option, the overflow down marker should be
-        replaced with the last option.
-        """
-        # Expected values.
-        exp = ('', (
-            f'{term.move(4, 0)}         '
-            f'{term.move(1, 0)}ham   '
-            f'{term.move(2, 0)}beans '
-            f'{term.reverse}'
-            f'{term.move(3, 0)}toast '
-            f'{term.normal}'
-            f'{term.move(4, 0)}tomato'
-        ))
-
-        # Test data and state.
-        kwargs = {
-            'options': [
-                menu.Option('spam', 's'),
-                menu.Option('eggs', 'e'),
-                menu.Option('bacon', 'b'),
-                menu.Option('ham', 'h'),
-                menu.Option('beans', 'n'),
-                menu.Option('toast', 'o'),
-                menu.Option('tomato', 't'),
-            ],
-            'height': 5,
-            'width': 9,
-            'term': term,
-        }
-        m = menu.Menu(**kwargs)
-        m._overflow_bottom = True
-        m._overflow_top = True
-        m._selected = 4
-        m._start = 2
-        m._stop = 5
-        key = KEY_DOWN
-
-        # Run test.
-        act = m.action(key)
-
-        # Determine test result.
-        self.assertEqual(exp, act)
-
-    def test_action_down_arrow_with_content_pad_left(self):
-        """When a down arrow is received, Menu.action() selects the
-        next option.
-        """
-        # Expected values.
-        exp = ('', (
-            f'{term.move(0, 3)}spam  '
-            f'{term.reverse}'
-            f'{term.move(1, 3)}eggs  '
-            f'{term.normal}'
-            f'{term.move(2, 3)}bacon '
-            f'{term.move(3, 3)}ham   '
-        ))
-
-        # Test data and state.
-        kwargs = {
-            'options': [
-                menu.Option('spam', 's'),
-                menu.Option('eggs', 'e'),
-                menu.Option('bacon', 'b'),
-                menu.Option('ham', 'h'),
-                menu.Option('beans', 'n'),
-                menu.Option('toast', 'o'),
-                menu.Option('tomato', 't'),
-            ],
-            'content_pad_left': 0.2,
-            'height': 5,
-            'width': 10,
-            'term': term,
-        }
-        m = menu.Menu(**kwargs)
-        m._overflow_bottom = True
-        m._stop = 4
-        key = KEY_DOWN
-
-        # Run test.
-        act = m.action(key)
-
-        # Determine test result.
-        self.assertEqual(exp, act)
-
-    def test_action_end(self):
-        """When an end is received, Menu.action() selects the
-        last option and jumps to that section of the menu.
-        """
-        # Expected values.
-        exp = ('', (
-            f'{term.move(4, 0)}         '
-            f'{term.move(0, 0)}         '
-            f'{term.move(0, 3)}[▲]'
-            f'{term.move(1, 0)}ham   '
-            f'{term.move(2, 0)}beans '
-            f'{term.move(3, 0)}toast '
-            f'{term.reverse}'
-            f'{term.move(4, 0)}tomato'
-            f'{term.normal}'
-        ))
-
-        # Test data and state.
-        kwargs = {
-            'options': [
-                menu.Option('spam', 's'),
-                menu.Option('eggs', 'e'),
-                menu.Option('bacon', 'b'),
-                menu.Option('ham', 'h'),
-                menu.Option('beans', 'n'),
-                menu.Option('toast', 'o'),
-                menu.Option('tomato', 't'),
-            ],
-            'height': 5,
-            'width': 9,
-            'term': term,
-        }
-        m = menu.Menu(**kwargs)
-        m._overflow_bottom = True
-        m._selected = 2
-        m._stop = 4
-        key = KEY_END
-
-        # Run test.
-        act = m.action(key)
-
-        # Determine test result.
-        self.assertEqual(exp, act)
-
     def test_action_home(self):
         """When a home is received, Menu.action() selects the
         first option and jumps to that section of the menu.

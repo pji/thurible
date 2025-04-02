@@ -13,6 +13,7 @@ rstcheck = "^6.2.4"
 rstcheck-core = "^1.2.1"
 sphinx = "^8.2.3"
 furo = "^2024.8.6"
+pytest-mock = "^3.14.0"
 pytest = "^8.3.5"
 
 [project]
@@ -32,6 +33,9 @@ classifiers = [
 dependencies = [
     'blessed',
 ]
+
+[tool.poetry.requires-plugins]
+poetry-plugin-export = ">=1.8"
 
 [project.urls]
 "Homepage" = "https://thurible.readthedocs.io/en/latest/index.html#"

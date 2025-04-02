@@ -8,10 +8,10 @@ build:
 clean:
 	rm -rf docs/build/html
 	rm -rf dist
-	rm -rf thurible.egg-info
+	rm -rf src/thurible.egg-info
 	rm -rf examples/__pycache__
 	rm -rf tests/__pycache__
-	rm -rf thurible/__pycache__
+	rm -rf src/thurible/__pycache__
 
 .PHONY: docs
 docs:
@@ -19,5 +19,14 @@ docs:
 
 .PHONY: pre
 pre:
-	python precommit.py
+	poetry run pytest
+	poetry run python precommit.py
 	git status
+
+.PHONY: test
+test:
+	poetry run pytest --capture=sys
+
+.PHONY: testv
+testv:
+	poetry run pytest -vv --capture=sys
