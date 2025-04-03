@@ -500,137 +500,74 @@ class TestFrame:
         )
 
 
-@pt.mark.skip
-class PanelTestCase(TerminalTestCase):
-    def test___init__cannot_set_panel_pad_left_and_align_h(self):
-        """If `panel_pad_left` and `panel_align_h` are set, raise
-        a PanelPaddingAndAlignmentSetError.
-        """
-        # Expected values.
-        exp_ex = p.PanelPaddingAndAlignmentSetError
-        exp_msg = 'Cannot set both panel padding and panel alignment.'
-
-        # Test data and state.
-        kwargs = {
-            'panel_pad_left': 0.1,
-            'panel_align_h': 'left',
-        }
-
-        # Run test and determine result.
-        with self.assertRaisesRegex(exp_ex, exp_msg):
-            _ = p.Panel(**kwargs)
-
-    def test___init__cannot_set_panel_pad_right_and_align_h(self):
-        """If `panel_pad_right` and `panel_align_h` are set, raise
-        a PanelPaddingAndAlignmentSetError.
-        """
-        # Expected values.
-        exp_ex = p.PanelPaddingAndAlignmentSetError
-        exp_msg = 'Cannot set both panel padding and panel alignment.'
-
-        # Test data and state.
-        kwargs = {
-            'panel_pad_right': 0.1,
-            'panel_align_h': 'left',
-        }
-
-        # Run test and determine result.
-        with self.assertRaisesRegex(exp_ex, exp_msg):
-            _ = p.Panel(**kwargs)
-
-    def test___init__optional_parameters(self):
-        """Given any parameters, a Panel subclass should return an
-        object with the expected attributes set.
-        """
-        # Expected values.
-        exp = kwargs_panel_opt_set
-
-        # Run test.
-        panel = p.Panel(**exp)
-
-        # Gather actuals.
-        act = {key: getattr(panel, key) for key in exp}
-
-        # Determine test results.
-        self.assertDictEqual(exp, act)
-
-    def test___init__required_parameters(self):
+class TestPanel:
+    def test__init_default(self, panel_attr_defaults):
         """Given only the required parameters, a Panel subclass should
         return an object with the expected attributes set.
         """
-        # Expected values.
-        exp_req = kwargs_panel_req
-        exp_opt = kwargs_panel_opt_default
+        panel = p.Panel()
+        assert {
+            k: getattr(panel, k) for k in panel_attr_defaults
+        } == panel_attr_defaults
 
-        # Run test.
-        panel = p.Panel(**exp_req)
+    def test__init_set(self, panel_attr_set):
+        """Given any parameters, a Panel subclass should return an
+        object with the expected attributes set.
+        """
+        panel = p.Panel(**panel_attr_set)
+        assert {
+            k: getattr(panel, k) for k in panel_attr_set
+        } == panel_attr_set
 
-        # Gather actuals.
-        act_req = {key: getattr(panel, key) for key in exp_req}
-        act_opt = {key: getattr(panel, key) for key in exp_opt}
+    def test__init_cannot_set_panel_pad_left_and_align_h(self):
+        """If `panel_pad_left` and `panel_align_h` are set, raise
+        a PanelPaddingAndAlignmentSetError.
+        """
+        with pt.raises(p.PanelPaddingAndAlignmentSetError):
+            _ = p.Panel(panel_pad_left=0.1, panel_align_h='left')
 
-        # Determine test results.
-        self.assertDictEqual(exp_req, act_req)
-        self.assertDictEqual(exp_opt, act_opt)
+    def test__init_cannot_set_panel_pad_right_and_align_h(self):
+        """If `panel_pad_right` and `panel_align_h` are set, raise
+        a PanelPaddingAndAlignmentSetError.
+        """
+        with pt.raises(p.PanelPaddingAndAlignmentSetError):
+            _ = p.Panel(panel_pad_right=0.1, panel_align_h='left')
 
-    def test___init__sum_of_h_rel_dims_does_not_equal_one(self):
+    def test__init_sum_of_h_rel_dims_does_not_equal_one(self):
         """If `panel_pad_left`, `panel_pad_right`, and
         `panel_relative_width` are set but the sum of all
         three doesn't equal one, `Panel` should raise a
         `panel.InvalidDimensionsError` exception.
         """
-        # Expected values.
-        exp_ex = p.InvalidDimensionsError
-        exp_msg = (
-            'If panel_pad_left, panel_pad_right, and panel_relative_width '
-            'are set, the sum of the three must equal one. The given values '
-            'were: panel_pad_left=0.1, panel_pad_right=0.2, and '
-            'panel_relative_width=0.3.'
-        )
+        with pt.raises(p.InvalidDimensionsError):
+            _ = p.Panel(
+                panel_pad_left=0.1,
+                panel_pad_right=0.2,
+                panel_relative_width=0.3
+            )
 
-        # Test data and state.
-        kwargs = {
-            'panel_pad_left': 0.1,
-            'panel_pad_right': 0.2,
-            'panel_relative_width': 0.3,
-        }
-
-        # Run test and determine result.
-        with self.assertRaisesRegex(exp_ex, exp_msg):
-            _ = p.Panel(**kwargs)
-
-    def test___init__sum_of_v_rel_dims_does_not_equal_one(self):
+    def test__init_sum_of_v_rel_dims_does_not_equal_one(self):
         """If `panel_pad_bottom`, `panel_pad_top`, and
         `panel_relative_height` are set but the sum of all
         three doesn't equal one, `Panel` should raise a
         `panel.InvalidDimensionsError` exception.
         """
-        # Expected values.
-        exp_ex = p.InvalidDimensionsError
-        exp_msg = (
-            'If panel_pad_top, panel_pad_bottom, and panel_relative_height '
-            'are set, the sum of the three must equal one. The given values '
-            'were: panel_pad_top=0.2, panel_pad_bottom=0.1, and '
-            'panel_relative_height=0.3.'
-        )
+        with pt.raises(p.InvalidDimensionsError):
+            _ = p.Panel(
+                panel_pad_bottom=0.1,
+                panel_pad_top=0.2,
+                panel_relative_height=0.3
+            )
 
-        # Test data and state.
-        kwargs = {
-            'panel_pad_bottom': 0.1,
-            'panel_pad_top': 0.2,
-            'panel_relative_height': 0.3,
-        }
-
-        # Run test and determine result.
-        with self.assertRaisesRegex(exp_ex, exp_msg):
-            _ = p.Panel(**kwargs)
-
-    def test___str__(self):
+    def test_as_str(self, capsys, term):
         """When converted to a string, a Pane object returns a string
         that will draw the entire splash screen.
         """
-        # Expected values.
-        exp = (
+        panel = p.Panel(
+            height=5,
+            width=6
+        )
+        assert str(panel) == (
             f'{term.move(0, 0)}      '
             f'{term.move(1, 0)}      '
             f'{term.move(2, 0)}      '
@@ -638,28 +575,19 @@ class PanelTestCase(TerminalTestCase):
             f'{term.move(4, 0)}      '
         )
 
-        # Test data and state.
-        kwargs = {
-            'height': 5,
-            'width': 6,
-            'term': term,
-        }
-        panel = p.Panel(**kwargs)
-
-        # Run test.
-        act = str(panel)
-
-        # Determine test result.
-        self.assertEqual(exp, act)
-
-    def test___str__with_bg_and_fg(self):
+    def test_as_str_with_bg_and_fg(self, capsys, term):
         """When converted to a string, a Pane object returns a string
         that will draw the entire splash screen. If there are foreground
         and background colors, the contents of the pane should have
         those colors.
         """
-        # Expected values.
-        exp = (
+        panel = p.Panel(
+            height=5,
+            width=6,
+            bg='blue',
+            fg='red'
+        )
+        assert str(panel) == (
             f'{term.red_on_blue}'
             f'{term.move(0, 0)}      '
             f'{term.move(1, 0)}      '
@@ -669,50 +597,25 @@ class PanelTestCase(TerminalTestCase):
             f'{term.normal}'
         )
 
-        # Test data and state.
-        kwargs = {
-            'height': 5,
-            'width': 6,
-            'term': term,
-            'bg': 'blue',
-            'fg': 'red',
-        }
-        panel = p.Panel(**kwargs)
-
-        # Run test.
-        act = str(panel)
-
-        # Determine test result.
-        self.assertEqual(exp, act)
-
-    def test_action(self):
+    def test_action(self, KEY_ENTER):
         """If passed a keystroke, Panel.action() should return a tuple
         containing the string for the keystroke and an empty string.
         """
-        # Expected values.
-        exp = ('\n', '')
+        panel = p.Panel(
+            height=5,
+            width=6
+        )
+        assert panel.action(KEY_ENTER) == ('\n', '')
 
-        # Test data and state.
-        kwargs = {
-            'height': 5,
-            'width': 6,
-            'term': term,
-        }
-        panel = p.Panel(**kwargs)
-        key = Keystroke('\n', term.KEY_ENTER, 'KEY_ENTER')
-
-        # Run test.
-        act = panel.action(key)
-
-        # Determine test result.
-        self.assertEqual(exp, act)
-
-    def test_clear_contents(self):
+    def test_clear_contents(self, capsys, term):
         """When called, Panel.clear_contents will return a string that
         clears the area within the panel in the terminal.
         """
-        # Expected values.
-        exp = (
+        panel = p.Panel(
+            height=5,
+            width=6
+        )
+        assert panel.clear_contents() == (
             f'{term.move(0, 0)}      '
             f'{term.move(1, 0)}      '
             f'{term.move(2, 0)}      '
@@ -720,27 +623,17 @@ class PanelTestCase(TerminalTestCase):
             f'{term.move(4, 0)}      '
         )
 
-        # Test data and state.
-        kwargs = {
-            'height': 5,
-            'width': 6,
-            'term': term,
-        }
-        panel = p.Panel(**kwargs)
-
-        # Run test.
-        act = panel.clear_contents()
-
-        # Determine test result.
-        self.assertEqual(exp, act)
-
-    def test_clear_contents_with_bg(self):
+    def test_clear_contents_with_bg(self, capsys, term):
         """When called, Panel.clear_contents will return a string that
         clears the area within the panel in the terminal. If there is a
         background color, the cleared area should have that color.
         """
-        # Expected values.
-        exp = (
+        panel = p.Panel(
+            height=5,
+            width=6,
+            bg='blue'
+        )
+        assert panel.clear_contents() == (
             f'{term.on_blue}'
             f'{term.move(0, 0)}      '
             f'{term.move(1, 0)}      '
@@ -750,29 +643,19 @@ class PanelTestCase(TerminalTestCase):
             f'{term.normal}'
         )
 
-        # Test data and state.
-        kwargs = {
-            'height': 5,
-            'width': 6,
-            'term': term,
-            'bg': 'blue',
-        }
-        panel = p.Panel(**kwargs)
-
-        # Run test.
-        act = panel.clear_contents()
-
-        # Determine test result.
-        self.assertEqual(exp, act)
-
-    def test_clear_contents_with_bg_and_fg(self):
+    def test_clear_contents_with_bg_and_fg(self, capsys, term):
         """When called, Panel.clear_contents will return a string that
         clears the area within the panel in the terminal. If there are
         background and foreground colors, the cleared area should have
         those colors.
         """
-        # Expected values.
-        exp = (
+        panel = p.Panel(
+            height=5,
+            width=6,
+            bg='blue',
+            fg='red'
+        )
+        assert panel.clear_contents() == (
             f'{term.red_on_blue}'
             f'{term.move(0, 0)}      '
             f'{term.move(1, 0)}      '
@@ -782,29 +665,17 @@ class PanelTestCase(TerminalTestCase):
             f'{term.normal}'
         )
 
-        # Test data and state.
-        kwargs = {
-            'height': 5,
-            'width': 6,
-            'term': term,
-            'bg': 'blue',
-            'fg': 'red',
-        }
-        panel = p.Panel(**kwargs)
-
-        # Run test.
-        act = panel.clear_contents()
-
-        # Determine test result.
-        self.assertEqual(exp, act)
-
-    def test_clear_contents_with_fg(self):
+    def test_clear_contents_with_fg(self, capsys, term):
         """When called, Panel.clear_contents will return a string that
         clears the area within the panel in the terminal. If there is a
         foreground color, the cleared area should have that color.
         """
-        # Expected values.
-        exp = (
+        panel = p.Panel(
+            height=5,
+            width=6,
+            fg='blue'
+        )
+        assert panel.clear_contents() == (
             f'{term.blue}'
             f'{term.move(0, 0)}      '
             f'{term.move(1, 0)}      '
@@ -814,48 +685,22 @@ class PanelTestCase(TerminalTestCase):
             f'{term.normal}'
         )
 
-        # Test data and state.
-        kwargs = {
-            'height': 5,
-            'width': 6,
-            'term': term,
-            'fg': 'blue',
-        }
-        panel = p.Panel(**kwargs)
-
-        # Run test.
-        act = panel.clear_contents()
-
-        # Determine test result.
-        self.assertEqual(exp, act)
-
     def test_register_key(self):
         """Given a string with the name of a control key as used by
         :mod:blessed and a method that follows the action handler
         protocol, :meth:Panel.register_key() should add the key and
         method to the dictionary of active keys.
         """
-        # Expected value data and state.
         def spam(self, key=None) -> str:
             return ''
 
-        # Expected value.
-        exp = {'KEY_SPAM': spam,}
-
-        # Test data and state.
-        kwargs = {
-            'height': 5,
-            'width': 6,
-        }
-        panel = p.Panel(**kwargs)
+        panel = p.Panel(
+            height=5,
+            width=6
+        )
         setattr(panel, 'spam', spam)
-
-        # Run test.
         panel.register_key('KEY_SPAM', spam)
-        act = panel.active_keys
-
-        # Determine test result.
-        self.assertEqual(exp, act)
+        assert panel.active_keys == {'KEY_SPAM': spam,}
 
     def test_register_key_given_unbound_method(self):
         """Given a string with the name of a control key as used by
@@ -866,149 +711,111 @@ class PanelTestCase(TerminalTestCase):
         should be bound as a method to the panel before it is added
         to the dictionary of active keys.
         """
-        # Expected value data and state.
         def spam(self, key=None) -> str:
             return ''
 
-        # Expected value.
-        exp = {'KEY_SPAM': spam,}
-
-        # Test data and state.
-        kwargs = {
-            'height': 5,
-            'width': 6,
-        }
-        panel = p.Panel(**kwargs)
-
-        # Run test.
+        panel = p.Panel(
+            height=5,
+            width=6
+        )
         panel.register_key('KEY_SPAM', spam)
-        act = panel.active_keys
+        assert panel.active_keys == {'KEY_SPAM': spam,}
 
-        # Determine test result.
-        self.assertEqual(exp, act)
-
-    def test_update(self):
+    def test_register_key_given_unbound_method(self):
         """If passed a message, Panel.update() should return an empty
         string.
         """
-        # Expected value.
-        exp = ''
-
-        # Test data and state.
         @dataclass
         class Spam(Message):
             value: str
 
         msg = Spam('eggs')
-        kwargs = {
-            'height': 5,
-            'width': 6,
-        }
-        panel = p.Panel(**kwargs)
-
-        # Run test.
-        act = panel.update(msg)
-
-        # Determine test result.
-        self.assertEqual(exp, act)
+        panel = p.Panel(
+            height=5,
+            width=6
+        )
+        assert panel.update(msg) == ''
 
 
-@pt.mark.skip
-class TitleTestCase(TerminalTestCase):
-    def test___init__optional_parameters(self):
-        """Given any parameters, a Title should return an
-        object with the expected attributes set.
-        """
-        # Expected values.
-        exp = {
-            **kwargs_title_opt_set,
-            **kwargs_frame_opt_set,
-            **kwargs_panel_req,
-            **kwargs_panel_opt_set,
-        }
-
-        # Run test.
-        panel = p.Title(**exp)
-
-        # Gather actuals.
-        act = {key: getattr(panel, key) for key in exp}
-
-        # Determine test results.
-        self.assertDictEqual(exp, act)
-
-    def test___init__required_parameters(self):
+class TestTitle:
+    def test__init_default(
+        self, title_attr_defaults,
+        frame_attr_defaults,
+        panel_attr_defaults
+    ):
         """Given only the required parameters, a Title should
         return an object with the expected attributes set.
         """
-        # Expected values.
-        exp_req = kwargs_panel_req
-        exp_opt = {
-            **kwargs_title_opt_default,
-            **kwargs_frame_opt_default,
-            **kwargs_panel_opt_default
-        }
+        panel = p.Title()
+        assert {
+            k: getattr(panel, k) for k in title_attr_defaults
+        } == title_attr_defaults
+        assert {
+            k: getattr(panel, k) for k in frame_attr_defaults
+        } == frame_attr_defaults
+        assert {
+            k: getattr(panel, k) for k in panel_attr_defaults
+        } == panel_attr_defaults
 
-        # Run test.
-        panel = p.Title(**exp_req)
+    def test__init_set(
+        self, title_attr_set,
+        frame_attr_set,
+        panel_attr_set
+    ):
+        """Given any parameters, a Title should return an
+        object with the expected attributes set.
+        """
+        panel = p.Title(
+            **title_attr_set,
+            **frame_attr_set,
+            **panel_attr_set
+        )
+        assert {
+            k: getattr(panel, k) for k in title_attr_set
+        } == title_attr_set
+        assert {
+            k: getattr(panel, k) for k in frame_attr_set
+        } == frame_attr_set
+        assert {
+            k: getattr(panel, k) for k in panel_attr_set
+        } == panel_attr_set
 
-        # Gather actuals.
-        act_req = {key: getattr(panel, key) for key in exp_req}
-        act_opt = {key: getattr(panel, key) for key in exp_opt}
-
-        # Determine test results.
-        self.assertDictEqual(exp_req, act_req)
-        self.assertDictEqual(exp_opt, act_opt)
-
-    def test___init__footer_frame_no_frame_type(self):
+    def test__init_footer_frame_no_frame_type(self):
         """If the footer_frame attribute is set without setting the
         frame_type attribute, the `Title` object should raise a
         `panel.NoFrameTypeForFrameError`.
         """
-        # Expected values.
-        exp_ex = p.NoFrameTypeForFrameError
-        exp_msg = 'You must set frame_type if you set footer_frame.'
+        with pt.raises(p.NoFrameTypeForFrameError):
+            _ = p.Title(
+                footer_text='spam',
+                footer_frame=True,
+                height=7,
+                width=10
+            )
 
-        # Test data and state.
-        kwargs = {
-            'footer_text': 'spam',
-            'footer_frame': True,
-            'height': 7,
-            'width': 10,
-            'term': term,
-        }
-
-        # Run test and determine test results.
-        with self.assertRaisesRegex(exp_ex, exp_msg):
-            panel = p.Title(**kwargs)
-
-    def test___init__title_frame_no_frame_type(self):
+    def test__init_title_frame_no_frame_type(self):
         """If the title_frame attribute is set without setting the
         title_type attribute, the `Title` object should raise a
         `panel.NoFrameTypeForFrameError`.
         """
-        # Expected values.
-        exp_ex = p.NoFrameTypeForFrameError
-        exp_msg = 'You must set frame_type if you set title_frame.'
+        with pt.raises(p.NoFrameTypeForFrameError):
+            _ = p.Title(
+                title_text='spam',
+                title_frame=True,
+                height=7,
+                width=10
+            )
 
-        # Test data and state.
-        kwargs = {
-            'title_text': 'spam',
-            'title_frame': True,
-            'height': 7,
-            'width': 10,
-            'term': term,
-        }
-
-        # Run test and determine test results.
-        with self.assertRaisesRegex(exp_ex, exp_msg):
-            panel = p.Title(**kwargs)
-
-    def test___str__(self):
+    def test_as_str(self, term):
         """When converted to a string, a Title object returns a
         string that will draw the entire splash screen.
         """
-        # Expected values.
-        exp = (
+        panel = p.Title(
+            title_text='spam',
+            height=5,
+            width=6
+        )
+        assert str(panel) == (
             f'{term.move(1, 0)}      '
             f'{term.move(2, 0)}      '
             f'{term.move(3, 0)}      '
@@ -1017,28 +824,18 @@ class TitleTestCase(TerminalTestCase):
             f'{term.move(0, 0)}spam'
         )
 
-        # Test data and state.
-        kwargs = {
-            'title_text': 'spam',
-            'height': 5,
-            'width': 6,
-            'term': term,
-        }
-        panel = p.Title(**kwargs)
-
-        # Run test.
-        act = str(panel)
-
-        # Determine test result.
-        self.assertEqual(exp, act)
-
-    def test___str__with_bg(self):
+    def test_as_str_with_bg(self, term):
         """When converted to a string, a Title object returns a
         string that will draw the entire splash screen. If the background
         color is set, the title should be that color.
         """
-        # Expected values.
-        exp = (
+        panel = p.Title(
+            title_text='spam',
+            height=5,
+            width=6,
+            bg='red'
+        )
+        assert str(panel) == (
             f'{term.on_red}'
             f'{term.move(1, 0)}      '
             f'{term.move(2, 0)}      '
@@ -1054,29 +851,18 @@ class TitleTestCase(TerminalTestCase):
             f'{term.normal}'
         )
 
-        # Test data and state.
-        kwargs = {
-            'title_text': 'spam',
-            'height': 5,
-            'width': 6,
-            'term': term,
-            'bg': 'red',
-        }
-        panel = p.Title(**kwargs)
-
-        # Run test.
-        act = str(panel)
-
-        # Determine test result.
-        self.assertEqual(exp, act)
-
-    def test___str__with_fg(self):
+    def test_as_str_with_fg(self, term):
         """When converted to a string, a Title object returns a
         string that will draw the entire splash screen. If the foreground
         color is set, the title should be that color.
         """
-        # Expected values.
-        exp = (
+        panel = p.Title(
+            title_text='spam',
+            height=5,
+            width=6,
+            fg='red'
+        )
+        assert str(panel) == (
             f'{term.red}'
             f'{term.move(1, 0)}      '
             f'{term.move(2, 0)}      '
@@ -1092,29 +878,17 @@ class TitleTestCase(TerminalTestCase):
             f'{term.normal}'
         )
 
-        # Test data and state.
-        kwargs = {
-            'title_text': 'spam',
-            'height': 5,
-            'width': 6,
-            'term': term,
-            'fg': 'red',
-        }
-        panel = p.Title(**kwargs)
-
-        # Run test.
-        act = str(panel)
-
-        # Determine test result.
-        self.assertEqual(exp, act)
-
-    def test___str__with_footer(self):
+    def test_as_str_with_footer(self, term):
         """When converted to a string, a Title object returns a
         string that will draw the entire splash screen. If there is a
         footer, it appears on the bottom of the panel.
         """
-        # Expected values.
-        exp = (
+        panel = p.Title(
+            footer_text='spam',
+            height=5,
+            width=6
+        )
+        assert str(panel) == (
             f'{term.move(0, 0)}      '
             f'{term.move(1, 0)}      '
             f'{term.move(2, 0)}      '
@@ -1123,30 +897,20 @@ class TitleTestCase(TerminalTestCase):
             f'{term.move(4, 0)}spam'
         )
 
-        # Test data and state.
-        kwargs = {
-            'footer_text': 'spam',
-            'height': 5,
-            'width': 6,
-            'term': term,
-        }
-        panel = p.Title(**kwargs)
-
-        # Run test.
-        act = str(panel)
-
-        # Determine test result.
-        self.assertEqual(exp, act)
-
-    def test___str__with_footer_align_center(self):
+    def test_as_str_with_footer_align_center(self, term):
         """When converted to a string, a Title object returns a
         string that will draw the entire splash screen. If there is a
         footer, it appears on the bottom of the panel. If there the
         footer align is center, the footer is center of the bottom line
         of the panel.
         """
-        # Expected values.
-        exp = (
+        panel = p.Title(
+            footer_text='spam',
+            footer_align='center',
+            height=5,
+            width=10
+        )
+        assert str(panel) == (
             f'{term.move(0, 0)}          '
             f'{term.move(1, 0)}          '
             f'{term.move(2, 0)}          '
@@ -1155,31 +919,20 @@ class TitleTestCase(TerminalTestCase):
             f'{term.move(4, 3)}spam'
         )
 
-        # Test data and state.
-        kwargs = {
-            'footer_text': 'spam',
-            'footer_align': 'center',
-            'height': 5,
-            'width': 10,
-            'term': term,
-        }
-        panel = p.Title(**kwargs)
-
-        # Run test.
-        act = str(panel)
-
-        # Determine test result.
-        self.assertEqual(exp, act)
-
-    def test___str__with_footer_align_right(self):
+    def test_as_str_with_footer_align_right(self, term):
         """When converted to a string, a Title object returns a
         string that will draw the entire splash screen. If there is a
         footer, it appears on the bottom of the panel. If there the
         footer align is right, the footer on the right of the bottom
         line of the panel.
         """
-        # Expected values.
-        exp = (
+        panel = p.Title(
+            footer_text='spam',
+            footer_align='right',
+            height=5,
+            width=10
+        )
+        assert str(panel) == (
             f'{term.move(0, 0)}          '
             f'{term.move(1, 0)}          '
             f'{term.move(2, 0)}          '
@@ -1188,23 +941,7 @@ class TitleTestCase(TerminalTestCase):
             f'{term.move(4, 6)}spam'
         )
 
-        # Test data and state.
-        kwargs = {
-            'footer_text': 'spam',
-            'footer_align': 'right',
-            'height': 5,
-            'width': 10,
-            'term': term,
-        }
-        panel = p.Title(**kwargs)
-
-        # Run test.
-        act = str(panel)
-
-        # Determine test result.
-        self.assertEqual(exp, act)
-
-    def test___str__with_footer_align_right_and_panel_pad_right(self):
+    def test_as_str_with_footer_align_right_and_panel_pad_right(self, term):
         """When converted to a string, a Title object returns a
         string that will draw the entire splash screen. If there is a
         footer, it appears on the bottom of the panel. If there the
@@ -1212,8 +949,14 @@ class TitleTestCase(TerminalTestCase):
         line of the panel. If there is right panel padding, the footer
         should be offset the correct amount.
         """
-        # Expected values.
-        exp = (
+        panel = p.Title(
+            footer_text='spam',
+            footer_align='right',
+            panel_pad_right=0.5,
+            height=5,
+            width=20
+        )
+        assert str(panel) == (
             f'{term.move(0, 0)}          '
             f'{term.move(1, 0)}          '
             f'{term.move(2, 0)}          '
@@ -1222,31 +965,20 @@ class TitleTestCase(TerminalTestCase):
             f'{term.move(4, 6)}spam'
         )
 
-        # Test data and state.
-        kwargs = {
-            'footer_text': 'spam',
-            'footer_align': 'right',
-            'panel_pad_right': 0.5,
-            'height': 5,
-            'width': 20,
-            'term': term,
-        }
-        panel = p.Title(**kwargs)
-
-        # Run test.
-        act = str(panel)
-
-        # Determine test result.
-        self.assertEqual(exp, act)
-
-    def test___str__with_footer_frame(self):
+    def test_as_str_with_footer_frame(self, term):
         """When converted to a string, a Title object returns a
         string that will draw the entire splash screen. If there is a
         footer, it appears on the bottom of the panel. If there is a
         footer frame, the frame is capped on either side of the footer.
         """
-        # Expected values.
-        exp = (
+        panel = p.Title(
+            footer_text='spam',
+            footer_frame=True,
+            frame_type='light',
+            height=7,
+            width=10
+        )
+        assert str(panel) == (
             f'{term.move(1, 1)}        '
             f'{term.move(2, 1)}        '
             f'{term.move(3, 1)}        '
@@ -1267,32 +999,20 @@ class TitleTestCase(TerminalTestCase):
             f'{term.move(6, 1)}┤spam├'
         )
 
-        # Test data and state.
-        kwargs = {
-            'footer_text': 'spam',
-            'footer_frame': True,
-            'frame_type': 'light',
-            'height': 7,
-            'width': 10,
-            'term': term,
-        }
-        panel = p.Title(**kwargs)
-
-        # Run test.
-        act = str(panel)
-
-        # Determine test result.
-        self.assertEqual(exp, act)
-
-    def test___str__with_footer_and_panel_pad_bottom(self):
+    def test_as_str_with_footer_and_panel_pad_bottom(self, term):
         """When converted to a string, a Title object returns a
         string that will draw the entire splash screen. If there is a
         footer, it appears on the bottom of the panel. If there is
         bottom panel padding, the location of the footer should be
         offset correctly.
         """
-        # Expected values.
-        exp = (
+        panel = p.Title(
+            footer_text='spam',
+            panel_pad_bottom=0.5,
+            height=10,
+            width=6
+        )
+        assert str(panel) == (
             f'{term.move(0, 0)}      '
             f'{term.move(1, 0)}      '
             f'{term.move(2, 0)}      '
@@ -1301,30 +1021,19 @@ class TitleTestCase(TerminalTestCase):
             f'{term.move(4, 0)}spam'
         )
 
-        # Test data and state.
-        kwargs = {
-            'footer_text': 'spam',
-            'panel_pad_bottom': 0.5,
-            'height': 10,
-            'width': 6,
-            'term': term,
-        }
-        panel = p.Title(**kwargs)
-
-        # Run test.
-        act = str(panel)
-
-        # Determine test result.
-        self.assertEqual(exp, act)
-
-    def test___str__with_frame(self):
+    def test_as_str_with_frame(self, term):
         """When converted to a string, a Title object returns a
         string that will draw the entire splash screen. If the panel
         has a frame, the title should be on the top line of the frame,
         indented to match left margin of the contents.
         """
-        # Expected values.
-        exp = (
+        panel = p.Title(
+            title_text='spam',
+            frame_type='light',
+            height=5,
+            width=10
+        )
+        assert str(panel) == (
             f'{term.move(1, 1)}        '
             f'{term.move(2, 1)}        '
             f'{term.move(3, 1)}        '
@@ -1339,23 +1048,7 @@ class TitleTestCase(TerminalTestCase):
             f'{term.move(0, 1)}spam'
         )
 
-        # Test data and state.
-        kwargs = {
-            'title_text': 'spam',
-            'height': 5,
-            'width': 10,
-            'term': term,
-            'frame_type': 'light',
-        }
-        panel = p.Title(**kwargs)
-
-        # Run test.
-        act = str(panel)
-
-        # Determine test result.
-        self.assertEqual(exp, act)
-
-    def test___str__with_frame_and_frame_bg_and_title_frame(self):
+    def test_as_str_with_frame_and_frame_bg_and_title_frame(self, term):
         """When converted to a string, a `Title` object returns a
         string that will draw the panel. If the panel has a frame,
         the title should be on the top line of the frame, indented
@@ -1364,8 +1057,16 @@ class TitleTestCase(TerminalTestCase):
         frame, the frame should be capped on either side ot the title,
         and the cap should be the same color as the frame.
         """
-        # Expected values.
-        exp = (
+        panel = p.Title(
+            title_text='spam',
+            title_frame=True,
+            frame_type='light',
+            frame_fg='red',
+            frame_bg='blue',
+            height=5,
+            width=10
+        )
+        assert str(panel) == (
             f'{term.move(1, 1)}        '
             f'{term.move(2, 1)}        '
             f'{term.move(3, 1)}        '
@@ -1389,35 +1090,22 @@ class TitleTestCase(TerminalTestCase):
             f'{term.normal}'
         )
 
-        # Test data and state.
-        kwargs = {
-            'title_text': 'spam',
-            'title_frame': True,
-            'frame_type': 'light',
-            'frame_fg': 'red',
-            'frame_bg': 'blue',
-            'height': 5,
-            'width': 10,
-            'term': term,
-        }
-        panel = p.Title(**kwargs)
-
-        # Run test.
-        act = str(panel)
-
-        # Determine test result.
-        self.assertEqual(exp, act)
-
-    def test___str__with_frame_and_overflowing_title(self):
-        """When converted to a string, a Title object returns a
-        string that will draw the entire splash screen. If the panel
-        has a frame, the title should be on the top line of the frame,
-        indented to match left margin of the contents. If the title
-        is longer than the available space, the title is truncated and
-        the overflow indicator is added.
+    def test_as_str_with_frame_and_overflowing_title(self, term):
+        """When converted to a string, a `Title` object returns a
+        string that will draw the panel. If the panel has a frame,
+        the title should be on the top line of the frame, indented
+        to match left margin of the contents. If the frame has a
+        color, the frame should be that color. If the title has a
+        frame, the frame should be capped on either side ot the title,
+        and the cap should be the same color as the frame.
         """
-        # Expected values.
-        exp = (
+        panel = p.Title(
+            title_text='spameggsbacon',
+            frame_type='light',
+            height=5,
+            width=10
+        )
+        assert str(panel) == (
             f'{term.move(1, 1)}        '
             f'{term.move(2, 1)}        '
             f'{term.move(3, 1)}        '
@@ -1432,31 +1120,19 @@ class TitleTestCase(TerminalTestCase):
             f'{term.move(0, 1)}spame[▸]'
         )
 
-        # Test data and state.
-        kwargs = {
-            'title_text': 'spameggsbacon',
-            'height': 5,
-            'width': 10,
-            'term': term,
-            'frame_type': 'light',
-        }
-        panel = p.Title(**kwargs)
-
-        # Run test.
-        act = str(panel)
-
-        # Determine test result.
-        self.assertEqual(exp, act)
-
-    def test___str__with_overflowing_footer(self):
+    def test_as_str_with_overflowing_footer(self, term):
         """When converted to a string, a Title object returns a
         string that will draw the entire splash screen. If there is a
         footer, it appears on the bottom of the panel. If the footer
         is longer than the available space, the footer is truncated and
         the overflow indicator is added.
         """
-        # Expected values.
-        exp = (
+        panel = p.Title(
+            footer_text='spameggs',
+            height=5,
+            width=6
+        )
+        assert str(panel) == (
             f'{term.move(0, 0)}      '
             f'{term.move(1, 0)}      '
             f'{term.move(2, 0)}      '
@@ -1465,21 +1141,9 @@ class TitleTestCase(TerminalTestCase):
             f'{term.move(4, 0)}spa[▸]'
         )
 
-        # Test data and state.
-        kwargs = {
-            'footer_text': 'spameggs',
-            'height': 5,
-            'width': 6,
-            'term': term,
-        }
-        panel = p.Title(**kwargs)
 
-        # Run test.
-        act = str(panel)
-
-        # Determine test result.
-        self.assertEqual(exp, act)
-
+@pt.mark.skip
+class TitleTestCase(TerminalTestCase):
     def test___str__with_overflowing_title(self):
         """When converted to a string, a Title object returns a
         string that will draw the entire splash screen. If the title
