@@ -10,6 +10,7 @@ from queue import Queue
 import pytest as pt
 from blessed.keyboard import Keystroke
 
+from thurible import menu
 from thurible.util import get_terminal
 
 
@@ -27,6 +28,12 @@ def KEY_DOWN(term):
 
 
 @pt.fixture
+def KEY_E(term):
+    """The end key."""
+    return Keystroke('e')
+
+
+@pt.fixture
 def KEY_END(term):
     """The end key."""
     return Keystroke('\x1b[F', term.KEY_END, 'KEY_END')
@@ -39,15 +46,51 @@ def KEY_ENTER(term):
 
 
 @pt.fixture
+def KEY_HOME(term):
+    """The home key."""
+    return Keystroke('\x1b[H', term.KEY_HOME, 'KEY_HOME')
+
+
+@pt.fixture
 def KEY_LEFT(term):
     """The left arrow key."""
     return Keystroke('\x1b[D', term.KEY_LEFT, 'KEY_LEFT')
 
 
 @pt.fixture
+def KEY_O(term):
+    """The o key."""
+    return Keystroke('o')
+
+
+@pt.fixture
+def KEY_PGDOWN(term):
+    """The page down key."""
+    return Keystroke('\x1b[U', term.KEY_PGDOWN, 'KEY_PGDOWN')
+
+
+@pt.fixture
 def KEY_RIGHT(term):
     """The right arrow key."""
     return Keystroke('\x1b[C', term.KEY_RIGHT, 'KEY_RIGHT')
+
+
+@pt.fixture
+def KEY_PGUP(term):
+    """The page up key."""
+    return Keystroke('\x1b[V', term.KEY_PGUP, 'KEY_PGUP')
+
+
+@pt.fixture
+def KEY_UP(term):
+    """The left arrow key."""
+    return Keystroke('\x1b[A', term.KEY_UP, 'KEY_UP')
+
+
+@pt.fixture
+def KEY_X(term):
+    """The x key."""
+    return Keystroke('x')
 
 
 @pt.fixture
@@ -199,3 +242,21 @@ def queues(mocker):
     queues = (Queue(), Queue())
     mocker.patch('thurible.util.get_queues', return_value=queues)
     yield queues
+
+
+# Menu options.
+@pt.fixture
+def menu_options():
+    """Very long list of common menu options."""
+    return [
+        menu.Option('spam', 's'),
+        menu.Option('eggs', 'e'),
+        menu.Option('bacon', 'b'),
+        menu.Option('ham', 'h'),
+        menu.Option('beans', 'n'),
+        menu.Option('toast', 'o'),
+        menu.Option('tomato', 't'),
+        menu.Option('coffee', 'c'),
+        menu.Option('muffin', 'f'),
+        menu.Option('grits ', 'g'),
+    ]

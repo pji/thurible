@@ -144,7 +144,6 @@ Changes in 0.0.2
 The following are the changes in v0.0.2:
 
 *   Moved dependency management to `poetry`.
-
 *   Moved `thurible` into a `src` folder.
 *   (Started.) Moved testing to `pytest`.
 
@@ -154,7 +153,10 @@ The following are the changes in v0.0.2:
     *   Refactored `test_filereader`.
     *   Refactored `test_init`.
     *   Refactored `test_log`.
-    *   (Started.) Refactored `test_menu`.
+    
+    *   Refactored `test_menu`.
+    *   (Started.) Refactored `test_panel`.
+    *   Refactored `test_thurible`.
 
 *   (Not started.) Implemented `tox` to test across supported Python versions.
 *   (Not started.) Moved doctests to `sphinx`.

@@ -11,6 +11,7 @@ from unittest.mock import call, patch, PropertyMock
 from threading import Thread
 from time import sleep
 
+import pytest as pt
 from blessed import Terminal
 from blessed.keyboard import Keystroke
 
@@ -35,6 +36,22 @@ KEY_UP = Keystroke('\x1b[A', term.KEY_UP, 'KEY_UP')
 KEY_X = Keystroke('x')
 
 
+# Fixtures.
+@pt.fixture
+def in_thread(queues):
+    """The test runs in a thread."""
+    q_to, q_from = queues
+    displays = {}
+    T = Thread(target=thb.queued_manager, kwargs={
+        'q_to': q_to,
+        'q_from': q_from,
+        'displays': displays
+    })
+    yield T, q_to, q_from, displays
+    if T.is_alive():
+        q_to.put(tm.End())
+
+
 # Utility classes and functions.
 class EndlessSideEffect(Iterator):
     def __init__(self, values, on=True, *args, **kwargs):
@@ -57,565 +74,353 @@ def empty_response():
     return None
 
 
+def get_delayed_input(msgs, inputs, in_thread, mocker):
+    mocker.patch('blessed.Terminal.fullscreen')
+    mocker.patch('thurible.thurible.print')
+    mocker.patch('blessed.Terminal.inkey', side_effect=inputs)
+    mocker.patch('blessed.Terminal.cbreak')
+    T, q_to, q_from, _ = in_thread
+    for msg in msgs:
+        if isinstance(msg, tm.Ping):
+            ping_name = msg.name
+    T.start()
+    for msg in msgs:
+        q_to.put(msg)
+    resp = None
+    count = 0
+    while not resp:
+        if not q_from.empty():
+            msg = q_from.get()
+            if isinstance(msg, tm.Pong) and msg.name == ping_name:
+                inputs.on = True
+            else:
+                resp = msg
+        assert count <= 100
+        count += 1
+        sleep(0.01)
+    return resp
+
+
+def get_msg_response(msgs, name, in_thread, mocker=None):
+    T, q_to, q_from, _ = in_thread
+    if mocker:
+        mocker.patch('blessed.Terminal.fullscreen')
+        mocker.patch('thurible.thurible.print')
+    T.start()
+    for msg in msgs:
+        q_to.put(msg)
+    resps = watch_for_pong(q_to, q_from, name=name)
+    return resps
+
+
+def send_msgs(msgs, name, in_thread, will_end=True):
+    T, q_to, q_from, displays = in_thread
+    T.start()
+    for msg in msgs:
+        q_to.put(msg)
+    if not will_end:
+        watch_for_pong(q_to, q_from, name=name)
+    else:
+        watch_for_pong(q_to, q_from, msg=tm.Ending('Received End message.'))
+
+
+def watch_for_pong(q_to, q_from, name='', msg=None):
+    """Send a ping to the queued_manager and wait for the pong
+    response, collecting all responses received before the pong.
+    This is usually done to ensure the queue_manager thread has
+    had time to process all of the previous messages sent to it.
+    """
+    if not msg:
+        msg = tm.Pong(name)
+        q_to.put(tm.Ping(name))
+
+    count = 0
+    resp = None
+    resps = []
+    while resp != msg:
+        if resp:
+            resps.append(resp)
+            if isinstance(resp, tm.Ending):
+                break
+            resp = None
+
+        if not q_from.empty():
+            resp = q_from.get()
+
+        assert count <= 100
+        count += 1
+        sleep(.01)
+    return resps
+
+
 # Test cases.
-class QueuedManagerTestCase(tp.TerminalTestCase):
-    def setUp(self):
-        self.q_to = Queue()
-        self.q_from = Queue()
-        self.displays = {}
-        self.t = Thread(target=thb.queued_manager, kwargs={
-            'q_to': self.q_to,
-            'q_from': self.q_from,
-            'displays': self.displays,
-        })
+def test_delete_display(capsys, in_thread):
+    """Sent a Delete message, queued_manager() should delete the
+    Panel with the given name from the stored panels.
+    """
+    msgs = [
+        tm.Store('eggs', splash.Splash('eggs')),
+        tm.Store('spam', splash.Splash('spam')),
+        tm.Delete('eggs'),
+    ]
+    send_msgs(msgs, 'test_delete_display', in_thread, False)
+    _, _, _, displays = in_thread
+    assert displays == {'spam': splash.Splash('spam'),}
 
-    def tearDown(self):
-        if self.t.is_alive():
-            self.q_to.put(tm.End())
 
-    # Utility methods.
-    def _watch_for_pong(self, name='', msg=None):
-        """Send a ping to the queued_manager and wait for the pong
-        response, collecting all responses received before the pong.
-        This is usually done to ensure the queue_manager thread has
-        had time to process all of the previous messages sent to it.
-        """
-        if not msg:
-            ping = tm.Ping(name)
-            msg = tm.Pong(name)
-            self.q_to.put(ping)
-        count = 0
-        resp = None
-        resps = []
-        while resp != msg:
-            if resp:
-                resps.append(resp)
-                if isinstance(resp, tm.Ending):
-                    break
-                resp = None
-            if not self.q_from.empty():
-                resp = self.q_from.get()
-            if count > 100:
-                raise RuntimeError('Ran too long.')
-            count += 1
-            sleep(.01)
-        return resps
+def test_display_alert(capsys, in_thread, term):
+    """Sent an Alert message, queued_manager() should display an
+    alert panel over the top of the current panel. Sent a Dismiss
+    message, queued_manager() should restore the current panel.
+    """
+    T, q_to, q_from, displays = in_thread
+    s = splash.Splash(content='spam', height=10, width=30)
+    msgs = [
+        tm.Store('spam', s),
+        tm.Show('spam'),
+        tm.Alert(
+            'test_display_alert',
+            '',
+            '?spam spam spam spam?',
+            dialog.yes_no
+        ),
+        tm.Dismiss('test_display_alert'),
+    ]
+    send_msgs(msgs, 'test_display_alert', in_thread, False)
+    captured = capsys.readouterr()
+    assert captured.out == (
+        f'{term.move(0, 0)}                              '
+        f'{term.move(1, 0)}                              '
+        f'{term.move(2, 0)}                              '
+        f'{term.move(3, 0)}                              '
+        f'{term.move(4, 0)}                              '
+        f'{term.move(5, 0)}                              '
+        f'{term.move(6, 0)}                              '
+        f'{term.move(7, 0)}                              '
+        f'{term.move(8, 0)}                              '
+        f'{term.move(9, 0)}                              '
+        f'{term.move(4, 13)}spam'
+        f'{term.move(3, 7)}                '
+        f'{term.move(4, 7)}                '
+        f'{term.move(5, 7)}                '
+        f'{term.move(6, 7)}                '
+        f'{term.move(2, 6)}┌────────────────┐'
+        f'{term.move(3, 6)}│'
+        f'{term.move(3, 23)}│'
+        f'{term.move(4, 6)}│'
+        f'{term.move(4, 23)}│'
+        f'{term.move(5, 6)}│'
+        f'{term.move(5, 23)}│'
+        f'{term.move(6, 6)}│'
+        f'{term.move(6, 23)}│'
+        f'{term.move(7, 6)}└────────────────┘'
+        f'{term.move(4, 7)}?spam spam spam'
+        f'{term.move(5, 7)}spam?'
+        f'{term.reverse}'
+        f'{term.move(6, 19)}[No]'
+        f'{term.normal}'
+        f'{term.move(6, 13)}[Yes]'
+        f'{term.move(0, 0)}                              '
+        f'{term.move(1, 0)}                              '
+        f'{term.move(2, 0)}                              '
+        f'{term.move(3, 0)}                              '
+        f'{term.move(4, 0)}                              '
+        f'{term.move(5, 0)}                              '
+        f'{term.move(6, 0)}                              '
+        f'{term.move(7, 0)}                              '
+        f'{term.move(8, 0)}                              '
+        f'{term.move(9, 0)}                              '
+        f'{term.move(4, 13)}spam'
+    )
 
-    # Patching handlers for simple tests.
-    @patch('blessed.Terminal.fullscreen')
-    @patch('blessed.Terminal.inkey')
-    @patch('blessed.Terminal.cbreak')
-    @patch('thurible.thurible.print')
-    def _get_delayed_input(
-        self,
-        msgs,
-        inputs,
-        mock_print,
-        mock_cbreak,
-        mock_inkey,
-        mock_fullscreen
-    ):
-        mock_inkey.side_effect = inputs
-        for msg in msgs:
-            if isinstance(msg, tm.Ping):
-                ping_name = msg.name
-        self.t.start()
-        for msg in msgs:
-            self.q_to.put(msg)
-        act = None
-        count = 0
-        while not act:
-            if not self.q_from.empty():
-                msg = self.q_from.get()
-                if isinstance(msg, tm.Pong) and msg.name == ping_name:
-                    inputs.on = True
-                else:
-                    act = msg
-            if count > 100:
-                raise RuntimeError('No response after 100 tries.')
-            count += 1
-            sleep(.01)
-        return act
 
-    @patch('blessed.Terminal.fullscreen')
-    @patch('blessed.Terminal.inkey')
-    @patch('blessed.Terminal.cbreak')
-    @patch('thurible.thurible.print')
-    def _get_input(
-        self,
-        msgs,
-        inputs,
-        mock_print,
-        mock_cbreak,
-        mock_inkey,
-        mock_fullscreen
-    ):
-        mock_inkey.side_effect = inputs
-        self.t.start()
-        for msg in msgs:
-            self.q_to.put(msg)
-        act = None
-        count = 0
-        while not act:
-            if not self.q_from.empty():
-                act = self.q_from.get()
-            if count > 100:
-                raise RuntimeError('No response after 100 tries.')
-            count += 1
-            sleep(.01)
-        return act
+def test_get_display(capsys, in_thread):
+    """Sent a `Showing` message, queued_manager() should return a
+    `Shown` message with the currently displayed panel.
+    """
+    msgs = [
+        tm.Store('spam', splash.Splash('eggs')),
+        tm.Show('spam'),
+        tm.Showing('test_get_display')
+    ]
+    result = get_msg_response(msgs, 'test_show_display', in_thread)
+    assert result == [tm.Shown('test_get_display', 'spam'),]
 
-    @patch('blessed.Terminal.fullscreen')
-    @patch('thurible.thurible.print')
-    def _get_msg_response(
-        self,
-        msgs,
-        name,
-        mock_print,
-        mock_fullscreen
-    ):
-        self.t.start()
-        for msg in msgs:
-            self.q_to.put(msg)
-        resps = self._watch_for_pong(name)
-        return resps
 
-    @patch('blessed.Terminal.fullscreen')
-    @patch('thurible.thurible.print')
-    def _send_msgs(
-        self,
-        msgs,
-        name,
-        will_end,
-        mock_print,
-        mock_fullscreen
-    ):
-        self.t.start()
-        for msg in msgs:
-            self.q_to.put(msg)
-        if not will_end:
-            _ = self._watch_for_pong(name)
-        else:
-            end = tm.Ending('Received End message.')
-            _ = self._watch_for_pong(msg=end)
-        return mock_print.mock_calls
+def test_list_stored_display(capsys, in_thread):
+    """Sent a `Storing` message, queued_manager() should return a
+    `Stored` message with a list of stored panels.
+    """
+    items = ('spam', 'eggs', 'bacon',)
+    msgs = [tm.Store(item, splash.Splash(item)) for item in items]
+    msgs.append(tm.Storing('ham'))
+    result = get_msg_response(msgs, 'test_list_stored_display', in_thread)
+    assert result == [tm.Stored('ham', items),]
 
-    # Simple tests.
-    def test_delete_display(self):
-        """Sent a Delete message, queued_manager() should delete the
-        Panel with the given name from the stored panels.
-        """
-        # Expected value.
-        exp = {'spam': splash.Splash('spam'),}
 
-        # Test data and state.
-        eggs = splash.Splash('eggs')
-        msgs = [
-            tm.Store('eggs', eggs),
-            tm.Store('spam', exp['spam']),
-            tm.Delete('eggs'),
-        ]
+def test_print_farewell(capsys, in_thread):
+    """Sent an End message with a farewell string, the farewell
+    string should be printed as the queued_manager() terminates.
+    """
+    msgs = [tm.End('spam'),]
+    send_msgs(msgs, 'test_print_farewell', in_thread)
+    captured = capsys.readouterr()
+    assert captured.out == 'spam\n'
 
-        # Run test and gather actual.
-        self._send_msgs(msgs, 'test_store_display', False)
-        act = self.displays
 
-        # Determine test result.
-        self.assertDictEqual(exp, act)
+def test_sends_selection_from_menu(
+    KEY_DOWN, KEY_ENTER, capsys, in_thread, menu_options, mocker
+):
+    """Receiving input from the user that isn't acted on by the
+    display, `queued_manager()` should send the input to the
+    application as a Data message.
+    """
+    msgs = [
+        tm.Store('menu', menu.Menu(menu_options[:3], height=5, width=7)),
+        tm.Show('menu'),
+        tm.Ping('test_sends_selection_from_menu'),
+    ]
+    inputs = EndlessSideEffect([KEY_DOWN, KEY_ENTER], False)
+    result = get_delayed_input(msgs, inputs, in_thread, mocker)
+    assert result == tm.Data('eggs')
 
-    def test_display_alert(self):
-        """Sent an Alert message, queued_manager() should display an
-        alert panel over the top of the current panel. Sent a Dismiss
-        message, queued_manager() should restore the current panel.
-        """
-        # Expected values.
-        exp = [
-            call((
-                f'{term.move(0, 0)}                              '
-                f'{term.move(1, 0)}                              '
-                f'{term.move(2, 0)}                              '
-                f'{term.move(3, 0)}                              '
-                f'{term.move(4, 0)}                              '
-                f'{term.move(5, 0)}                              '
-                f'{term.move(6, 0)}                              '
-                f'{term.move(7, 0)}                              '
-                f'{term.move(8, 0)}                              '
-                f'{term.move(9, 0)}                              '
-                f'{term.move(4, 13)}spam'
-            ), end='', flush=True),
-            call((
-                f'{term.move(3, 7)}                '
-                f'{term.move(4, 7)}                '
-                f'{term.move(5, 7)}                '
-                f'{term.move(6, 7)}                '
-                f'{term.move(2, 6)}┌────────────────┐'
-                f'{term.move(3, 6)}│'
-                f'{term.move(3, 23)}│'
-                f'{term.move(4, 6)}│'
-                f'{term.move(4, 23)}│'
-                f'{term.move(5, 6)}│'
-                f'{term.move(5, 23)}│'
-                f'{term.move(6, 6)}│'
-                f'{term.move(6, 23)}│'
-                f'{term.move(7, 6)}└────────────────┘'
-                f'{term.move(4, 7)}?spam spam spam'
-                f'{term.move(5, 7)}spam?'
-                f'{term.reverse}'
-                f'{term.move(6, 19)}[No]'
-                f'{term.normal}'
-                f'{term.move(6, 13)}[Yes]'
-            ), end='', flush=True),
-            call((
-                f'{term.move(0, 0)}                              '
-                f'{term.move(1, 0)}                              '
-                f'{term.move(2, 0)}                              '
-                f'{term.move(3, 0)}                              '
-                f'{term.move(4, 0)}                              '
-                f'{term.move(5, 0)}                              '
-                f'{term.move(6, 0)}                              '
-                f'{term.move(7, 0)}                              '
-                f'{term.move(8, 0)}                              '
-                f'{term.move(9, 0)}                              '
-                f'{term.move(4, 13)}spam'
-            ), end='', flush=True),
-        ]
 
-        # Test data and state.
-        s = splash.Splash(
-            content='spam',
-            height=10,
-            width=30,
-            term=Terminal()
-        )
-        msgs = [
-            tm.Store('spam', s),
-            tm.Show('spam'),
-            tm.Alert(
-                'test_display_alert',
-                '',
-                '?spam spam spam spam?',
-                dialog.yes_no
-            ),
-            tm.Dismiss('test_display_alert'),
-        ]
+def test_sends_exception(capsys, in_thread):
+    """When an exception is raised in queued_manager, it sends the
+    exception to the program and ends.
+    """
+    class Spam(splash.Splash):
+        ex = ValueError('eggs')
 
-        # Run test.
-        act = self._send_msgs(msgs, 'test_show_display', False)
+        def __str__(self):
+            raise self.ex
 
-        # Determine test result.
-        self.assertEqual(exp, act)
+    msgs = [
+        tm.Store('spam', Spam('spam', height=5, width=6)),
+        tm.Show('spam')
+    ]
+    result = get_msg_response(msgs, 'test_sends_exception', in_thread)
+    assert result == [tm.Ending('Exception.', Spam.ex),]
 
-    def test_get_display(self):
-        """Sent a `Showing` message, queued_manager() should return a
-        `Shown` message with the currently displayed panel.
-        """
-        # Expected value.
-        exp = [tm.Shown('test_get_display', 'spam'),]
 
-        # Test data and state.
-        s = splash.Splash('eggs')
-        msgs = [
-            tm.Store(exp[0].display, s),
-            tm.Show(exp[0].display),
-            tm.Showing(exp[0].name),
-        ]
+def test_sends_input_to_application(KEY_X, capsys, in_thread, mocker):
+    """Receiving input from the user that isn't acted on by the'
+    display, `queued_manager()` should send the input to the
+    application as a Data message.
+    """
+    msgs = [
+        tm.Store('spam', splash.Splash('spam', height=5, width=6)),
+        tm.Show('spam'),
+        tm.Ping('test_sends_input_to_application'),
+    ]
+    inputs = EndlessSideEffect([KEY_X,], False)
+    result = get_delayed_input(msgs, inputs, in_thread, mocker)
+    assert result == tm.Data('x')
 
-        # Run test.
-        act = self._get_msg_response(msgs, 'test_show_display')
 
-        # Determine test result.
-        self.assertListEqual(exp, act)
+def test_show_display(capsys, in_thread, term):
+    """Sent a Show message, queued_manager() should write the
+    string to the terminal.
+    """
+    msgs = [
+        tm.Store('spam', splash.Splash('spam', height=5, width=20)),
+        tm.Show('spam')
+    ]
+    send_msgs(msgs, 'test_show_display', in_thread, False)
+    captured = capsys.readouterr()
+    assert captured.out == (
+        f'{term.move(0, 0)}                    '
+        f'{term.move(1, 0)}                    '
+        f'{term.move(2, 0)}                    '
+        f'{term.move(3, 0)}                    '
+        f'{term.move(4, 0)}                    '
+        f'{term.move(2, 8)}spam'
+    )
 
-    def test_list_stored_display(self):
-        """Sent a `Storing` message, queued_manager() should return a
-        `Stored` message with a list of stored panels.
-        """
-        # Expected value.
-        exp = [tm.Stored('ham', ('spam', 'eggs', 'bacon',)),]
 
-        # Test data and state.
-        msgs = [
-            tm.Store(exp[0].stored[0], splash.Splash(exp[0].stored[0])),
-            tm.Store(exp[0].stored[1], splash.Splash(exp[0].stored[1])),
-            tm.Store(exp[0].stored[2], splash.Splash(exp[0].stored[2])),
-            tm.Storing(exp[0].name),
-        ]
+def test_store_display(capsys, in_thread):
+    """Sent a Store message, queued_manager() should store the
+    contained Display for later use.
+    """
+    msgs = [tm.Store('spam', splash.Splash('spam', height=5, width=6)),]
+    send_msgs(msgs, 'test_store_display', in_thread, False)
+    _, _, _, display = in_thread
+    assert display == {'spam': splash.Splash('spam', height=5, width=6),}
 
-        # Run test.
-        act = self._get_msg_response(msgs, 'test_list_stored_display')
 
-        # Determine test result.
-        self.assertListEqual(exp, act)
+def test_updates_display(capsys, in_thread, term):
+    """Sent a `log.Update` message, `queued_manager()` should
+    route the message to the currently showing panel and print
+    any resulting update.
+    """
+    msgs = [
+        tm.Store('spam', log.Log(('spam',), height=5, width=20)),
+        tm.Show('spam'),
+        log.Update('eggs'),
+    ]
+    send_msgs(msgs, 'test_updates_display', in_thread, False)
+    captured = capsys.readouterr()
+    assert captured.out == (
+        f'{term.move(0, 0)}                    '
+        f'{term.move(1, 0)}                    '
+        f'{term.move(2, 0)}                    '
+        f'{term.move(3, 0)}                    '
+        f'{term.move(4, 0)}                    '
+        f'{term.move(0, 0)}spam'
+        f'{term.move(0, 0)}                    '
+        f'{term.move(1, 0)}                    '
+        f'{term.move(2, 0)}                    '
+        f'{term.move(3, 0)}                    '
+        f'{term.move(4, 0)}                    '
+        f'{term.move(0, 0)}eggs'
+        f'{term.move(1, 0)}spam'
+    )
 
-    def test_print_farewell(self):
-        """Sent an End message with a farewell string, the farewell
-        string should be printed as the queued_manager() terminates.
-        """
-        # Expected value.
-        exp = [call('spam'),]
 
-        # Test data and state.
-        msgs = [tm.End('spam'),]
-
-        # Run test.
-        act = self._send_msgs(msgs, 'test_print_farewell', True)
-
-        # Determine test result.
-        self.assertEqual(exp, act)
-
-    def test_sends_selection_from_menu(self):
-        """Receiving input from the user that isn't acted on by the
-        display, `queued_manager()` should send the input to the
-        application as a Data message.
-        """
-        # Expected value.
-        exp = tm.Data('eggs')
-
-        # Test data and state.
-        inputs = EndlessSideEffect([
-            KEY_DOWN,
-            KEY_ENTER
-        ], False)
-        msgs = [
-            tm.Store('menu', menu.Menu(
-                [
-                    menu.Option('spam', 's'),
-                    menu.Option('eggs', 'e'),
-                    menu.Option('bacon', 'b'),
-                ],
-                height=5,
-                width=7,
-                term=term
-            )),
-            tm.Show('menu'),
-            tm.Ping('test_sends_selection_from_menu'),
-        ]
-
-        # Run test and gather actual.
-        act = self._get_delayed_input(msgs, inputs)
-
-        # Determine test results.
-        self.assertEqual(exp, act)
-
-    def test_sends_exception(self):
-        """When an exception is raised in queued_manager, it sends the
-        exception to the program and ends.
-        """
-        # Expected value.
-        exp = [tm.Ending('Exception.', ValueError('eggs')),]
-
-        # Test data and state.
-        class Spam(splash.Splash):
-            def __str__(self):
-                raise exp[0].ex
-
-        s = Spam(
-            content='spam',
-            height=5,
-            width=6,
-            term=Terminal()
-        )
-        msgs = [
-            tm.Store('spam', s),
-            tm.Show('spam'),
-        ]
-
-        # Run test.
-        act = self._get_msg_response(msgs, 'test_show_display')
-
-        # Determine test result.
-        self.assertListEqual(exp, act)
-
-    def test_sends_input_to_application(self):
-        """Receiving input from the user that isn't acted on by the'
-        display, `queued_manager()` should send the input to the
-        application as a Data message.
-        """
-        # Expected value.
-        exp = tm.Data('x')
-
-        # Test data and state.
-        inputs = EndlessSideEffect([KEY_X,])
-        s = splash.Splash(
-            content='spam',
-            height=5,
-            width=6,
-            term=Terminal()
-        )
-        msgs = [
-            tm.Store('spam', s),
-            tm.Show('spam'),
-        ]
-
-        # Run test and gather actual.
-        act = self._get_input(msgs, inputs)
-
-        # Determine test results.
-        self.assertEqual(exp, act)
-
-    def test_show_display(self):
-        """Sent a Show message, queued_manager() should write the
-        string to the terminal.
-        """
-        # Expected value.
-        exp = [call((
-            f'{term.move(0, 0)}                    '
-            f'{term.move(1, 0)}                    '
-            f'{term.move(2, 0)}                    '
-            f'{term.move(3, 0)}                    '
-            f'{term.move(4, 0)}                    '
-            f'{term.move(2, 8)}spam'
-        ), end='', flush=True),]
-
-        # Test data and state.
-        s = splash.Splash(
-            content='spam',
-            height=5,
-            width=20,
-            term=Terminal()
-        )
-        msgs = [
-            tm.Store('spam', s),
-            tm.Show('spam'),
-        ]
-
-        # Run test.
-        act = self._send_msgs(msgs, 'test_show_display', False)
-
-        # Determine test result.
-        self.assertListEqual(exp, act)
-
-    def test_store_display(self):
-        """Sent a Store message, queued_manager() should store the
-        contained Display for later use.
-        """
-        # Expected value.
-        exp = {'spam': splash.Splash(
-            content='spam',
-            height=5,
-            width=6,
-            term=Terminal()
-        ),}
-
-        # Test data and state.
-        msgs = [tm.Store('spam', exp['spam']),]
-
-        # Run test and gather actual.
-        self._send_msgs(msgs, 'test_store_display', False)
-        act = self.displays
-
-        # Determine test result.
-        self.assertDictEqual(exp, act)
-
-    def test_updates_display(self):
-        """Sent a `log.Update` message, `queued_manager()` should
-        route the message to the currently showing panel and print
-        any resulting update.
-        """
-        # Expected value.
-        exp = [
-            call((
-                f'{term.move(0, 0)}                    '
-                f'{term.move(1, 0)}                    '
-                f'{term.move(2, 0)}                    '
-                f'{term.move(3, 0)}                    '
-                f'{term.move(4, 0)}                    '
-                f'{term.move(0, 0)}spam'
-            ), end='', flush=True),
-            call((
-                f'{term.move(0, 0)}                    '
-                f'{term.move(1, 0)}                    '
-                f'{term.move(2, 0)}                    '
-                f'{term.move(3, 0)}                    '
-                f'{term.move(4, 0)}                    '
-                f'{term.move(0, 0)}eggs'
-                f'{term.move(1, 0)}spam'
-            ), end='', flush=True),
-        ]
-
-        # Test data and state.
-        p = log.Log(
-            content=('spam',),
-            height=5,
-            width=20,
-        )
-        msgs = [
-            tm.Store('spam', p),
-            tm.Show('spam'),
-            log.Update('eggs'),
-        ]
-
-        # Run test.
-        act = self._send_msgs(msgs, 'test_updates_display', False)
-
-        # Determine test result.
-        self.assertEqual(exp, act)
-
-    # Complex tests.
-    @patch('blessed.Terminal.height', new_callable=PropertyMock)
-    @patch('blessed.Terminal.width', new_callable=PropertyMock)
-    @patch('blessed.Terminal.fullscreen')
-    @patch('thurible.thurible.print')
+class TestQueuedManagerComplex:
     def test_change_terminal_dimensions_changes_panel_dimensions(
-        self,
-        mock_print,
-        mock_fullscreen,
-        mock_width,
-        mock_height
+        self, in_thread, mocker
     ):
         """When the size of the terminal changes and a fullscreen panel
         is showing, the size of the panel should be updated to match the
         new size of the terminal.
         """
-        # Expected values.
-        exp_before = {'height': 24, 'width': 80,}
-        exp_after = {'height': 31, 'width': 43,}
-
-        # Test data and state.
-        mock_height.return_value = exp_before['height']
-        mock_width.return_value = exp_before['width']
+        mock_height = mocker.patch(
+            'blessed.Terminal.height',
+            new_callable=PropertyMock,
+            return_value=24
+        )
+        mock_width = mocker.patch(
+            'blessed.Terminal.width',
+            new_callable=PropertyMock,
+            return_value=31
+        )
         msgs = [
             tm.Store('spam', splash.Splash('spam')),
             tm.Show('spam'),
         ]
-        self.t.start()
+        T, q_to, q_from, displays = in_thread
+        T.start()
         for msg in msgs:
-            self.q_to.put(msg)
-        _ = self._watch_for_pong('before_change')
+            q_to.put(msg)
+        watch_for_pong(q_to, q_from, 'before_change')
+        assert displays['spam'].height == 24
+        assert displays['spam'].width == 31
 
-        # Run test.
-        act_before = {
-            'height': self.displays['spam'].height,
-            'width': self.displays['spam'].width,
-        }
-        mock_height.return_value = exp_after['height']
-        mock_width.return_value = exp_after['width']
-        _ = self._watch_for_pong('after_change')
-        act_after = {
-            'height': self.displays['spam'].height,
-            'width': self.displays['spam'].width,
-        }
+        mock_height.return_value = 80
+        mock_width.return_value = 43
+        watch_for_pong(q_to, q_from, 'after_change')
+        assert displays['spam'].height == 80
+        assert displays['spam'].width == 43
 
-        # Determine test result.
-        self.assertEqual(exp_before, act_before)
-        self.assertEqual(exp_after, act_after)
-
-    @patch('blessed.Terminal.cbreak')
-    @patch('blessed.Terminal.fullscreen')
-    def test_terminal_modes(self, mock_fullscreen, mock_cbreak):
+    def test_terminal_modes(self, capsys, in_thread, mocker):
         """While running, the terminal should be in `fullscreen` and
         `cbreak` modes.
         """
-        # Expected values.
-        exp_fs = [call(), call().__enter__(),]
-        exp_cb = [call(), call().__enter__(),]
-
-        # Run test and gather actuals.
-        self.t.start()
-        _ = self._watch_for_pong('test_terminal_modes')
-        act_fs = mock_fullscreen.mock_calls
-        act_cb = mock_cbreak.mock_calls
-
-        # Determine test result.
-        self.assertEqual(exp_fs, act_fs)
-        self.assertEqual(exp_cb, act_cb)
+        mock_cbreak = mocker.patch('blessed.Terminal.cbreak')
+        mock_fscreen = mocker.patch('blessed.Terminal.fullscreen')
+        T, q_to, q_from, _ = in_thread
+        T.start()
+        watch_for_pong(q_to, q_from, 'test_terminal_modes')
+        assert mock_cbreak.mock_calls == [call(), call().__enter__(),]
+        assert mock_fscreen.mock_calls == [call(), call().__enter__(),]
