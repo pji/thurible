@@ -148,6 +148,7 @@ The following are the changes in v0.0.2:
 *   (Started.) Moved testing to `pytest`.
 
     *   Added `make test`.
+    *   Added hook to help make test output readable.
     *   Refactored `test_dialog`.
     *   Refactored `test_event_manager`.
     *   Refactored `test_filereader`.
@@ -155,8 +156,16 @@ The following are the changes in v0.0.2:
     *   Refactored `test_log`.
     
     *   Refactored `test_menu`.
-    *   (Started.) Refactored `test_panel`.
+    *   Refactored `test_panel`.
+    *   Refactored `test_progress`.
+    *   Refactored `test_splash`.
+    *   Refactored `test_table`.
+    *   Refactored `test_text`.
+    *   Refactored `test_textdialog`.
     *   Refactored `test_thurible`.
+    *   Refactored `test_util`.
+
+*   Fixed unsafe terminal behavior in `thurible.thurible` tests.
 
 *   (Not started.) Implemented `tox` to test across supported Python versions.
 *   (Not started.) Moved doctests to `sphinx`.

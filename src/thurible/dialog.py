@@ -4,7 +4,7 @@ dialog
 
 A dialog for terminal applications.
 """
-from typing import Sequence, Optional
+from typing import Optional, Sequence
 
 from blessed.keyboard import Keystroke
 

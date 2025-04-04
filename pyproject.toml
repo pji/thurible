@@ -2,29 +2,16 @@
 requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
 
-[tool.rstcheck]
-report_level = "WARNING"
-ignore_directives = ["autoclass", "autofunction"]
-
-[tool.poetry.group.dev.dependencies]
-pycodestyle = "^2.13.0"
-mypy = "^1.15.0"
-rstcheck = "^6.2.4"
-rstcheck-core = "^1.2.1"
-sphinx = "^8.2.3"
-furo = "^2024.8.6"
-pytest-mock = "^3.14.0"
-pytest = "^8.3.5"
 
 [project]
 name = "thurible"
-version = "0.0.1"
+version = "0.0.2"
 authors = [
     {name="Paul J. Iutzi", email="pji@mac.com"},
 ]
 description = "Tools for creating fullscreen terminal UIs on top of blessed."
 readme = "README.rst"
-requires-python = ">=3.11"
+requires-python = ">=3.9"
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
@@ -34,13 +21,51 @@ dependencies = [
     'blessed',
 ]
 
+
+[tool.rstcheck]
+report_level = "WARNING"
+ignore_directives = ["autoclass", "autofunction"]
+
+
+[tool.poetry.group.dev.dependencies]
+pycodestyle = "^2.13.0"
+mypy = "^1.15.0"
+rstcheck = "^6.2.4"
+rstcheck-core = "^1.2.1"
+sphinx = "^7.0.1"
+# sphinx = "^8.2.3"
+furo = "^2024.8.6"
+pytest-mock = "^3.14.0"
+pytest = "^8.3.5"
+isort = "^6.0.1"
+tox = "^4.25.0"
+
+
 [tool.poetry.requires-plugins]
 poetry-plugin-export = ">=1.8"
+
+
+[tool.tox]
+legacy_tox_ini = """[tox]
+envlist = py39, py310, py311, py312, py313
+
+
+[testenv]
+allowlist_externals = isort
+commands =
+    pytest {posargs: tests}
+    isort ./src/thurible --check-only --diff --skip .tox --lai 2 -m 3
+    isort ./tests --check-only --diff --skip .tox --lai 2 -m 3
+deps = -rrequirements.txt
+    pytest
+    pytest-mock
+"""
 
 [project.urls]
 "Homepage" = "https://thurible.readthedocs.io/en/latest/index.html#"
 "Documentation" = "https://thurible.readthedocs.io/en/latest/index.html#"
 "Source" = "https://github.com/pji/thurible"
+
 
 [project.scripts]
 filereader = "examples.filereader:parse_invocation"

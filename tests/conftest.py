@@ -14,6 +14,75 @@ from thurible import menu
 from thurible.util import get_terminal
 
 
+# Hooks.
+def pytest_assertrepr_compare(config, op, left, right):
+    """Hooks into assertions to neutralize terminal escapes. This
+    keeps the cursor from jumping around when printing output
+    from failed test.
+    """
+    def sanitize_str(s):
+        if isinstance(s, str) and '\x1b' in s:
+            parts = s.split('\x1b')
+            for i in range(len(parts) - 1):
+                parts[i + 1] = '\u241b' + parts[i + 1]
+            parts = [f' {part!r}' for part in parts]
+            return parts
+        return s
+
+    def sanitize_seq(seq):
+        sanitized = [
+            sanitize_str(item)
+            for item in seq
+        ]
+        if seq != sanitized:
+            result = []
+            for new, old in zip(sanitized, seq):
+                if isinstance(old, str) and not isinstance(new, str):
+                    result.extend(new)
+                    result[-1] = result[-1] + ','
+                else:
+                    result.append(f'  {new!r},')
+            if isinstance(seq, tuple):
+                result = ['(', *result, ')',]
+            else:
+                result = ['[', *result, ']',]
+            return result
+        return eq
+
+    def sanitize(item):
+        if isinstance(item, (tuple, list)):
+            return sanitize_seq(item)
+        if isinstance(item, str):
+            return sanitize_str(item)
+        return item
+
+    newleft = sanitize(left)
+    newright = sanitize(right)
+    if newleft != left or newright != right:
+        if not isinstance(newleft, list):
+            newleft = [newleft,]
+        if not isinstance(newright, list):
+            newright = [newright,]
+        opp_ops = {
+            '==': '!=',
+            '!=': '==',
+            'is': 'is not',
+            'is not': 'is',
+        }
+        opp_ops.setdefault(op, '???')
+        return [
+            'Comparing results:',
+            '   vals:',
+            *newleft,
+            '',
+            opp_ops[op],
+            '',
+            *newright
+        ]
+    return None
+
+
+# Fixtures.
 @pt.fixture
 def term():
     """A terminal object."""
@@ -21,6 +90,24 @@ def term():
 
 
 # Common key strokes.
+@pt.fixture
+def KEY_BACKSPACE(term):
+    """The backspace key."""
+    return Keystroke('\x08', term.KEY_BACKSPACE, 'KEY_BACKSPACE')
+
+
+@pt.fixture
+def KEY_BELL(term):
+    """The backspace key."""
+    return Keystroke('\x07', term.KEY_BELL, 'KEY_BELL')
+
+
+@pt.fixture
+def KEY_DELETE(term):
+    """The delete key."""
+    return Keystroke('\x1b[3~]', term.KEY_DELETE, 'KEY_DELETE')
+
+
 @pt.fixture
 def KEY_DOWN(term):
     """The down arrow key."""
@@ -43,6 +130,12 @@ def KEY_END(term):
 def KEY_ENTER(term):
     """The enter key."""
     return Keystroke('\n', term.KEY_ENTER, 'KEY_ENTER')
+
+
+@pt.fixture
+def KEY_F1(term):
+    """The F1 key."""
+    return Keystroke('\x1bOP', term.KEY_F1, 'KEY_F1')
 
 
 @pt.fixture
@@ -70,15 +163,21 @@ def KEY_PGDOWN(term):
 
 
 @pt.fixture
+def KEY_PGUP(term):
+    """The page up key."""
+    return Keystroke('\x1b[V', term.KEY_PGUP, 'KEY_PGUP')
+
+
+@pt.fixture
 def KEY_RIGHT(term):
     """The right arrow key."""
     return Keystroke('\x1b[C', term.KEY_RIGHT, 'KEY_RIGHT')
 
 
 @pt.fixture
-def KEY_PGUP(term):
-    """The page up key."""
-    return Keystroke('\x1b[V', term.KEY_PGUP, 'KEY_PGUP')
+def KEY_S(term):
+    """The end key."""
+    return Keystroke('s')
 
 
 @pt.fixture

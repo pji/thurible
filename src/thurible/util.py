@@ -6,7 +6,6 @@ Miscellaneous utility functions and classes for the `thurible`
 package.
 """
 from queue import Queue
-
 from typing import Optional
 
 from blessed import Terminal

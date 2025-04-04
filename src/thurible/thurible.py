@@ -12,8 +12,8 @@ from typing import Optional
 from blessed import Terminal
 
 from thurible import messages as tm
-from thurible.panel import Panel
 from thurible.dialog import Dialog
+from thurible.panel import Panel
 from thurible.util import get_terminal
 
 

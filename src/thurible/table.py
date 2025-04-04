@@ -6,9 +6,9 @@ An object for displaying a data table in a terminal.
 """
 from __future__ import annotations
 
-from dataclasses import astuple, dataclass, fields
 import unicodedata as ucd
-from typing import Any, Optional, Protocol, Sequence, TYPE_CHECKING
+from dataclasses import astuple, dataclass, fields
+from typing import TYPE_CHECKING, Any, Optional, Protocol, Sequence
 
 from blessed import Terminal
 from blessed.keyboard import Keystroke

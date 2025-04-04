@@ -7,14 +7,14 @@ Unit tests for the `filereader` example.
 from pathlib import Path
 from queue import Queue
 
+import pytest as pt
 from blessed import Terminal
 from blessed.keyboard import Keystroke
-import pytest as pt
 
-from examples import filereader as fr
 import thurible as thb
 import thurible.messages as tm
-from thurible import get_terminal, menu, Table, text
+from examples import filereader as fr
+from thurible import Table, get_terminal, menu, text
 
 
 # Common values.

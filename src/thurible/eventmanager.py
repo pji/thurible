@@ -9,10 +9,10 @@ from queue import Queue
 from threading import Thread
 from typing import Callable, Optional
 
+import thurible.messages as tm
 from thurible.panel import Panel
 from thurible.thurible import queued_manager
 from thurible.util import get_queues
-import thurible.messages as tm
 
 
 # Manager.

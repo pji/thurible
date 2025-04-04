@@ -4,86 +4,79 @@ test_textdialog
 
 Unit tests for the `thurible.textdialog` module.
 """
-import unittest as ut
-
-from blessed.keyboard import Keystroke
+import pytest as pt
 
 from thurible import textdialog
-from tests import test_panel as tp
-
-
-# Common data.
-term = tp.term
-KEY_BACKSPACE = Keystroke('\x08', term.KEY_ENTER, 'KEY_BACKSPACE')
-KEY_BELL = Keystroke('\x07')
-KEY_DELETE = Keystroke('\x1b[3~', term.KEY_DELETE, 'KEY_DELETE')
-KEY_END = Keystroke('\x1b[F', term.KEY_END, 'KEY_END')
-KEY_ENTER = Keystroke('\n', term.KEY_ENTER, 'KEY_ENTER')
-KEY_F1 = Keystroke('\x1bOP', term.KEY_F1, 'KEY_F1')
-KEY_HOME = Keystroke('\x1b[H', term.KEY_HOME, 'KEY_HOME')
-KEY_LEFT = Keystroke('\x1b[D', term.KEY_LEFT, 'KEY_LEFT')
-KEY_RIGHT = Keystroke('\x1b[C', term.KEY_RIGHT, 'KEY_RIGHT')
-KEY_S = Keystroke('s')
 
 
 # Test class.
-class TextDialogTestCase(tp.TerminalTestCase):
-    def test___init__optional_parameters(self):
-        """Given any parameters, a `TextDialong` should return an
-        object with the expected attributes set.
-        """
-        # Expected values.
-        exp = {
-            'message_text': 'spam',
-            **tp.kwargs_content_opt_default,
-            **tp.kwargs_title_opt_set,
-            **tp.kwargs_frame_opt_set,
-            **tp.kwargs_panel_req,
-            **tp.kwargs_panel_opt_set,
-        }
-
-        # Run test.
-        d = textdialog.TextDialog(**exp)
-
-        # Gather actuals.
-        act = {key: getattr(d, key) for key in exp}
-
-        # Determine test results.
-        self.assertDictEqual(exp, act)
-
-    def test___init__required_parameters(self):
+class TestTextDialog:
+    def test__init_default(
+        self, content_attr_defaults,
+        frame_attr_defaults,
+        panel_attr_defaults,
+        title_attr_defaults
+    ):
         """Given only the required parameters, a `TextDialog` should
         return an object with the expected attributes set.
         """
-        # Expected values.
-        exp_req = {
-            'message_text': 'spam',
-            **tp.kwargs_panel_req
-        }
-        exp_opt = {
-            **tp.kwargs_content_opt_default,
-            **tp.kwargs_title_opt_default,
-            **tp.kwargs_frame_opt_default,
-            **tp.kwargs_panel_opt_default,
-        }
+        panel = textdialog.TextDialog(
+            message_text='spam'
+        )
+        assert panel.message_text == 'spam'
+        assert {
+            k: getattr(panel, k) for k in content_attr_defaults
+        } == content_attr_defaults
+        assert {
+            k: getattr(panel, k) for k in title_attr_defaults
+        } == title_attr_defaults
+        assert {
+            k: getattr(panel, k) for k in frame_attr_defaults
+        } == frame_attr_defaults
+        assert {
+            k: getattr(panel, k) for k in panel_attr_defaults
+        } == panel_attr_defaults
 
-        # Run test.
-        d = textdialog.TextDialog(**exp_req)
+    def test__init_set(
+        self, content_attr_set,
+        frame_attr_set,
+        panel_attr_set,
+        title_attr_set
+    ):
+        """Given only the required parameters, a `TextDialog` should
+        return an object with the expected attributes set.
+        """
+        panel = textdialog.TextDialog(
+            message_text='bacon',
+            **content_attr_set,
+            **title_attr_set,
+            **frame_attr_set,
+            **panel_attr_set
+        )
+        assert panel.message_text == 'bacon'
+        assert {
+            k: getattr(panel, k) for k in content_attr_set
+        } == content_attr_set
+        assert {
+            k: getattr(panel, k) for k in title_attr_set
+        } == title_attr_set
+        assert {
+            k: getattr(panel, k) for k in frame_attr_set
+        } == frame_attr_set
+        assert {
+            k: getattr(panel, k) for k in panel_attr_set
+        } == panel_attr_set
 
-        # Gather actuals.
-        act_req = {key: getattr(d, key) for key in exp_req}
-        act_opt = {key: getattr(d, key) for key in exp_opt}
-
-        # Determine test results.
-        self.assertDictEqual(exp_req, act_req)
-        self.assertDictEqual(exp_opt, act_opt)
-
-    def test___str__(self):
+    def test_as_str(self, term):
         """When converted to a string, a `TextDialog` object returns a
         string that will draw the dialog.
         """
-        # Expected values.
-        exp = (
+        panel = textdialog.TextDialog(
+            message_text='spam',
+            height=5,
+            width=10
+        )
+        assert str(panel) == (
             f'{term.move(0, 0)}          '
             f'{term.move(1, 0)}          '
             f'{term.move(2, 0)}          '
@@ -96,27 +89,17 @@ class TextDialogTestCase(tp.TerminalTestCase):
             f'{term.normal}'
         )
 
-        # Test data and state.
-        kwargs = {
-            'message_text': 'spam',
-            'height': 5,
-            'width': 10,
-        }
-        d = textdialog.TextDialog(**kwargs)
-
-        # Run test.
-        act = str(d)
-
-        # Determine test result.
-        self.assertEqual(exp, act)
-
-    def test___str__message_wraps(self):
+    def test_as_str_message_wraps(self, term):
         """When converted to a string, a `TextDialog` object returns a
         string that will draw the dialog. If the message is longer than
         the width of the Dialog, the message text wraps to the next line.
         """
-        # Expected values.
-        exp = (
+        panel = textdialog.TextDialog(
+            message_text='spam eggs bacon',
+            height=5,
+            width=10
+        )
+        assert str(panel) == (
             f'{term.move(0, 0)}          '
             f'{term.move(1, 0)}          '
             f'{term.move(2, 0)}          '
@@ -130,433 +113,257 @@ class TextDialogTestCase(tp.TerminalTestCase):
             f'{term.normal}'
         )
 
-        # Test data and state.
-        kwargs = {
-            'message_text': 'spam eggs bacon',
-            'height': 5,
-            'width': 10,
-        }
-        d = textdialog.TextDialog(**kwargs)
-
-        # Run test.
-        act = str(d)
-
-        # Determine test result.
-        self.assertEqual(exp, act)
-
-    def test_action_backspace(self):
+    def test_action_backspace(self, KEY_BACKSPACE, term):
         """When a backspace is received, `TextDialog.action()` should
         delete the previous character.
         """
-        # Expected values.
-        exp = ('', (
+        panel = textdialog.TextDialog(
+            message_text='spam',
+            height=5,
+            width=10
+        )
+        panel.value = 'ss'
+        panel._selected = 2
+        assert panel.action(KEY_BACKSPACE) == ('', (
             f'{term.move(4, 2)}s       '
             f'{term.reverse}'
             f'{term.move(4, 3)} '
             f'{term.normal}'
         ))
 
-        # Test data and state.
-        kwargs = {
-            'message_text': 'spam',
-            'height': 5,
-            'width': 10,
-        }
-        d = textdialog.TextDialog(**kwargs)
-        d.value = 'ss'
-        d._selected = 2
-        key = KEY_BACKSPACE
-
-        # Run test.
-        act = d.action(key)
-
-        # Determine test result.
-        self.assertEqual(exp, act)
-
-    def test_action_delete(self):
+    def test_action_delete(self, KEY_DELETE, term):
         """When a delete is received, `TextDialog.action()` should
         delete the selected character.
         """
-        # Expected values.
-        exp = ('', (
+        panel = textdialog.TextDialog(
+            message_text='spam',
+            height=5,
+            width=10
+        )
+        panel.value = 'ham'
+        panel._selected = 0
+        assert panel.action(KEY_DELETE) == ('', (
             f'{term.move(4, 2)}am      '
             f'{term.reverse}'
             f'{term.move(4, 2)}a'
             f'{term.normal}'
         ))
 
-        # Test data and state.
-        kwargs = {
-            'message_text': 'spam',
-            'height': 5,
-            'width': 10,
-        }
-        d = textdialog.TextDialog(**kwargs)
-        d.value = 'ham'
-        d._selected = 0
-        key = KEY_DELETE
-
-        # Run test.
-        act = d.action(key)
-
-        # Determine test result.
-        self.assertEqual(exp, act)
-
-    def test_action_end(self):
+    def test_action_end(self, KEY_END, term):
         """When an end is received, `TextDialog.action()` should
         move the cursor to the last position.
         """
-        # Expected values.
-        exp = ('', (
+        panel = textdialog.TextDialog(
+            message_text='spam',
+            height=5,
+            width=10
+        )
+        panel.value = 'ss'
+        panel._selected = 0
+        assert panel.action(KEY_END) == ('', (
             f'{term.move(4, 2)}ss      '
             f'{term.reverse}'
             f'{term.move(4, 4)} '
             f'{term.normal}'
         ))
 
-        # Test data and state.
-        kwargs = {
-            'message_text': 'spam',
-            'height': 5,
-            'width': 10,
-        }
-        d = textdialog.TextDialog(**kwargs)
-        d.value = 'ss'
-        d._selected = 0
-        key = KEY_END
-
-        # Run test.
-        act = d.action(key)
-
-        # Determine test result.
-        self.assertEqual(exp, act)
-
-    def test_action_enter(self):
+    def test_action_enter(self, KEY_ENTER, term):
         """When an enter is received, `TextDialog.action()` should
         return the previously entered text as data.
         """
-        # Expected values.
-        exp = ('eggs', '')
+        panel = textdialog.TextDialog(
+            message_text='spam',
+            height=5,
+            width=10
+        )
+        panel.value = 'eggs'
+        assert panel.action(KEY_ENTER) == ('eggs', '')
 
-        # Test data and state.
-        kwargs = {
-            'message_text': 'spam',
-            'height': 5,
-            'width': 10,
-        }
-        d = textdialog.TextDialog(**kwargs)
-        d.value = 'eggs'
-        key = KEY_ENTER
-
-        # Run test.
-        act = d.action(key)
-
-        # Determine test result.
-        self.assertEqual(exp, act)
-
-    def test_action_home(self):
+    def test_action_home(self, KEY_HOME, term):
         """When a home is received, `TextDialog.action()` should
         move the cursor to the first character.
         """
-        # Expected values.
-        exp = ('', (
+        panel = textdialog.TextDialog(
+            message_text='spam',
+            height=5,
+            width=10
+        )
+        panel.value = 'ss'
+        panel._selected = 2
+        assert panel.action(KEY_HOME) == ('', (
             f'{term.move(4, 2)}ss      '
             f'{term.reverse}'
             f'{term.move(4, 2)}s'
             f'{term.normal}'
         ))
 
-        # Test data and state.
-        kwargs = {
-            'message_text': 'spam',
-            'height': 5,
-            'width': 10,
-        }
-        d = textdialog.TextDialog(**kwargs)
-        d.value = 'ss'
-        d._selected = 2
-        key = KEY_HOME
-
-        # Run test.
-        act = d.action(key)
-
-        # Determine test result.
-        self.assertEqual(exp, act)
-
-    def test_action_left_arrow(self):
-        """When a left arrow is received, `TextDialog.action()` should
-        move the cursor to the previous character.
+    def test_action_left(self, KEY_LEFT, term):
+        """When a home is received, `TextDialog.action()` should
+        move the cursor to the first character.
         """
-        # Expected values.
-        exp = ('', (
+        panel = textdialog.TextDialog(
+            message_text='spam',
+            height=5,
+            width=10
+        )
+        panel.value = 'ss'
+        panel._selected = 2
+        assert panel.action(KEY_LEFT) == ('', (
             f'{term.move(4, 2)}ss      '
             f'{term.reverse}'
             f'{term.move(4, 3)}s'
             f'{term.normal}'
         ))
 
-        # Test data and state.
-        kwargs = {
-            'message_text': 'spam',
-            'height': 5,
-            'width': 10,
-        }
-        d = textdialog.TextDialog(**kwargs)
-        d.value = 'ss'
-        d._selected = 2
-        key = KEY_LEFT
-
-        # Run test.
-        act = d.action(key)
-
-        # Determine test result.
-        self.assertEqual(exp, act)
-
-    def test_action_left_arrow_cannot_go_past_home(self):
+    def test_action_left_cannot_go_past_home(self, KEY_LEFT, term):
         """When a left arrow is received, `TextDialog.action()` should
         move the cursor to the previous character. If at the left-most
         character, the cursor cannot move to a previous character.
         """
-        # Expected values.
-        exp = ('', (
+        panel = textdialog.TextDialog(
+            message_text='spam',
+            height=5,
+            width=10
+        )
+        panel.value = 'ss'
+        panel._selected = 0
+        assert panel.action(KEY_LEFT) == ('', (
             f'{term.move(4, 2)}ss      '
             f'{term.reverse}'
             f'{term.move(4, 2)}s'
             f'{term.normal}'
         ))
 
-        # Test data and state.
-        kwargs = {
-            'message_text': 'spam',
-            'height': 5,
-            'width': 10,
-        }
-        d = textdialog.TextDialog(**kwargs)
-        d.value = 'ss'
-        d._selected = 0
-        key = KEY_LEFT
-
-        # Run test.
-        act = d.action(key)
-
-        # Determine test result.
-        self.assertEqual(exp, act)
-
-    def test_action_not_a_keystroke(self):
+    def test_action_not_a_keystroke(self, term):
         """When something other than a keystroke is received,
         `TextDialog.action()` should throw a ValueError exception.
         """
-        # Expected values.
-        exp_ex = ValueError
-        exp_msg = 'Can only accept Keystrokes. Received: str.'
+        panel = textdialog.TextDialog(
+            message_text='spam',
+            height=5,
+            width=10
+        )
+        with pt.raises(ValueError) as ex:
+            panel.action('\x00')
+            assert str(ex) == 'Can only accept Keystrokes. Received: str.'
 
-        # Test data and state.
-        kwargs = {
-            'message_text': 'spam',
-            'height': 5,
-            'width': 10,
-        }
-        d = textdialog.TextDialog(**kwargs)
-        key = '\x00'
-
-        # Run test and determine results.
-        with self.assertRaisesRegex(exp_ex, exp_msg):
-            act = d.action(key)
-
-    def test_action_right_arrow(self):
+    def test_action_right(self, KEY_RIGHT, term):
         """When a right arrow is received, `TextDialog.action()` should
         move the cursor to the next character.
         """
-        # Expected values.
-        exp = ('', (
+        panel = textdialog.TextDialog(
+            message_text='spam',
+            height=5,
+            width=10
+        )
+        panel.value = 'ss'
+        panel._selected = 0
+        assert panel.action(KEY_RIGHT) == ('', (
             f'{term.move(4, 2)}ss      '
             f'{term.reverse}'
             f'{term.move(4, 3)}s'
             f'{term.normal}'
         ))
 
-        # Test data and state.
-        kwargs = {
-            'message_text': 'spam',
-            'height': 5,
-            'width': 10,
-        }
-        d = textdialog.TextDialog(**kwargs)
-        d.value = 'ss'
-        d._selected = 0
-        key = KEY_RIGHT
-
-        # Run test.
-        act = d.action(key)
-
-        # Determine test result.
-        self.assertEqual(exp, act)
-
-    def test_action_right_arrow_cannot_go_past_end(self):
+    def test_action_right_arrow_cannot_go_past_end(self, KEY_RIGHT, term):
         """When a right arrow is received, `TextDialog.action()` should
         move the cursor to the next character. If the cursor is in the
         right-most position, the cursor cannot move to the right.
         """
-        # Expected values.
-        exp = ('', (
+        panel = textdialog.TextDialog(
+            message_text='spam',
+            height=5,
+            width=10
+        )
+        panel.value = 'ss'
+        panel._selected = 2
+        assert panel.action(KEY_RIGHT) == ('', (
             f'{term.move(4, 2)}ss      '
             f'{term.reverse}'
             f'{term.move(4, 4)} '
             f'{term.normal}'
         ))
 
-        # Test data and state.
-        kwargs = {
-            'message_text': 'spam',
-            'height': 5,
-            'width': 10,
-        }
-        d = textdialog.TextDialog(**kwargs)
-        d.value = 'ss'
-        d._selected = 2
-        key = KEY_RIGHT
-
-        # Run test.
-        act = d.action(key)
-
-        # Determine test result.
-        self.assertEqual(exp, act)
-
-    def test_action_s(self):
+    def test_action_s(self, KEY_S, term):
         """When an `s` is received, `TextDialog.action()` should update
         the text entry area to include the `s` and move the cursor one
         column to the right.
         """
-        # Expected values.
-        exp = ('', (
+        panel = textdialog.TextDialog(
+            message_text='spam',
+            height=5,
+            width=10
+        )
+        panel._selected = 0
+        assert panel.action(KEY_S) == ('', (
             f'{term.move(4, 2)}s       '
             f'{term.reverse}'
             f'{term.move(4, 3)} '
             f'{term.normal}'
         ))
 
-        # Test data and state.
-        kwargs = {
-            'message_text': 'spam',
-            'height': 5,
-            'width': 10,
-        }
-        d = textdialog.TextDialog(**kwargs)
-        d._selected = 0
-        key = KEY_S
-
-        # Run test.
-        act = d.action(key)
-
-        # Determine test result.
-        self.assertEqual(exp, act)
-
-    def test_action_s_with_value(self):
+    def test_action_s_with_value(self, KEY_S, term):
         """When an `s` is received, `TextDialog.action()` should update
         the text entry area to include the `s` and move the cursor one
         column to the right.
         """
-        # Expected values.
-        exp = ('', (
+        panel = textdialog.TextDialog(
+            message_text='spam',
+            height=5,
+            width=10
+        )
+        panel._selected = 1
+        panel.value = 's'
+        assert panel.action(KEY_S) == ('', (
             f'{term.move(4, 2)}ss      '
             f'{term.reverse}'
             f'{term.move(4, 4)} '
             f'{term.normal}'
         ))
 
-        # Test data and state.
-        kwargs = {
-            'message_text': 'spam',
-            'height': 5,
-            'width': 10,
-        }
-        d = textdialog.TextDialog(**kwargs)
-        d._selected = 1
-        d.value = 's'
-        key = KEY_S
-
-        # Run test.
-        act = d.action(key)
-
-        # Determine test result.
-        self.assertEqual(exp, act)
-
-    def test_action_s_with_value_inserting_character(self):
+    def test_action_s_with_value_inserting_character(self, KEY_S, term):
         """When an `s` is received, `TextDialog.action()` should update
         the text entry area to include the `s` and move the cursor one
         column to the right. If the cursor has selected a character in
         the value, the typed character is inserted before the selected
         character.
         """
-        # Expected values.
-        exp = ('', (
+        panel = textdialog.TextDialog(
+            message_text='spam',
+            height=5,
+            width=10
+        )
+        panel._selected = 1
+        panel.value = 'aa'
+        assert panel.action(KEY_S) == ('', (
             f'{term.move(4, 2)}asa     '
             f'{term.reverse}'
             f'{term.move(4, 4)}a'
             f'{term.normal}'
         ))
 
-        # Test data and state.
-        kwargs = {
-            'message_text': 'spam',
-            'height': 5,
-            'width': 10,
-        }
-        d = textdialog.TextDialog(**kwargs)
-        d._selected = 1
-        d.value = 'aa'
-        key = KEY_S
-
-        # Run test.
-        act = d.action(key)
-
-        # Determine test result.
-        self.assertEqual(exp, act)
-
-    def test_action_undefined_application_key(self):
+    def test_action_undefined_application_key(self, KEY_F1, term):
         """When an "application" keystroke whose behavior has not been
         defined is received, `TextDialog.action()` should return the
         string value of the keystroke as data.
         """
-        # Expected values.
-        exp = ('\x1bOP', '')
+        panel = textdialog.TextDialog(
+            message_text='spam',
+            height=5,
+            width=10
+        )
+        panel.value = 'eggs'
+        assert panel.action(KEY_F1) == ('\x1bOP', '')
 
-        # Test data and state.
-        kwargs = {
-            'message_text': 'spam',
-            'height': 5,
-            'width': 10,
-        }
-        d = textdialog.TextDialog(**kwargs)
-        d.value = 'eggs'
-        key = KEY_F1
-
-        # Run test.
-        act = d.action(key)
-
-        # Determine test result.
-        self.assertEqual(exp, act)
-
-    def test_action_undefined_control_key(self):
-        """When a control character keystroke whose behavior has not
-        been defined is received, `TextDialog.action()` should return
-        the string value of the keystroke as data.
+    def test_action_undefined_control_key(self, KEY_BELL, term):
+        """When an "application" keystroke whose behavior has not been
+        defined is received, `TextDialog.action()` should return the
+        string value of the keystroke as data.
         """
-        # Expected values.
-        exp = ('\x07', '')
-
-        # Test data and state.
-        kwargs = {
-            'message_text': 'spam',
-            'height': 5,
-            'width': 10,
-        }
-        d = textdialog.TextDialog(**kwargs)
-        d.value = 'eggs'
-        key = KEY_BELL
-
-        # Run test.
-        act = d.action(key)
-
-        # Determine test result.
-        self.assertEqual(exp, act)
+        panel = textdialog.TextDialog(
+            message_text='spam',
+            height=5,
+            width=10
+        )
+        panel.value = 'eggs'
+        assert panel.action(KEY_BELL) == ('\x07', '')

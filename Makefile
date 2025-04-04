@@ -19,7 +19,7 @@ docs:
 
 .PHONY: pre
 pre:
-	poetry run pytest
+	poetry run tox
 	poetry run python precommit.py
 	git status
 

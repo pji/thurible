@@ -4,90 +4,54 @@ test_util
 
 Unit tests for the `thurible.util` module.
 """
-import unittest as ut
+import pytest as pt
 
 from thurible import util
 
 
-class BoxTestCase(ut.TestCase):
+class TestBox:
     def test_normal(self):
         "A Box object should return box characters."""
-        # Expected value.
-        expected = {
-            'top': '\u2500',
-            'bot': '\u2500',
-            'side': '\u2502',
-            'ltop': '\u250c',
-            'rtop': '\u2510',
-            'mtop': '\u252c',
-            'lbot': '\u2514',
-            'rbot': '\u2518',
-            'mbot': '\u2534',
-            'lside': '\u251c',
-            'rside': '\u2524',
-            'mid': '\u253c',
-        }
-
-        # Test data and state.
         box = util.Box()
-
-        # Run test and gather actuals.
-        for attr in expected:
-            actual = getattr(box, attr)
-
-            # Determine test result.
-            self.assertEqual(expected[attr], actual)
+        assert box.top == '\u2500'
+        assert box.bot == '\u2500'
+        assert box.side == '\u2502'
+        assert box.ltop == '\u250c'
+        assert box.rtop == '\u2510'
+        assert box.mtop == '\u252c'
+        assert box.lbot == '\u2514'
+        assert box.rbot == '\u2518'
+        assert box.mbot == '\u2534'
+        assert box.lside == '\u251c'
+        assert box.rside == '\u2524'
+        assert box.mid == '\u253c'
 
     def test_change_type(self):
         """If given a kind, the kind property should change the kind
         attribute and the _chars attribute.
         """
-        # Expected value.
-        expected = ['\u2500', '\u2501', '\u2508']
-
-        # Test data and state.
         box = util.Box('light')
+        assert box.top == '\u2500'
 
-        # Run test and gather actuals.
-        actual = [box.top,]
         box.kind = 'heavy'
-        actual.append(box.top)
-        box.kind = 'light_quadruple_dash'
-        actual.append(box.top)
+        assert box.top == '\u2501'
 
-        # Determine test result.
-        self.assertEqual(expected, actual)
+        box.kind = 'light_quadruple_dash'
+        assert box.top == '\u2508'
 
     def test_custom(self):
         """If given a kind of 'custom' string of characters, the box
          object should return the custom characters and it's kind
          should be 'custom'.
         """
-        # Expected value.
-        exp_kind = 'custom'
-        exp_chars = 'abcdefghijklmn'
-        exp_sample = 'g'
-
-        # Test data and state.
-        box = util.Box(custom=exp_chars)
-
-        # Run test and gather actuals.
-        act_kind = box.kind
-        act_chars = box._chars
-        act_sample = box.mtop
-
-        # Determine test result.
-        self.assertEqual(exp_kind, act_kind)
-        self.assertEqual(exp_chars, act_chars)
-        self.assertEqual(exp_sample, act_sample)
+        box = util.Box(custom='abcdefghijklmn')
+        assert box.kind == 'custom'
+        assert box._chars == 'abcdefghijklmn'
+        assert box.mtop == 'g'
 
     def test_invalid_custom_string(self):
         """The passed custom string is not exactly fourteen characters
         long, a ValueError should be raised.
         """
-        # Expected value.
-        expected = ValueError
-
-        # Run test and determine result.
-        with self.assertRaises(expected):
-            box = util.Box(custom='bad')
+        with pt.raises(ValueError):
+            _ = util.Box(custom='bad')
