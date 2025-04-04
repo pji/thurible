@@ -99,8 +99,24 @@ class Panel:
         height. It is a percentage expressed as a :class:`float`
         between 0.0 and 1.0, inclusive. See :ref:`sizing` for more
         information.
-    :return: None.
-    :rtype: NoneType
+    :return: A :class:`Panel` object.
+    :rtype: thurible.panel.Panel
+    :usage:
+        To create a new :class:`thurible.panel.Panel` subclass:
+
+        .. testcode::
+
+            from thurible import panel
+
+            class Spam(panel.Panel):
+                 def wobble(self):
+                     pass
+
+            spam = Spam(height=10, width=10)
+
+        Information on the sizing of :class:`thurible.panel.Panel`
+        objects can be found in the :ref:`sizing` section below.
+
     """
     # Magic methods.
     def __init__(

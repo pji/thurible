@@ -207,9 +207,13 @@ panel_align_v
     is recommended to avoid using these two attributes.
 
 So how does this actually work? Let's say we have the following
-panel::
+panel:
 
-    panel = Panel(
+.. testcode::
+
+    import thurible
+
+    panel = thurible.panel.Panel(
         origin_x=0,
         width=80,
         panel_relative_width=0.8,
@@ -217,33 +221,48 @@ panel::
     )
 
 The width of the interior of the panel, as given by
-:attr:`panel.inner_width` is::
+:attr:`panel.inner_width` is:
 
-    int(panel.width * panel.panel_relative_width)
-    int(80 * 0.8)
-    int(64.0)
-    64
+.. testsetup:: inner_layer
+
+    import thurible
+
+    panel = thurible.panel.Panel(
+        origin_x=0,
+        width=80,
+        panel_relative_width=0.8,
+        panel_align_h='right'
+    )
+
+.. testcode:: inner_layer
+
+    int(panel.width * panel.panel_relative_width) == 64
+    int(80 * 0.8) == 64
+    int(64.0) == 64
 
 Since the interior is aligned "right", the starting point of the
-interior, as given by :attr:`panel.inner_x` is::
+interior, as given by :attr:`panel.inner_x` is:
 
-    panel.origin_x + (panel.width - panel.inner_width)
-    0 + (80 - 64)
-    0 + 16
-    16
+.. testcode:: inner_layer
 
-Had the alignment been "center", it would have been::
+    panel.origin_x + (panel.width - panel.inner_width) == 16
+    0 + (80 - 64) == 16
+    0 + 16 == 16
 
-    panel.origin_x + (panel.width - panel.inner_width) // 2
-    0 + (80 - 64) // 2
-    0 + 16 // 2
-    0 + 8
-    8
+Had the alignment been "center", it would have been:
 
-Had the alignment been "left", it would have been::
+.. testcode:: inner_layer
 
-    panel.origin_x
-    0
+    panel.origin_x + (panel.width - panel.inner_width) // 2 == 8
+    0 + (80 - 64) // 2 == 8
+    0 + 16 // 2 == 8
+    0 + 8 == 8
+
+Had the alignment been "left", it would have been:
+
+.. testcode:: inner_layer
+
+    panel.origin_x == 0
 
 .. warning::
     The above is not completely accurate for the current version

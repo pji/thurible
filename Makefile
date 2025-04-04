@@ -15,6 +15,7 @@ clean:
 
 .PHONY: docs
 docs:
+	sphinx-build -b doctest docs/source/ docs/build/html
 	sphinx-build -b html docs/source/ docs/build/html
 
 .PHONY: pre

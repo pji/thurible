@@ -112,8 +112,8 @@ program after the user presses any key on their keyboard::
         q_to.put(end)
 
 
-Usage Example
-=============
+Usage Examples
+==============
 Usage examples are found in the `examples/` directory.
 
 examples/eventsplash.py
@@ -132,12 +132,6 @@ examples/showsplash.py
     A terminal application that uses a `thurible.queued_manager`
     to display a simple splash screen.
 
-If you want to run them to see what they do, you need to run them like
-modules. For example, to run filereader from the root of the repository,
-run the following::
-
-    python3 -m examples.filereader
-
 
 Changes in 0.0.2
 ================
@@ -145,7 +139,7 @@ The following are the changes in v0.0.2:
 
 *   Moved dependency management to `poetry`.
 *   Moved `thurible` into a `src` folder.
-*   (Started.) Moved testing to `pytest`.
+*   Moved testing to `pytest`.
 
     *   Added `make test`.
     *   Added hook to help make test output readable.
@@ -154,7 +148,6 @@ The following are the changes in v0.0.2:
     *   Refactored `test_filereader`.
     *   Refactored `test_init`.
     *   Refactored `test_log`.
-    
     *   Refactored `test_menu`.
     *   Refactored `test_panel`.
     *   Refactored `test_progress`.
@@ -166,8 +159,8 @@ The following are the changes in v0.0.2:
     *   Refactored `test_util`.
 
 *   Fixed unsafe terminal behavior in `thurible.thurible` tests.
+*   Implemented `tox` to test across supported Python versions.
 
-*   (Not started.) Implemented `tox` to test across supported Python versions.
 *   (Not started.) Moved doctests to `sphinx`.
 *   (Started.) Documentation formatting changes.
 
