@@ -21,8 +21,17 @@ class Update(Message):
     message.
 
     :param text: The message to add to the panel.
-    :return: None.
-    :rtype: NoneType
+    :return: An :class:`thurible.Update` object.
+    :rtype: thurible.Update
+    :usage:
+        To create a new :class:`thurible.Update` object:
+
+        .. testcode::
+
+            import thurible
+
+            update = thurible.Update('spam')
+
     """
     text: str
 
@@ -42,12 +51,45 @@ class Log(Content, Title):
         The first item in the sequence is considered the most
         recent.
     :param maxlen: (Optional.) The total number of entries the
-        :class:thurible.Log will store. This is used to allow the
+        :class:`thurible.Log` will store. This is used to allow the
         terminal window to be resized without causing the loss of
         any messages. It's not intended for the user to be able to
         scroll to view messages that have rolled off the terminal.
-    :return: None.
-    :rtype: NoneType
+    :return: A :class:`Log` object.
+    :rtype: thurible.Log
+    :usage:
+        To create a new :class:`thurible.Log` object:
+
+        .. testcode::
+
+            import thurible
+
+            dialog = thurible.Log()
+
+        To create a new :class:`thurible.Log` object that
+        will show a maximum of three messages at a time
+        and starts with a welcome message:
+
+        .. testsetup:: log
+
+            import thurible
+            log = thurible.Log(['Welcome!',], maxlen=3)
+
+        .. testcode:: log
+
+            log = thurible.Log(['Welcome!',], maxlen=3)
+
+        To update the messages in a log use a :class:`thurible.Update`
+        message:
+
+        .. testcode:: log
+
+            update = thurible.Update('spam')
+            log.update(update)
+
+        Information on the sizing of :class:`thurible.Log`
+        objects can be found in the :ref:`sizing` section below.
+
     """
     def __init__(
         self,

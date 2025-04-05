@@ -16,8 +16,8 @@ import thurible.messages as tm
 # thread or process, there needs to be shared queues to allow the
 # program to send commands to the manager and the manager to send
 # input and data back to the program.
-q_to = Queue()
-q_from = Queue()
+q_to: Queue = Queue()
+q_from: Queue = Queue()
 
 # In thurible, a manager is used to send output to the terminal
 # and to receive input from the user. For showsplash, we are using

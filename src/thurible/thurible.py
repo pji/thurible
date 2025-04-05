@@ -43,8 +43,7 @@ def queued_manager(
         want the manager to display.
     :return: None.
     :rtype: NoneType
-
-    Usage::
+    :usage:
 
         >>> from queue import Queue
         >>> from threading import Thread
@@ -67,6 +66,7 @@ def queued_manager(
         >>> # End the thread running the queued_manager.
         >>> msg = End('Ending.')
         >>> q_in.put(msg)
+
     """
     # Set up.
     if term is None:
@@ -84,20 +84,33 @@ def queued_manager(
     # Program loop.
     with term.fullscreen(), term.cbreak(), term.hidden_cursor():
         while True:
-            if showing and displays[showing].height == last_height:
-                if term.height != last_height:
+            try:
+
+                # If the terminal height has changed, change the height
+                # of the showing panel to match.
+                if (
+                    showing
+                    and displays[showing].height == last_height
+                    and term.height != last_height
+                ):
                     displays[showing].height = term.height
                     last_height = term.height
                     print(term.clear, end='', flush=True)
                     print(str(displays[showing]), end='', flush=True)
-            if showing and displays[showing].width == last_width:
-                if term.width != last_width:
+
+                # If the terminal width has changed, change the width
+                # of the showing panel to match.
+                if (
+                    showing
+                    and displays[showing].width == last_width
+                    and term.width != last_width
+                ):
                     displays[showing].width = term.width
                     last_width = term.width
                     print(term.clear, end='', flush=True)
                     print(str(displays[showing]), end='', flush=True)
 
-            try:
+                # Manage messages from the application.
                 (
                     displays, showing, end, farewell, reason, history
                 ) = check_messages(
@@ -109,15 +122,19 @@ def queued_manager(
                 )
                 if end:
                     break
+
+                # Manage messages from the user.
                 check_input(q_from, displays, showing, term)
 
+            # Handle any exceptions that occurred while managing the
+            # messages.
             except Exception as ex:
                 reason = 'Exception.'
                 exception = ex
                 break
 
     # After exiting full screen mode, print the farewell message and
-    # inform the program the manager is ending..
+    # inform the program the manager is ending.
     if farewell:
         print(farewell)
     q_from.put(tm.Ending(reason, exception))
@@ -132,6 +149,16 @@ def check_input(
 ) -> None:
     """Check if input from the user was received and act on any
     received.
+
+    :param q_from: A queue for messages the manager sends to the program.
+    :param displays: Storage for the panels the program may want the
+        manager to display.
+    :param showing: The display currently showing in the terminal.
+    :param term: A :class:`blessed.Terminal` instance for formatting
+        text for terminal display.
+    :returns: None.
+    :rtype: NoneType.
+
     """
     key = term.inkey(timeout=.01)
     if key:
@@ -155,6 +182,17 @@ def check_messages(
 ) -> tuple[dict[str, Panel], str, bool, str, str, deque[str]]:
     """Check if messages from the program were received and act on any
     received.
+
+    :param q_to: A queue for messages the program sends to the manager.
+    :param q_from: A queue for messages the manager sends to the program.
+    :param displays: Storage for the panels the program may want the
+        manager to display.
+    :param showing: The display currently showing in the terminal.
+    :param history: A running history of the panels that have been
+        shown in the terminal.
+    :returns: A :class:`tuple` object.
+    :rtype: tuple
+
     """
     end = False
     reason = ''

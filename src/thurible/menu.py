@@ -1,5 +1,5 @@
 """
-text
+menu
 ~~~~
 
 An object for displaying a text area in a terminal.
@@ -22,6 +22,16 @@ class Option:
     :param name: The name of the option.
     :param hotkey: (Optional.) A hotkey that can be used to invoke
         the option.
+    :returns: A :class:`thurible.Option` object.
+    :rtype: thurible.Option
+    :usage:
+        To create a menu option "spam" with the hotkey of "s":
+
+        .. testcode::
+
+            import thurible
+
+            option = thurible.Option('spam', hotkey='s')
     """
     name: str
     hotkey: Optional[str] = None
@@ -34,24 +44,6 @@ class Menu(Scroll, Title):
     :class:`thurible.panel.Scroll` and :class:`thurible.panel.Title`,
     it can also take those parameters and has those public methods,
     properties, and active keys.
-
-    :class:`thurible.Menu` adds the additional active key:
-
-    *   KEY_ENTER: Select the highlighted option.
-    *   Optional hot keys to highlight the options, as defined in the
-        :class:`thurible.Option` object for the option.
-
-    :class:`thurible.Menu` modifies the behavior of the following
-    active keys:
-
-    *   KEY_END: Highlight the last option, scrolling if needed.
-    *   KEY_DOWN: Highlight the next option, scrolling if needed.
-    *   KEY_HOME: Highlight the first option, scrolling if needed.
-    *   KEY_PGDOWN: Scroll to and highlight the option one screen down.
-    *   KEY_PGUP: Scroll to and highlight the option one screen up.
-    *   KEY_UP: Highlight the previous option, scrolling if needed.
-
-    For more information on active keys, see :ref:`active`.
 
     :param options: A sequence of :class:`thurible.Option` objects
         defining the options available to the user.
@@ -69,8 +61,43 @@ class Menu(Scroll, Title):
         :class:`thurible.panel.Content` for more information.
     :param content_align_v: (Optional.) The vertical alignment
         of the contents of the panel. It defaults to "top".
-    :return: None.
-    :rtype: NoneType
+    :return: A :class:`thurible.Menu` object.
+    :rtype: thurible.Menu
+    :usage:
+        To create a minimal new :class:`thurible.Menu` object with
+        two options:
+
+        .. testcode::
+
+            import thurible
+
+            opt1 = thurible.Option('spam', hotkey='s')
+            opt2 = thurible.Option('eggs', hotkey='e')
+            menu = thurible.Menu([opt1, opt2])
+
+        Information on the sizing of :class:`thurible.Menu`
+        objects can be found in the :ref:`sizing` section below.
+
+    :active keys:
+        :class:`thurible.Menu` adds the additional active key:
+
+            *   KEY_ENTER: Select the highlighted option.
+            *   Optional hot keys to highlight the options, as defined in
+                the :class:`thurible.Option` object for the option.
+
+        :class:`thurible.Menu` modifies the behavior of the following
+        active keys:
+
+            *   KEY_END: Highlight the last option, scrolling if needed.
+            *   KEY_DOWN: Highlight the next option, scrolling if needed.
+            *   KEY_HOME: Highlight the first option, scrolling if needed.
+            *   KEY_PGDOWN: Scroll to and highlight the option one screen
+                down.
+            *   KEY_PGUP: Scroll to and highlight the option one screen up.
+            *   KEY_UP: Highlight the previous option, scrolling if needed.
+
+        For more information on active keys, see :ref:`active`.
+
     """
     # Magic methods.
     def __init__(

@@ -24,7 +24,7 @@ dependencies = [
 
 [tool.rstcheck]
 report_level = "WARNING"
-ignore_directives = ["autoclass", "autofunction"]
+ignore_directives = ["autoclass", "autofunction", "automodule",]
 
 
 [tool.poetry.group.dev.dependencies]

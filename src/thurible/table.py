@@ -10,23 +10,12 @@ import unicodedata as ucd
 from dataclasses import astuple, dataclass, fields
 from typing import TYPE_CHECKING, Any, Optional, Protocol, Sequence
 
-from blessed import Terminal
-from blessed.keyboard import Keystroke
-
 from thurible.panel import Scroll, Title
 from thurible.util import Box as Frame
 
 
 if TYPE_CHECKING:
     from _typeshed import DataclassInstance
-
-
-# Protocols for type hinting.
-class Dataclass(Protocol):
-    """A class definition that can be used to represent dataclasses
-    for type hinting.
-    """
-    __dataclass_fields__: dict
 
 
 # Classes.
@@ -46,8 +35,30 @@ class Table(Scroll, Title):
         of the contents of the panel. It defaults to "left".
     :param content_align_v: (Optional.) The vertical alignment
         of the contents of the panel. It defaults to "top".
-    :return: None.
-    :rtype: NoneType
+    :return: A :class:`thurible.Table` object.
+    :rtype: thurible.Table
+    :usage:
+        To create a new :class:`thurible.Table` object:
+
+        .. testcode::
+
+            from dataclasses import dataclass
+            import thurible
+
+            @dataclass
+            class Record:
+                name: str
+                count: int
+
+            record_1 = Record('Graham', 1)
+            record_2 = Record('Michael', 2)
+            record_3 = Record('John', 3)
+            records = [record_1, record_2, record_3,]
+            table = thurible.Table(records)
+
+        Information on the sizing of :class:`thurible.Table`
+        objects can be found in the :ref:`sizing` section below.
+
     """
     def __init__(
         self,
@@ -65,7 +76,6 @@ class Table(Scroll, Title):
 
         self._char_true = '█'
         self._char_false = '▁'
-#         self._ofr = '[▶︎]'
 
     def __eq__(self, other) -> bool:
         if not isinstance(other, self.__class__):
@@ -120,8 +130,9 @@ class Table(Scroll, Title):
         the dataclasses.
 
         :return: A :class:`list` object containing each width as an
-        :class:`int`.
+            :class:`int`.
         :rtype: list
+
         """
         if '_field_widths' not in self.__dict__:
             fnames = self.field_names

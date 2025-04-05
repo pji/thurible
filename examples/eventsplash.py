@@ -96,8 +96,8 @@ def ending_handler(msg: tm.Message, q_to: Queue) -> bool:
         raise TypeError('This should only get Ending messages.')
 
     # if the UI ran into an exception, raise that for the application.
-    if msg.exception:
-        raise msg.exception
+    if msg.ex:
+        raise msg.ex
 
     # Otherwise, just tell the event_manager to stop running.
     return False

@@ -25,8 +25,40 @@ class Text(Scroll, Title):
         of the contents of the panel. It defaults to "left".
     :param content_align_v: (Optional.) The vertical alignment
         of the contents of the panel. It defaults to "top".
-    :return: None.
-    :rtype: NoneType
+    :return: A :class:`thurible.Text` object.
+    :rtype: thurible.Text
+    :usage:
+        To create a new minimal :class:`thurible.Text` object:
+
+        .. testcode::
+
+            import thurible
+
+            text = thurible.Text()
+
+        To create a :class:`thurible.Text` object containing the
+        text "spam".:
+
+        .. testsetup::
+
+            import thurible
+
+        .. testcode::
+
+            text = thurible.Text('spam')
+
+        Information on the sizing of :class:`thurible.Text`
+        objects can be found in the :ref:`sizing` section below.
+    :active keys:
+        This class defines the following :ref:`active keys<active>`:
+
+            *   KEY_END: Scroll to the end of the content.
+            *   KEY_DOWN: Scroll down in the content.
+            *   KEY_HOME: Scroll to the top of the content.
+            *   KEY_PGDOWN: Scroll one screen down in the content.
+            *   KEY_PGUP: Scroll one page up in the content.
+            *   KEY_UP: Scroll one line up in the content.
+
     """
     # Magic methods.
     def __init__(

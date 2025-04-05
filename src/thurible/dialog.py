@@ -32,8 +32,28 @@ class Dialog(Content, Title):
         the user.
     :param options: The options the user can chose from. This is a
         sequence of :class:`thurible.Option` objects.
-    :return: None.
-    :rtype: NoneType.
+    :return: A :class:`Dialog` object.
+    :rtype: thurible.Dialog
+    :usage:
+        To create a new :class:`thurible.Dialog` object with the
+        message text `spam` and default yes/no options:
+
+        .. testcode::
+
+            import thurible
+
+            dialog = thurible.Dialog('spam')
+
+        Information on the sizing of :class:`thurible.Dialog`
+        objects can be found in the :ref:`sizing` section below.
+    :active keys:
+        This class defines the following :ref:`active keys<active>`:
+
+            *   KEY_ENTER: Select current option.
+            *   KEY_LEFT: Move to next option.
+            *   KEY_RIGHT: Move to previous option.
+            *   <hotkey>: Move to the defined option.
+
     """
     def __init__(
         self,

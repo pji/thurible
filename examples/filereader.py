@@ -68,7 +68,7 @@ class Qword:
 
 # Functions.
 def build_names_list(
-    paths: list[str],
+    paths: list[Path],
     prefix: str = ' ',
     show_hidden: bool = False
 ) -> list[str]:
@@ -165,12 +165,12 @@ def create_options_from_paths(
     """
     # Ensure we are working with pathlib.Path objects since some tests
     # may still be sending strings.
-    paths = [Path(path) for path in paths]
+    paths_ = [Path(path) for path in paths]
 
     # Split the paths into directories and files so they can be
     # labelled differently in the menu.
-    dirs = [path for path in paths if path.is_dir()]
-    files = [path for path in paths if not path.is_dir()]
+    dirs = [path for path in paths_ if path.is_dir()]
+    files = [path for path in paths_ if not path.is_dir()]
 
     # Start the menus with the option to go back to the parent
     # directory.
@@ -261,10 +261,12 @@ def get_hex(data: bytes) -> list[Qword]:
         # to set passing around fields, so this is a hacky solution
         # for adding more visual separation to the Table when displayed.
         lineno = f'{i // 8 % 256:0>8b} '
-        args = [lineno,]
+        args = []
 
         # Add the next eight bytes to the arguments.
         args += pairs[i:i + 8]
+        while len(args) < 8:
+            args.append('')
 
         # Build the Latin-1 translation of the bytes. Latin-1 here is
         # used because it is a one-byte character set. Every byte has a
@@ -279,7 +281,18 @@ def get_hex(data: bytes) -> list[Qword]:
         latin = f' {latin}'
 
         # Add the data as a Qword into the list.
-        qword = Qword(*args, in_latin=latin)
+        qword = Qword(
+            position=lineno,
+            b0=args[0],
+            b1=args[1],
+            b2=args[2],
+            b3=args[3],
+            b4=args[4],
+            b5=args[5],
+            b6=args[6],
+            b7=args[7],
+            in_latin=latin
+        )
         results.append(qword)
 
     # Return the list of Qwords.
@@ -291,7 +304,7 @@ def handle_menu_selection(
     path: Path,
     q_to: Queue,
     show_hidden: bool = False
-) -> None:
+) -> Path:
     """Update the terminal based on the option selected in the menu."""
     # Separate the file reading mode from the file to read. Since
     # panel action handlers have to return a single string, both
@@ -312,6 +325,7 @@ def handle_menu_selection(
     # Determine whether the path is a directory or file and, if it's
     # a file, how the user wanted to view the file. Create the needed
     # panel based on that information.
+    panel: Union[FileReaderMenu, thb.Table, thb.Text]
     if path.is_dir():
         panel = create_dir_menu(path, show_hidden=show_hidden)
     elif mode == 'b':
@@ -355,7 +369,7 @@ def parse_invocation() -> None:
     main(args.path, show_hidden=args.show_hidden)
 
 
-def read_file_as_binary(path: Union[str, Path]) -> str:
+def read_file_as_binary(path: Union[str, Path]) -> bytes:
     """Return the contents of the given file as bytes."""
     with open(path, 'rb') as fh:
         text = fh.read()
@@ -383,7 +397,7 @@ def remap_nonprintables(text: str) -> str:
 
 # Mainline.
 def main(
-    path: str = '',
+    path: Union[str, Path] = '',
     q_to: Optional[Queue] = None,
     q_from: Optional[Queue] = None,
     show_hidden: bool = False
@@ -520,8 +534,8 @@ def main(
                 # should't happen with queued_manager, but may be possible
                 # with managers developed in the future.
                 elif isinstance(msg, tm.Ending):
-                    msg = f'queue_manager ended for reason: {msg.reason}'
-                    raise RuntimeError(msg)
+                    reason = f'queue_manager ended for reason: {msg.reason}'
+                    raise RuntimeError(reason)
 
     # End the manager if the application has been interrupted.
     except KeyboardInterrupt as ex:

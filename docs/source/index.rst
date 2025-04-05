@@ -3,21 +3,9 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to the :mod:`thurible` documentation!
-=============================================
-
-.. toctree::
-   :maxdepth: 2
-   :caption: Contents:
-
-   /panels.rst
-   /managers.rst
-   /messages.rst
-   /utility.rst
-
-
-Introduction to :mod:`thurible`
-===============================
+###############
+:mod:`thurible`
+###############
 
 The :mod:`thurible` package provides tools for creating user interfaces
 in terminal applications. It's built on top of the :mod:`blessed` package,
@@ -25,14 +13,28 @@ but no interaction with the :mod:`blessed` package is required. The
 intention is for all interactions with terminal to be abstracted into
 "panels" that are displayed to the user.
 
-A :dfn:`thurible` is a metal vessel hanging from chains used to burn incense
-during religious ceremonies. It seemed a reasonable name for a package
-build on top of :mod:`blessed`. Plus, it's just a fun word.
+.. note::  
+    A :dfn:`thurible` is a metal vessel hanging from chains used to burn
+    incense during religious ceremonies. It seemed a reasonable name for
+    a package build on top of :mod:`blessed`. Plus, it's just a fun word.
+
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Contents:
+
+   self
+   /panels.rst
+   /managers.rst
+   /messages.rst
+   /utility.rst
+   /updates.rst
+
 
 .. _using:
 
 Using :mod:`thurible`
-=====================
+*********************
 
 :dfn:`Panels` format and display data in a terminal. If you are used
 to working with graphical user interfaces, you can think of them like
@@ -56,15 +58,16 @@ the panel until there is more text to display in the terminal, causing
 your panel to be displayed after it is relevant to the user.
 
 Using :func:`print` to display the panel only shows the panel in the
-terminal. It won't all users to interact with the panel by, for example
+terminal. It won't all users to interact with the panel by, for example,
 scrolling through its text or selecting a menu option. While it's
 possible to create your own code for handling that, the easiest way to
 do it is to use a manager.
 
+
 .. _advanced:
 
 Managers and Messages
-=====================
+*********************
 
 :dfn:`Managers` manage displaying panels and retrieving user input, so
 you don't have to worry about it. Your code just needs to tell the
@@ -115,7 +118,7 @@ program after the user presses any key on their keyboard::
 
 
 Usage Examples
-==============
+**************
 Usage examples are found in the `examples/` directory.
 
 examples/eventsplash.py
@@ -136,7 +139,7 @@ examples/showsplash.py
 
 
 Indices and tables
-==================
+******************
 
 * :ref:`genindex`
 * :ref:`modindex`

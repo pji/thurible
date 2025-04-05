@@ -17,9 +17,9 @@ from blessed.keyboard import Keystroke
 
 from thurible.dialog import Dialog
 from thurible.eventmanager import event_manager
-from thurible.log import Log
+from thurible.log import Log, Update
 from thurible.menu import Menu, Option
-from thurible.progress import Progress
+from thurible.progress import NoTick, Progress, Tick
 from thurible.splash import Splash
 from thurible.table import Table
 from thurible.text import Text

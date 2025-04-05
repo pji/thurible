@@ -56,7 +56,7 @@ the panel until there is more text to display in the terminal, causing
 your panel to be displayed after it is relevant to the user.
 
 Using `print` to display the panel only shows the panel in the
-terminal. It won't all users to interact with the panel by, for example
+terminal. It won't all users to interact with the panel by, for example,
 scrolling through its text or selecting a menu option. While it's
 possible to create your own code for handling that, the easiest way to
 do it is to use a manager.
@@ -132,55 +132,3 @@ examples/showsplash.py
     A terminal application that uses a `thurible.queued_manager`
     to display a simple splash screen.
 
-
-Changes in 0.0.2
-================
-The following are the changes in v0.0.2:
-
-*   Moved dependency management to `poetry`.
-*   Moved `thurible` into a `src` folder.
-*   Moved testing to `pytest`.
-
-    *   Added `make test`.
-    *   Added hook to help make test output readable.
-    *   Refactored `test_dialog`.
-    *   Refactored `test_event_manager`.
-    *   Refactored `test_filereader`.
-    *   Refactored `test_init`.
-    *   Refactored `test_log`.
-    *   Refactored `test_menu`.
-    *   Refactored `test_panel`.
-    *   Refactored `test_progress`.
-    *   Refactored `test_splash`.
-    *   Refactored `test_table`.
-    *   Refactored `test_text`.
-    *   Refactored `test_textdialog`.
-    *   Refactored `test_thurible`.
-    *   Refactored `test_util`.
-
-*   Fixed unsafe terminal behavior in `thurible.thurible` tests.
-*   Implemented `tox` to test across supported Python versions.
-
-*   (Not started.) Moved doctests to `sphinx`.
-*   (Started.) Documentation formatting changes.
-
-
-To-Do List
-==========
-The following items are likely in future releases:
-
-*   Manager updates:
-
-    *   Add coroutine manager.
-    
-*   Panel updates:
-
-    *   Fall back frames that only use ASCII characters.
-    *   Fall back overflow indicators that only use ASCII characters.
-    *   Simplify sizing.
-    *   Add a simple table for sequences.
-    *   Add a simple table for mappings.
-    *   Add a textfield panel.
-    *   Add a textform panel.
-    *   Add a tableform panel.
-    *   Figure out what to do if dialog message overflows.

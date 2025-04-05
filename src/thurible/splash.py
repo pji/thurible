@@ -18,8 +18,31 @@ class Splash(Content, Title):
 
     :param content: (Optional.) The text to display within the
         interior of the panel.
-    :return: None.
-    :rtype: NoneType
+    :return: A :class:`thurible.Splash` object.
+    :rtype: thurible.Splash
+    :usage:
+        To create a minimal :class:`thurible.Splash` object:
+
+        .. testcode::
+
+            import thurible
+
+            splash = thurible.Splash()
+
+        To create a splash screen with the word "spam" in the
+        middle of the screen:
+
+        .. testsetup:: splash
+
+            import thurible
+
+        .. testcode:: splash
+
+            splash = thurible.Splash('spam')
+
+        Information on the sizing of :class:`thurible.Splash`
+        objects can be found in the :ref:`sizing` section below.
+
     """
     # Magic methods.
     def __init__(

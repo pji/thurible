@@ -20,8 +20,18 @@ class NoTick(Message):
     the progress bar to advance.
 
     :param message: A message to display.
-    :return: None.
-    :rtype: NoneType
+    :return: A :class:`thurible.NoTick` object.
+    :rtype: thurible.NoTick
+    :usage:
+        To create a message to advance a :class:`thurible.Progress`
+        object with the text "still working...":
+
+        .. testcode::
+
+            import thurible
+
+            notick = thurible.NoTick('still working...')
+
     """
     message: str = ''
 
@@ -33,8 +43,18 @@ class Tick(Message):
     progress bar to advance.
 
     :param message: A message to display.
-    :return: None.
-    :rtype: NoneType
+    :return: A :class:`thurible.Tick` object.
+    :rtype: thurible.Tick
+    :usage:
+        To create a message to advance a :class:`thurible.Progress`
+        object with the text "another step completed":
+
+        .. testcode::
+
+            import thurible
+
+            tick = thurible.Tick('another step completed')
+
     """
     message: str = ''
 
@@ -66,8 +86,43 @@ class Progress(Content, Title):
         in reverse chronological order.
     :param timestamp: (Optional.) Add a timestamp to the messages
         when they are displayed.
-    :return: None.
-    :rtype: NoneType
+    :return: A :class:`thurible.Progress` object.
+    :rtype: thurible.Progress
+    :usage:
+        To create a :class:`thurible.Progress` object with six steps:
+
+        .. testcode::
+
+            import thurible
+
+            progress = thurible.Progress(6)
+
+        To send an update message to a :class:`thurible.Progress`
+        object that advances the bar use a :class:`thurible.Tick`
+        message:
+
+        .. testsetup:: progress
+
+            import thurible
+            progress = thurible.Progress(6)
+
+        .. testcode:: progress
+
+            tick = thurible.Tick('First step complete.')
+            progress.update(tick)
+
+        To send an update message to a :class:`thurible.Progress`
+        object that does not advance the bar use a :class:`thurible.NoTick`
+        message:
+
+        .. testcode:: progress
+
+            notick = thurible.NoTick('A thing happened.')
+            progress.update(notick)
+
+        Information on the sizing of :class:`thurible.Progress`
+        objects can be found in the :ref:`sizing` section below.
+
     """
     def __init__(
         self,

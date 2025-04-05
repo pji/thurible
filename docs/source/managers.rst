@@ -12,11 +12,22 @@ manager containing input from the user.
 .. autofunction:: thurible.queued_manager
 .. autofunction:: thurible.event_manager
 
+
+.. manager-ops:
+
+How Managers Work
+*****************
+The following are details on the internal operations of managers to
+help you understand how to work with them. While they apply to both
+managers, these details are mostly hidden from :func:`event_manager`.
+It's more important to understand them when working with
+:func:`queued_manager`.
+
+
 .. _manager-loop:
 
 The Manager Loop
-****************
-
+^^^^^^^^^^^^^^^^
 Once started, a manager loops through a standard set of actions until
 it is told to close or crashes. Those actions are:
 
@@ -51,11 +62,11 @@ message to announce the end of the loop. If the loop is ending due to
 and exception, that exception is passed to the application within
 the :class:`thurible.messages.Ending` message.
 
+
 .. _storing-panels:
 
 Storing Panels
-**************
-
+^^^^^^^^^^^^^^
 To allow your application to pre-load panels and easily switch back
 and forth between panels without having to recreate them, the
 manager stores all panels sent to it with the
@@ -71,3 +82,22 @@ panels.
     provide the same name for two panels, one panel will overwrite
     the other panel. For this reason, it is recommended all panels
     be given unique names.
+
+
+.. mgr_examples:
+
+Examples
+^^^^^^^^
+The `examples` directory in the :mod:`thurible` repository provides
+examples for how to use managers.
+
+An example of using :func:`event_manager` is found in:
+
+*   `examples/eventsplash.py`
+
+Examples of using :func:`queued_manager` are found in:
+
+*   `examples/favword.py`
+*   `examples/filereader.py`
+*   `examples/showsplash.py`
+*   `examples/tensecs.py`
