@@ -616,7 +616,7 @@ class Panel:
 
         # Create the clearing string and return.
         for i in range(height):
-            result += self.term.move(y + i, x) + ' ' * width
+            result += self._move_cursor(y + i, x) + ' ' * width
         if color:
             result += self.term.normal
         return result
@@ -659,6 +659,10 @@ class Panel:
         elif bg:
             color += f'on_{bg}'
         return getattr(self.term, color)
+
+    def _move_cursor(self, y: int, x: int) -> str:
+        """Move the location of the cursor."""
+        return self.term.move_xy(x, y)
 
     def _set_relative_dimenstion(
         self,
@@ -973,19 +977,19 @@ class Frame(Panel):
         frame = Box(frame_type)
         result = self._get_color(foreground, background)
         result += (
-            self.term.move(origin_y, origin_x)
+            self._move_cursor(origin_y, origin_x)
             + frame.ltop
             + frame.top * (width - 2)
             + frame.rtop
         )
         for y in range(origin_y + 1, origin_y + height - 1):
             line = (
-                self.term.move(y, origin_x) + frame.side
-                + self.term.move(y, origin_x + width - 1) + frame.side
+                self._move_cursor(y, origin_x) + frame.side
+                + self._move_cursor(y, origin_x + width - 1) + frame.side
             )
             result += line
         result += (
-            self.term.move(origin_y + height - 1, origin_x)
+            self._move_cursor(origin_y + height - 1, origin_x)
             + frame.lbot
             + frame.bot * (width - 2)
             + frame.rbot
@@ -1355,7 +1359,7 @@ class Scroll(Content):
             height += 1
             end = y + height - 1
             update += self._get_color(self.fg, self.bg)
-            update += self.term.move(end, x) + ' ' * width
+            update += self._move_cursor(end, x) + ' ' * width
             if self.fg or self.bg:
                 update += self.term.normal
         if self._stop < length and not self._overflow_bottom:
@@ -1365,8 +1369,8 @@ class Scroll(Content):
             end = y + height
             x_mod = self._align_h('center', len(self._ofbot), width)
             update += self._get_color(self.fg, self.bg)
-            update += self.term.move(end, x) + ' ' * width
-            update += self.term.move(end, x + x_mod) + self._ofbot
+            update += self._move_cursor(end, x) + ' ' * width
+            update += self._move_cursor(end, x + x_mod) + self._ofbot
             if self.fg or self.bg:
                 update += self.term.normal
         if self._start <= 1 and self._overflow_top:
@@ -1375,7 +1379,7 @@ class Scroll(Content):
             height += 1
             y -= 1
             update += self._get_color(self.fg, self.bg)
-            update += self.term.move(y, x) + ' ' * width
+            update += self._move_cursor(y, x) + ' ' * width
             if self.fg or self.bg:
                 update += self.term.normal
         if self._start > 0 and not self._overflow_top:
@@ -1383,8 +1387,8 @@ class Scroll(Content):
             self._overflow_top = True
             x_mod = self._align_h('center', len(self._oftop), width)
             update += self._get_color(self.fg, self.bg)
-            update += self.term.move(y, x) + ' ' * width
-            update += self.term.move(y, x + x_mod) + self._oftop
+            update += self._move_cursor(y, x) + ' ' * width
+            update += self._move_cursor(y, x + x_mod) + self._oftop
             if self.fg or self.bg:
                 update += self.term.normal
             height -= 1
@@ -1411,7 +1415,7 @@ class Scroll(Content):
         update += self._get_color(self.fg, self.bg)
         for i, line in enumerate(lines[self._start: self._stop]):
             x_mod = self._align_h(self.content_align_h, len(line), width)
-            update += self.term.move(y + i, x + x_mod) + line
+            update += self._move_cursor(y + i, x + x_mod) + line
         if self.fg or self.bg:
             update += self.term.normal
         return update
@@ -1549,12 +1553,12 @@ class Title(Frame):
             fg = self.title_fg if self.title_fg else self.fg
         if not result and self.title_text:
             result += self._get_color(fg, bg)
-            result += self.term.move(y, x) + ' ' * width
+            result += self._move_cursor(y, x) + ' ' * width
             if bg or fg:
                 result += self.term.normal
         if not result and self.footer_text:
             result += self._get_color(fg, bg)
-            result += self.term.move(y + height - 1, x) + ' ' * width
+            result += self._move_cursor(y + height - 1, x) + ' ' * width
             if bg or fg:
                 result += self.term.normal
         return result
@@ -1639,7 +1643,7 @@ class Title(Frame):
             raise InvalidTitleAlignmentError(msg)
 
         # Create the title and return.
-        result += self.term.move(y, x) + title
+        result += self._move_cursor(y, x) + title
         return result
 
     def _title_color(self, title: str) -> str:

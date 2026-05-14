@@ -6,6 +6,16 @@ Update Notes
 The following are the notes on updates to :mod:`thurible`.
 
 
+.. _v0_0_3:
+
+Changes in 0.0.3
+****************
+The following are the changes in v0.0.3:
+
+*   Updated dependencies.
+*   Changed cursor movement to support updated :mod:`blessed`
+
+
 .. _v0_0_2:
 
 Changes in 0.0.2
@@ -34,7 +44,7 @@ The following items are likely in future releases:
 *   Manager updates:
 
     *   Add coroutine manager.
-    
+
 *   Panel updates:
 
     *   Fall back frames that only use ASCII characters.

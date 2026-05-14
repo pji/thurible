@@ -160,7 +160,7 @@ class Progress(Content, Title):
         x = self.content_x
 
         # Add the progress bar.
-        result += self.term.move(y, x) + self.progress_bar
+        result += self._move_cursor(y, x) + self.progress_bar
         y += 1
 
         # Add messages.
@@ -289,7 +289,7 @@ class Progress(Content, Title):
         y = self.inner_y
         y += self._align_v('middle', height, self.inner_height)
         x = self.content_x
-        result += self.term.move(y, x) + self.progress_bar
+        result += self._move_cursor(y, x) + self.progress_bar
         y += 1
 
         if self.max_messages:
@@ -301,5 +301,5 @@ class Progress(Content, Title):
         result = ''
         width = self.content_width
         for i, line in zip(range(self.max_messages), self.lines):
-            result += f'{self.term.move(y + i, x)}{line:<{width}}'
+            result += f'{self._move_cursor(y + i, x)}{line:<{width}}'
         return result

@@ -175,6 +175,6 @@ class Log(Content, Title):
     ) -> str:
         result = ''
         for line in lines[:height]:
-            result += self.term.move(y, x) + line
+            result += self._move_cursor(y, x) + line
             y += 1
         return result

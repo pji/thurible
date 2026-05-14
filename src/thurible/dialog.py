@@ -89,7 +89,7 @@ class Dialog(Content, Title):
             name = option.name
             length = len(name) + 2
             x = self._align_h('right', length, width) + self.inner_x
-            opt_text += f'{self.term.move(y, x)}[{name}]'
+            opt_text += f'{self._move_cursor(y, x)}[{name}]'
             if i == len(self.options) - 1 - self._selected:
                 opt_text += self.term.normal
             result += opt_text
@@ -112,7 +112,7 @@ class Dialog(Content, Title):
         x = self.inner_x
         result = ''
         for i, line in enumerate(wrapped):
-            result += f'{self.term.move(y + i, x)}{line}'
+            result += f'{self._move_cursor(y + i, x)}{line}'
         return result
 
     # Public methods.
@@ -148,7 +148,7 @@ class Dialog(Content, Title):
                 name = option.name
                 length = len(name) + 2
                 x = self._align_h('right', length, width)
-                opt_text += f'{self.term.move(y, x)}[{name}]'
+                opt_text += f'{self._move_cursor(y, x)}[{name}]'
                 if i == len(self.options) - 1 - self._selected:
                     opt_text += self.term.normal
                 update += opt_text

@@ -275,8 +275,8 @@ class Table(Scroll, Title):
             bottom_y = origin_y + height - 1
             for fwidth in fwidths:
                 x += fwidth
-                result += self.term.move(origin_y, x) + frame.mtop
-                result += self.term.move(bottom_y, x) + frame.mbot
+                result += self._move_cursor(origin_y, x) + frame.mtop
+                result += self._move_cursor(bottom_y, x) + frame.mbot
                 x += 1
 
         if background or foreground:
@@ -317,7 +317,7 @@ class Table(Scroll, Title):
             x_mod = self._align_h(self.content_align_h, len(line), width)
             if self.frame_type:
                 x_mod -= 1
-            update += self.term.move(y + i, x + x_mod) + line
+            update += self._move_cursor(y + i, x + x_mod) + line
         if self.fg or self.bg:
             update += self.term.normal
         return update

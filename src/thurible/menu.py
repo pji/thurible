@@ -336,7 +336,7 @@ class Menu(Scroll, Title):
                 update += self._color_selection()
 
             # Create the option.
-            update += self.term.move(y + i, x + x_mod) + line
+            update += self._move_cursor(y + i, x + x_mod) + line
 
             # Revert to the base colors if this option was selected.
             if opt_index == self._selected and not (self.fg or self.bg):

@@ -88,11 +88,11 @@ class TextDialog(Content, Title):
         height = self.inner_height
         x = self.inner_x
         y = self._align_v('bottom', 1, height) + self.inner_y
-        result += self.term.move(y, x) + self.prompt
+        result += self._move_cursor(y, x) + self.prompt
 
         x += 2
         result += self.term.reverse
-        result += self.term.move(y, x) + ' '
+        result += self._move_cursor(y, x) + ' '
         result += self.term.normal
 
         return result
@@ -106,7 +106,7 @@ class TextDialog(Content, Title):
         x = self.inner_x
         result = ''
         for i, line in enumerate(wrapped):
-            result += f'{self.term.move(y + i, x)}{line}'
+            result += f'{self._move_cursor(y + i, x)}{line}'
         return result
 
     # Public methods.
@@ -156,9 +156,9 @@ class TextDialog(Content, Title):
             y = self._align_v('bottom', 1, height) + self.inner_y
 
             # Create the string used to update the terminal.
-            update += self.term.move(y, x) + f'{self.value:<{width}}'
+            update += self._move_cursor(y, x) + f'{self.value:<{width}}'
             update += self.term.reverse
-            update += self.term.move(y, x + self._selected)
+            update += self._move_cursor(y, x + self._selected)
             if self._selected < len(self.value):
                 selected_char = self.value[self._selected]
             else:

@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "thurible"
-version = "0.0.2"
+version = "0.0.3"
 authors = [
     {name="Paul J. Iutzi", email="pji@mac.com"},
 ]
@@ -48,7 +48,7 @@ poetry-plugin-export = ">=1.8"
 
 [tool.tox]
 legacy_tox_ini = """[tox]
-envlist = py39, py310, py311, py312, py313
+envlist = py39, py310, py311, py312, py313, py314
 
 
 [testenv]

@@ -69,7 +69,7 @@ class Splash(Content, Title):
         for i, line in enumerate(lines):
             length_h = len(line)
             x_mod = self._align_h(self.content_align_h, length_h, width)
-            result += self.term.move(y + i, x + x_mod) + line
+            result += self._move_cursor(y + i, x + x_mod) + line
         return result
 
     # Properties.
