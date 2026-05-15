@@ -17,7 +17,7 @@ import blessed
 project = 'Thurible'
 copyright = '2022, Paul J. Iutzi'
 author = 'Paul J. Iutzi'
-release = '0.0.2'
+release = '0.0.4'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration

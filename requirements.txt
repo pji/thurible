@@ -1,4 +1,4 @@
-ansicon==1.89.0 ; python_version >= "3.9" and platform_system == "Windows"
-blessed==1.39.0 ; python_version >= "3.9"
-jinxed==2.0.0 ; python_version >= "3.9" and platform_system == "Windows"
-wcwidth==0.7.0 ; python_version >= "3.9"
+ansicon==1.89.0 ; python_version >= "3.12" and platform_system == "Windows"
+blessed==1.39.0 ; python_version >= "3.12"
+jinxed==2.0.0 ; python_version >= "3.12" and platform_system == "Windows"
+wcwidth==0.7.0 ; python_version >= "3.12"
