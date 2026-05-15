@@ -6,6 +6,16 @@ Update Notes
 The following are the notes on updates to :mod:`thurible`.
 
 
+.. _v0_0_4:
+
+Changes in 0.0.4
+****************
+The following are the changes in v0.0.4:
+
+*   Updated dev dependencies.
+*   Changed minimum Python version to 3.12.
+
+
 .. _v0_0_3:
 
 Changes in 0.0.3
