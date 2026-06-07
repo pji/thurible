@@ -13,7 +13,7 @@ but no interaction with the :mod:`blessed` package is required. The
 intention is for all interactions with terminal to be abstracted into
 "panels" that are displayed to the user.
 
-.. note::  
+.. note::
     A :dfn:`thurible` is a metal vessel hanging from chains used to burn
     incense during religious ceremonies. It seemed a reasonable name for
     a package build on top of :mod:`blessed`. Plus, it's just a fun word.
@@ -45,7 +45,7 @@ you can display a panel yourself just by using :func:`print`. Let's
 say you just want to put the word "SPAM" in the middle of the terminal::
 
     from thurible import Splash
-    
+
     splash = Splash('spam')
     print(splash, end='', flush=True)
 
@@ -108,7 +108,7 @@ program after the user presses any key on their keyboard::
     while not isinstance(data, [tm.Data, tm.Ending]):
         if not q_from.empty():
             data = q_from.get()
-    
+
     # Once the user pressed a key, tell the manager to end gracefully.
     # If the manager sent an Ending message, then you don't need to
     # tell it to end. It's crashed on its own.
@@ -121,6 +121,8 @@ Usage Examples
 **************
 Usage examples are found in the `examples/` directory.
 
+examples/envreader.py
+    An example of using :class:`thurible.Table`
 examples/eventsplash.py
     A terminal application that uses a :class:`thurible.event_manager`
     to display a simple splash screen.

@@ -43,7 +43,7 @@ you can display a panel yourself just by using `print`. Let's
 say you just want to put the word "SPAM" in the middle of the terminal::
 
     from thurible import Splash
-    
+
     splash = Splash('spam')
     print(splash, end='', flush=True)
 
@@ -103,7 +103,7 @@ program after the user presses any key on their keyboard::
     while not isinstance(data, [tm.Data, tm.Ending]):
         if not q_from.empty():
             data = q_from.get()
-    
+
     # Once the user pressed a key, tell the manager to end gracefully.
     # If the manager sent an Ending message, then you don't need to
     # tell it to end. It's crashed on its own.
@@ -116,6 +116,8 @@ Usage Examples
 ==============
 Usage examples are found in the `examples/` directory.
 
+examples/envreader.py
+    An example of using `thurible.Table`.
 examples/eventsplash.py
     A terminal application that uses a `thurible.event_manager`
     to display a simple splash screen.

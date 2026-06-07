@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "thurible"
-version = "0.0.4"
+version = "0.0.5"
 authors = [
     {name="Paul J. Iutzi", email="pji@mac.com"},
 ]
