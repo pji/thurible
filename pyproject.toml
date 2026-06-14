@@ -53,7 +53,7 @@ envlist = py312, py313, py314
 [testenv]
 allowlist_externals = isort
 commands =
-    pytest {posargs: tests}
+    pytest {posargs: tests} --capture=sys
     isort ./src/thurible --check-only --diff --skip .tox --lai 2 -m 3
     isort ./tests --check-only --diff --skip .tox --lai 2 -m 3
 deps = -rrequirements.txt

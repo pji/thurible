@@ -122,7 +122,7 @@ Usage Examples
 Usage examples are found in the `examples/` directory.
 
 examples/envreader.py
-    An example of using :class:`thurible.Table`
+    An example of using :class:`thurible.Table`.
 examples/eventsplash.py
     A terminal application that uses a :class:`thurible.event_manager`
     to display a simple splash screen.
