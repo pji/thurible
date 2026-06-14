@@ -378,8 +378,14 @@ def read_file_as_binary(path: Union[str, Path]) -> bytes:
 
 def read_file_as_text(path: Union[str, Path], encoding: str = 'utf_8') -> str:
     """Return the contents of the given file as text."""
-    with open(path, encoding=encoding) as fh:
-        text = fh.read()
+    path = Path(path)
+    text = path.read_text(encoding)
+
+    # If the file type is "man", assume the file is using man-style
+    # troff macros.
+    if path.suffix == '.man':
+        text = thb.man.to_term(text)
+
     return text
 
 

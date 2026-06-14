@@ -11,3 +11,4 @@ panels, managers, or messages.
     :members:
 .. autofunction:: thurible.get_queues
 .. autofunction:: thurible.get_terminal
+.. autofunction:: thurible.man.to_term

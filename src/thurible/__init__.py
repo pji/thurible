@@ -15,6 +15,7 @@ if _sys.version_info[:2] < (3, 9):
 from blessed import Terminal
 from blessed.keyboard import Keystroke
 
+from thurible import man
 from thurible.dialog import Dialog
 from thurible.eventmanager import event_manager
 from thurible.log import Log, Update

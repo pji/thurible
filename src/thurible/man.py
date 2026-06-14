@@ -970,8 +970,8 @@ def parse(tokens: Sequence[Token], width: Optional[int] = 80) -> str:
 
 
 # Main line.
-def main(text: str, width: Optional[int]) -> str:
-    """Parse man-style macros.
+def to_term(text: str, width: Optional[int] = None) -> str:
+    """Convert man-style macros into terminal ready text.
 
     :param text: A :class:`str` with man troff macros.
     :param width: (Optional.) The width of the terminal as a
@@ -979,6 +979,14 @@ def main(text: str, width: Optional[int]) -> str:
     :return: The troff macros turned into a string ready to display in
         the terminal as a :class:`str`.
     :rtype: str
+    :usage:
+        To convert troff macros to terminal ready text:
+
+        >>> from thurible import man
+        >>> macro = '.RS 4\\n.P\\nThis paragraph is indented.'
+        >>> man.to_term(macro)
+        '        This paragraph is indented.\\n\\n'
+
     """
     tokens = lex(text)
     return parse(tokens, width)

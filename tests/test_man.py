@@ -103,7 +103,7 @@ class TestDocument:
             '.IP\n'
             'The indentation is still removed.\n'
         )
-        assert man.main(doc, w) == (
+        assert man.to_term(doc, w) == (
             f'{indent_base}'
             f'{indent_outdent}'
         )
@@ -112,7 +112,7 @@ class TestDocument:
         """Indentation from the .RS macro should persist to the
         next paragraph.
         """
-        assert man.main(doc_indent, w) == indent_base
+        assert man.to_term(doc_indent, w) == indent_base
 
     def test_re_changes_margin(
         self, doc_indent,
@@ -129,7 +129,7 @@ class TestDocument:
             '.P\n'
             'The indentation is still removed.\n'
         )
-        assert man.main(doc, w) == (
+        assert man.to_term(doc, w) == (
             f'{indent_base}'
             f'{indent_outdent}'
         )
@@ -148,7 +148,7 @@ class TestDocument:
             '.P\n'
             'The indentation is still removed.\n'
         )
-        assert man.main(doc, w) == (
+        assert man.to_term(doc, w) == (
             f'{indent_base}'
             f'{BOLD}SPAM{NML}\n'
             f'{indent_outdent}'
@@ -168,7 +168,7 @@ class TestDocument:
             '.P\n'
             'The indentation is still removed.\n'
         )
-        assert man.main(doc, w) == (
+        assert man.to_term(doc, w) == (
             f'{indent_base}'
             f'  {BOLD}SPAM{NML}\n'
             f'{indent_outdent}'
@@ -189,7 +189,7 @@ class TestDocument:
             '\n'
             'The indentation is still removed.\n'
         )
-        assert man.main(doc, w) == (
+        assert man.to_term(doc, w) == (
             'Spam    This paragraph\n'
             '        is indented.\n'
             '\n'
